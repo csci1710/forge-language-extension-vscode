@@ -1,15 +1,15 @@
 {
-	"name": "lsp-sample-server",
-	"description": "Example implementation of a language server in node.",
+	"name": "forge-server",
+	"description": "Implementation of the Forge language server in node.",
 	"version": "1.0.0",
-	"author": "Microsoft Corporation",
-	"license": "MIT",
+	"author": "",
+	"license": "",
 	"engines": {
 		"node": "*"
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Microsoft/vscode-extension-samples"
+		"url": ""
 	},
 	"dependencies": {
 		"vscode-languageserver": "^7.0.0",

@@ -1,14 +1,12 @@
-# LSP Example
+# Forge languager server 
 
-Heavily documented sample code for https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+Adapted from the heavily [documented sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
 
 ## Functionality
 
-This Language Server works for plain text file. It has the following language features:
+This Language Server works for the language Forge. It has the following language features:
 - Completions
-- Diagnostics regenerated on each file change or configuration change
-
-It also includes an End-to-End test.
+- Diagnostics 
 
 ## Structure
 
