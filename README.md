@@ -22,7 +22,7 @@ This Language Server works for the language Forge. It has the following language
         └── server.ts // Language Server entry point
 ```
 
-## Running the Sample
+## Running the extension
 
 - Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder
 - Open VS Code on this folder.
