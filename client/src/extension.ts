@@ -11,6 +11,7 @@ import {
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
+	// console.log("Forge Client activated!");
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
@@ -42,7 +43,7 @@ export function activate(context: ExtensionContext) {
 
 	// Create the language client and start the client.
 	client = new LanguageClient(
-		'ForgeLanguageServer',
+		'forgeLanguageServer',
 		'Forge Language Server',
 		serverOptions,
 		clientOptions
