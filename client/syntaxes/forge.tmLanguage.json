@@ -1,0 +1,449 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Forge",
+	"patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#constants"
+        },
+        {
+            "include": "#built-in"
+        },
+        {
+            "include": "#declaration"
+        },
+        {
+            "include": "#expression"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#digit"
+        }
+	],
+	"repository": {
+		"comments": {
+            "patterns": [{
+                    "begin": "/\\*",
+                    "end": "\\*/",
+                    "name": "comment.block.forge"
+                },
+                {
+                    "begin": "//",
+                    "end": "\n",
+                    "name": "comment.line.double-slash"
+                },
+                {
+                    "begin": "--",
+                    "end": "\n",
+                    "name": "comment.line.double-dash"
+                }
+            ]
+        },
+		"keywords": {
+            "patterns": [
+                {
+                    "include": "#define"
+                },
+                {
+                    "include": "#modifier"
+                },
+                {
+                    "include": "#operator"
+                },
+                {
+                    "include": "#control"
+                },
+                {
+                    "include": "#variable"
+                }
+            ],
+            "repository": {
+                "define": {
+                    "patterns": [
+                        {
+                            "match": "(#lang)\\b",
+                            "name": "keyword.control.lang.forge"
+                        },
+                        {
+                            "match": "\\b(forge)\\b",
+                            "name": "keyword.control.lang.forge"
+                        },
+                        {
+                            "match": "\\b(sig)\\b",
+                            "name": "keyword.language.sig.forge"
+                        },
+                        {
+                            "match": "\\b(test)\\b",
+                            "name": "keyword.language.test.forge"
+                        },
+                        {
+                            "match": "\\b(expect)\\b",
+                            "name": "keyword.language.expect.forge"
+                        },
+                        {
+                            "match": "\\b(fact)\\b",
+                            "name": "keyword.language.fact.forge"
+                        },
+                        {
+                            "match": "\\b(pred)\\b",
+                            "name": "keyword.language.pred.forge"
+                        },
+                        {
+                            "match": "\\b(fun)\\b",
+                            "name": "keyword.language.fun.forge"
+                        },
+                        {
+                            "match": "\\b(module)\\b",
+                            "name": "keyword.language.module.forge"
+                        },
+                        {
+                            "match": "\\b(extends)\\b",
+                            "name": "keyword.language.extends.forge"
+                        },
+                        {
+                            "match": ":",
+                            "name": "keyword.other.colon.forge"
+                        },
+                        {
+                            "match": "\\b(check)\\s",
+                            "name": "keyword.language.check.forge"
+                        },
+                        {
+                            "match": "\\b(assert)\\b",
+                            "name": "keyword.language.assert.forge"
+                        },
+                        {
+                            "match": "\\b(run)\\b",
+                            "name": "keyword.language.run.forge"
+                        },
+						{
+                            "match": "\\b(example)\\b",
+                            "name": "keyword.language.example.forge"
+                        },
+                        {
+                            "match": "\\b(open)\\b",
+                            "name": "keyword.other.open.forge"
+                        },
+                        {
+                            "match": "\\b(as)\\b",
+                            "name": "keyword.other.as.forge"
+                        },
+                        {
+                            "match": "\\b(is)\\b",
+                            "name": "keyword.other.is.forge"
+                        }
+                    ]
+                },
+                "modifier": {
+                    "patterns": [
+                        {
+                            "match": "\\b(abstract)\\b",
+                            "name": "keyword.modifier.abstract.forge"
+                        },
+                        {
+                            "match": "\\b(all|lone|no|one|set|some|sum|univ|none)\\b",
+                            "name": "keyword.modifier.set.forge"
+                        },
+                        {
+                            "match": "'",
+                            "name": "string.value.prime.forge"
+                        }
+                    ]
+                },
+                "operator": {
+                    "patterns": [{
+                            "include": "#unary"
+                        },
+                        {
+                            "include": "#binary"
+                        }
+                    ],
+                    "repository": {
+                        "unary": {
+                            "patterns": [{
+                                "match": "!(?!.)|#|~|\\*|\\^|(\\b(not)\\b)",
+                                "name": "keyword.other.operator.forge"
+                            }]
+                        },
+                        "binary": {
+                            "patterns": [
+                                {
+                                    "match": "(?:\\|\\|)|&&|<=>|=>|&|\\+|\\+\\+|<:|:>|\\.|->|-",
+                                    "name": "keyword.other.operator.forge"
+                                },
+                                {
+                                    "match": "\\b(and|or|iff|implies|else|in)\\b",
+                                    "name": "keyword.other.operator.forge"
+                                },
+                                {
+                                    "match": "=|<|>|=<|>=|!=",
+                                    "name": "keyword.operator.forge"
+                                },
+                                {
+                                    "match": ",",
+                                    "name": "keyword.other.comma.forge"
+                                },
+                                {
+                                    "match": "\\|",
+                                    "name": "keyword.other.split.forge"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "variable": {
+                    "patterns": [{
+                            "match": "\\b(let)\\b",
+                            "name": "keyword.language.let.forge"
+                        },
+                        {
+                            "match": "\\b(this)\\b",
+                            "name": "keyword.language.this.forge"
+                        }
+                    ]
+                },
+                "control": {
+                    "patterns": [{
+                            "match": "\\b(for)\\b",
+                            "name": "keyword.control.for.forge"
+                        },
+                        {
+                            "match": "\\b(but)\\b",
+                            "name": "keyword.control.but.forge"
+                        },
+                        {
+                            "match": "\\b(exactly)\\b",
+                            "name": "keyword.control.exactly.forge"
+                        }
+                    ]
+                }
+            }
+        },
+        "constants": {
+            "patterns": [{
+                    "match": "\\b(iden)\\b",
+                    "name": "constant.language.forge"
+                }
+            ]
+        },
+        "declaration": {
+            "patterns": [{
+                    "include": "#module"
+                },
+                {
+                    "include": "#predicate"
+                },
+                {
+                    "include": "#signature"
+                },
+                {
+                    "include": "#fact"
+                },
+                {
+                    "include": "#fun"
+                }
+            ],
+            "repository": {
+                "module": {
+                    "patterns": [{
+                        "match": "(module)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                        "captures": {
+                            "1": {
+                                "name": "keyword.language.module.alloy"
+                            },
+                            "2": {
+                                "name": "support.class.module.alloy"
+                            }
+                        }
+                    }]
+                },
+                "predicate": {
+                    "patterns": [{
+                        "match": "(pred)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                        "captures": {
+                            "1": {
+                                "name": "keyword.language.pred.alloy"
+                            },
+                            "2": {
+                                "name": "entity.name.function.pred.alloy"
+                            }
+                        }
+                    }]
+                },
+                "signature": {
+                    "patterns": [{
+                        "begin": "(abstract)?\\s*(lone|some|one)?\\s*(sig)\\b\\s*",
+                        "end": "(?=\\{)",
+                        "beginCaptures": {
+                            "1": {
+                                "name": "keyword.modifier.abstract.alloy"
+                            },
+                            "2": {
+                                "name": "keyword.modifier.set.alloy"
+                            },
+                            "3": {
+                                "name": "keyword.language.sig.alloy"
+                            }
+                        },
+                        "patterns": [{
+                                "begin": "(extends)",
+                                "end": "(?=\\{)",
+                                "beginCaptures": {
+                                    "1": {
+                                        "name": "keyword.language.extends.alloy"
+                                    }
+                                },
+                                "patterns": [{
+                                    "match": "(?:\\w|'|_|\\d|/)+",
+                                    "name": "entity.other.inherited-class.alloy"
+                                }]
+                            },
+                            {
+                                "begin": "(in)",
+                                "end": "(?=\\{)",
+                                "beginCaptures": {
+                                    "1": {
+                                        "name": "keyword.other.in.alloy"
+                                    }
+                                },
+                                "patterns": [{
+                                        "match": "(?:\\w|'|_|\\d|/)+",
+                                        "name": "entity.other.inherited-class.alloy"
+                                    },
+                                    {
+                                        "match": "\\+",
+                                        "name": "keyword.operator.binary.alloy"
+                                    }
+                                ]
+                            },
+                            {
+                                "match": "(?:\\w|'|_|\\d|/)+",
+                                "name": "entity.name.type.signature.alloy"
+                            },
+                            {
+                                "match": ",",
+                                "name": "keyword.other.comma.alloy"
+                            }
+                        ]
+                    }]
+                },
+                "fact": {
+                    "patterns": [{
+                        "match": "(fact)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                        "captures": {
+                            "1": {
+                                "name": "keyword.language.fact.alloy"
+                            },
+                            "2": {
+                                "name": "entity.name.function.fact.alloy"
+                            }
+                        }
+                    }]
+                },
+                "fun": {
+                    "patterns": [{
+                        "match": "(fun)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                        "captures": {
+                            "1": {
+                                "name": "keyword.language.fun.alloy"
+                            },
+                            "2": {
+                                "name": "entity.name.function.fun.alloy"
+                            }
+                        }
+                    }]
+                }
+            }
+        },
+        "expression": {
+            "patterns": [{
+                    "match": "(check)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.language.check.alloy"
+                        },
+                        "2": {
+                            "name": "entity.name.function.check.alloy"
+                        }
+                    }
+                },
+                {
+                    "match": "(example)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.language.example.alloy"
+                        },
+                        "2": {
+                            "name": "entity.name.function.example.alloy"
+                        }
+                    }
+                },
+                {
+                    "match": "(assert)\\b\\s*((?:\\w|'|_|\\d|/)+)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.language.assert.alloy"
+                        },
+                        "2": {
+                            "name": "entity.name.function.check.alloy"
+                        }
+                    }
+                }
+            ]
+        },
+        "digit": {
+            "patterns": [{
+                "match": "\\b(\\d+)\\b",
+                "name": "constant.numeric.alloy"
+            }]
+        },
+        "built-in": {
+            "patterns": [{
+                    "match": "\\b(plus|minus|mul|div|rem|sum|sing)(\\[)",
+                    "captures": {
+                        "1": {
+                            "name": "support.function.numeric.alloy"
+                        },
+                        "2": {
+                            "name": "support.other.parenthesis.regexp"
+                        }
+                    }
+                },
+                {
+                    "match": "\\b(open)\\b\\s*((?:\\w|'|_|\\d|/)+)(\\[)",
+                    "captures": {
+                        "1": {
+                            "name": "keyword.other.open.alloy"
+                        },
+                        "2": {
+                            "name": "support.class.module.alloy"
+                        },
+                        "3": {
+                            "name": "support.other.parenthesis.regexp"
+                        }
+                    }
+                },
+                {
+                    "match": "((?:\\w|'|_|\\d)+)\\s*(\\[)",
+                    "captures": {
+                        "1": {
+                            "name": "support.function.order.alloy"
+                        },
+                        "2": {
+                            "name": "support.other.parenthesis.regexp"
+                        }
+                    }
+                },
+                {
+                    "match":  "\\[|\\]",
+                    "name": "support.other.parenthesis.regexp"
+                }
+            ]
+        }
+	},
+	"scopeName": "source.forge"
+}
