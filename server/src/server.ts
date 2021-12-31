@@ -131,8 +131,7 @@ documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 });
 
-// const { spawn } = require('child_process');
-// const children: (ChildProcess|null)[] = [null, null];
+// make the racket child process global
 let racket: ChildProcess | null = null;
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
