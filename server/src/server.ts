@@ -172,10 +172,10 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 				let start = 0;
 				let end = 0;
 
-				const line_match = /line=(\d+)/.exec(myStderr); 
-				const column_match = /column=(\d+)/.exec(myStderr); 
+				const line_match = /line=(\d+)/.exec(myStderr);
+				const column_match = /column=(\d+)/.exec(myStderr);
 				// let offset_match = parser(myStderr, /offset=(\d+)/);
-				
+
 				let line_num = 0;
 				let col_num = 0;
 
@@ -187,7 +187,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 				} else {
 					// or it could be evaluated error
-					const special_match = /rkt:(\d+):(\d+):/.exec(myStderr); 
+					const special_match = /rkt:(\d+):(\d+):/.exec(myStderr);
 					if (special_match !== null) {
 						line_num = parseInt(special_match[1]);
 						col_num = parseInt(special_match[2]);
