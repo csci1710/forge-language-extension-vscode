@@ -130,14 +130,21 @@ documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 });
 
+function parser(racketStderr: string, pattern: RegExp): RegExpExecArray | null {
+	let m: RegExpExecArray | null;
+	m = pattern.exec(racketStderr);
+	return m;
+}
+
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
 
 	const text = textDocument.getText();
-	const filepath = "/tmp/forge-language-server.rkt";// textDocument.uri.slice("file://".length);
+	// todo: this is a temporary solution to let it work, should ask about racket stdin
+	const filepath = "/tmp/forge-language-server.rkt"; // textDocument.uri.slice("file://".length);
 	const diagnostics: Diagnostic[] = [];
 	// todo: make sure the filepath is valid
-	connection.console.log(filepath);
+	// connection.console.log(filepath);
 
 	const { spawn } = require('child_process');
 
@@ -167,13 +174,47 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 				let start = 0;
 				let end = 0;
 
+				let line_match = parser(myStderr, /line=(\d+)/);
+				let column_match = parser(myStderr, /column=(\d+)/);
+				// let offset_match = parser(myStderr, /offset=(\d+)/);
+				
+				let line_num = 0;
+				let col_num = 0;
+
+				if (line_match !== null && column_match !== null) {
+					// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
+					line_num = parseInt(line_match[0].slice("line=".length));
+					col_num = parseInt(column_match[0].slice("column=".length));
+
+				} else {
+					let special_match = parser(myStderr, /rkt:(\d+)\:(\d+):/);
+					if (special_match !== null) {
+						line_num = parseInt(special_match[1]);
+						col_num = parseInt(special_match[2]);
+					}
+				}
+
+				if (line_num !== 0) {
+					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
+					// // iterate through file content
+					let m: RegExpExecArray | null;
+					let pattern = /(.*)\n/g;
+					while (line_num > 0 && (m = pattern.exec(text))) {
+						// connection.console.log(`match: ${m[0]}, ${m.index}`);
+						start = m.index + col_num;
+						end = m.index + m[0].length;
+						line_num -= 1;
+					}
+					// connection.console.log(`start: ${start}, end: ${end}`);
+				}
+
 				const diagnostic: Diagnostic = {
 					severity: DiagnosticSeverity.Warning,
 					range: {
 						start: textDocument.positionAt(start),
 						end: textDocument.positionAt(end)
 					},
-					message: `${textDocument.uri} has error around "${text.slice(start, end)}": ${myStderr}.`,
+					message: `Racket evaluation error: ${myStderr}`,
 					source: 'Racket REPL'
 				};
 				if (hasDiagnosticRelatedInformationCapability) {
@@ -183,7 +224,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 								uri: textDocument.uri,
 								range: Object.assign({}, diagnostic.range)
 							},
-							message: 'Some more info here'
+							message: `${myStderr}`
 						}
 					];
 				}
@@ -196,7 +237,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 		});
 
-		connection.console.log("end spawning");
+		// connection.console.log("end spawning");
 
 
 	});
