@@ -137,7 +137,8 @@ function parser(racketStderr: string, pattern: RegExp): RegExpExecArray | null {
 }
 
 // const { spawn } = require('child_process');
-const children: (ChildProcess|null)[] = [null, null];
+// const children: (ChildProcess|null)[] = [null, null];
+let racket: ChildProcess | null = null;
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
@@ -150,37 +151,28 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// connection.console.log(filepath);
 
 	// write to tmp
-	if (children[0] !== null) {
-		children[0].kill();
-	}
 	const echo = spawn(`echo '${text}' > ${filepath}`, { shell: true });
-	children[0] = echo;
-
 	echo.on('exit', (code: string) => {
-		children[0] = null;
-
-		// send text to repl and get result
-		if (children[1] !== null) {
-			children[1].kill();
-		}
-		const racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
-		children[1] = racket;
 
 		let myStderr = "\n";
-		// connection.console.log(`Racket Err: ${racket.stderr}`);
+		// send text to repl and get result
+		if (racket) {
+			racket.kill('SIGTERM');
+		}
+		racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
+		if (!racket) {
+			throw new Error("cannot launch racket"); // console.error("cannot launch racket");
+			// return diagnostics;
+		}
 
-		// racket.stdout.on('data', (data: string) => {
-		// 	myStdout = data;
-		// 	connection.console.log(`Racket Out: ${data}`);
-		// });
-
-		racket.stderr.on('data', (data: string) => {
-			myStderr += data;
-			// connection.console.log(`Racket Err: ${data}`);
-		});
+		if (racket.stderr) {
+			racket.stderr.on('data', (data: string) => {
+				myStderr += data;
+				// connection.console.log(`Racket Err: ${data}`);
+			});
+		}
 
 		racket.on('exit', (code: string) => {
-			children[1] = null;
 			if (myStderr !== "\n") {
 				let start = 0;
 				let end = 0;
