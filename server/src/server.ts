@@ -131,35 +131,75 @@ documents.onDidChangeContent(change => {
 });
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+	// const settings = await getDocumentSettings(textDocument.uri);
 
 	const text = textDocument.getText();
+	const filepath = "/tmp/forge-language-server.rkt";// textDocument.uri.slice("file://".length);
 	const diagnostics: Diagnostic[] = [];
+	// todo: make sure the filepath is valid
+	connection.console.log(filepath);
 
-	// TODO: send text to repl and get result
-	let start = 0;
-	let end = 5;
+	const { spawn } = require('child_process');
 
-	const diagnostic: Diagnostic = {
-		severity: DiagnosticSeverity.Warning,
-		range: {
-			start: textDocument.positionAt(start),
-			end: textDocument.positionAt(end)
-		},
-		message: `${text[start]} has error.`,
-		source: 'racket compilation'
-	};
-	if (hasDiagnosticRelatedInformationCapability) {
-		diagnostic.relatedInformation = [
-			{
-				location: {
-					uri: textDocument.uri,
-					range: Object.assign({}, diagnostic.range)
-				},
-				message: 'Some more info here'
+	// write to tmp
+	const echo = spawn(`echo '${text}' > ${filepath}`, { shell: true });
+
+	echo.on('exit', (code: string) => {
+
+		// send text to repl and get result
+		const racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
+
+		let myStderr = "\n";
+		// connection.console.log(`Racket Err: ${racket.stderr}`);
+
+		// racket.stdout.on('data', (data: string) => {
+		// 	myStdout = data;
+		// 	connection.console.log(`Racket Out: ${data}`);
+		// });
+
+		racket.stderr.on('data', (data: string) => {
+			myStderr += data;
+			// connection.console.log(`Racket Err: ${data}`);
+		});
+
+		racket.on('exit', (code: string) => {
+			if (myStderr !== "\n") {
+				let start = 0;
+				let end = 0;
+
+				const diagnostic: Diagnostic = {
+					severity: DiagnosticSeverity.Warning,
+					range: {
+						start: textDocument.positionAt(start),
+						end: textDocument.positionAt(end)
+					},
+					message: `${textDocument.uri} has error around "${text.slice(start, end)}": ${myStderr}.`,
+					source: 'Racket REPL'
+				};
+				if (hasDiagnosticRelatedInformationCapability) {
+					diagnostic.relatedInformation = [
+						{
+							location: {
+								uri: textDocument.uri,
+								range: Object.assign({}, diagnostic.range)
+							},
+							message: 'Some more info here'
+						}
+					];
+				}
+				diagnostics.push(diagnostic);
 			}
-		];
-	}
-	diagnostics.push(diagnostic);
+
+			// Send the computed diagnostics to VSCode.
+			connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+
+
+		});
+
+		connection.console.log("end spawning");
+
+
+	});
 
 	// // In this simple example we get the settings for every validate run.
 	// const settings = await getDocumentSettings(textDocument.uri);
@@ -202,9 +242,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// 	}
 	// 	diagnostics.push(diagnostic);
 	// }
-
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
 
 connection.onDidChangeWatchedFiles(_change => {
