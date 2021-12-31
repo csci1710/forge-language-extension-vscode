@@ -146,19 +146,19 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// write to tmp
 	const echo = spawn(`echo '${text}' > ${filepath}`, { shell: true });
+	// when echo is done, we try to launch racket to eval
 	echo.on('exit', (code: string) => {
-
 		let myStderr = "\n";
-		// send text to repl and get result
+		// if there exists a racket we need to term it first
 		if (racket) {
 			racket.kill('SIGTERM');
 		}
+		// spawn racket
 		racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
 		if (!racket) {
 			throw new Error("cannot launch racket"); // console.error("cannot launch racket");
-			// return diagnostics;
 		}
-
+		// receive stderr
 		if (racket.stderr) {
 			racket.stderr.on('data', (data: string) => {
 				myStderr += data;
@@ -166,6 +166,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 			});
 		}
 
+		// when racket finishes eval, we parse the received stderr and send diagnostics to client
 		racket.on('exit', (code: string) => {
 			if (myStderr !== "\n") {
 				let start = 0;
@@ -178,12 +179,14 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 				let line_num = 0;
 				let col_num = 0;
 
+				// the stderr could be tokenization issues
 				if (line_match !== null && column_match !== null) {
 					// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
 					line_num = parseInt(line_match[0].slice("line=".length));
 					col_num = parseInt(column_match[0].slice("column=".length));
 
 				} else {
+					// or it could be evaluated error
 					const special_match = /rkt:(\d+):(\d+):/.exec(myStderr); 
 					if (special_match !== null) {
 						line_num = parseInt(special_match[1]);
@@ -191,10 +194,11 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 					}
 				}
 
+				// if we get some line/col number, we want to get the start and end of the error
 				if (line_num !== 0) {
 					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
-					// // iterate through file content
 					let m: RegExpExecArray | null;
+					// iterate over each line
 					const pattern = /(.*)\n/g;
 					while (line_num > 0 && (m = pattern.exec(text))) {
 						// connection.console.log(`match: ${m[0]}, ${m.index}`);
@@ -211,7 +215,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 						start: textDocument.positionAt(start),
 						end: textDocument.positionAt(end)
 					},
-					message: `Racket evaluation error: ${myStderr}`,
+					message: `Racket Evaluation Error: ${myStderr}`,
 					source: 'Racket REPL'
 				};
 				if (hasDiagnosticRelatedInformationCapability) {
