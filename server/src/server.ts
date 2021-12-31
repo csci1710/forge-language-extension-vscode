@@ -154,7 +154,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 			racket.kill('SIGTERM');
 		}
 		// spawn racket
-		racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
+		racket = spawn(`echo '(load "${filepath}")' | racket`, { shell: true });
 		if (!racket) {
 			throw new Error("cannot launch racket"); // console.error("cannot launch racket");
 		}
