@@ -16,6 +16,7 @@ import {
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
+import { ChildProcess, spawn } from 'child_process';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -131,10 +132,12 @@ documents.onDidChangeContent(change => {
 });
 
 function parser(racketStderr: string, pattern: RegExp): RegExpExecArray | null {
-	let m: RegExpExecArray | null;
-	m = pattern.exec(racketStderr);
-	return m;
+	// let m: RegExpExecArray | null;
+	return pattern.exec(racketStderr);
 }
+
+// const { spawn } = require('child_process');
+const children: (ChildProcess|null)[] = [null, null];
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
@@ -146,15 +149,22 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// todo: make sure the filepath is valid
 	// connection.console.log(filepath);
 
-	const { spawn } = require('child_process');
-
 	// write to tmp
+	if (children[0] !== null) {
+		children[0].kill();
+	}
 	const echo = spawn(`echo '${text}' > ${filepath}`, { shell: true });
+	children[0] = echo;
 
 	echo.on('exit', (code: string) => {
+		children[0] = null;
 
 		// send text to repl and get result
+		if (children[1] !== null) {
+			children[1].kill();
+		}
 		const racket = spawn(`echo '(enter! (file "${filepath}"))' | racket`, { shell: true });
+		children[1] = racket;
 
 		let myStderr = "\n";
 		// connection.console.log(`Racket Err: ${racket.stderr}`);
@@ -170,12 +180,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		});
 
 		racket.on('exit', (code: string) => {
+			children[1] = null;
 			if (myStderr !== "\n") {
 				let start = 0;
 				let end = 0;
 
-				let line_match = parser(myStderr, /line=(\d+)/);
-				let column_match = parser(myStderr, /column=(\d+)/);
+				const line_match = parser(myStderr, /line=(\d+)/);
+				const column_match = parser(myStderr, /column=(\d+)/);
 				// let offset_match = parser(myStderr, /offset=(\d+)/);
 				
 				let line_num = 0;
@@ -187,7 +198,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 					col_num = parseInt(column_match[0].slice("column=".length));
 
 				} else {
-					let special_match = parser(myStderr, /rkt:(\d+)\:(\d+):/);
+					const special_match = parser(myStderr, /rkt:(\d+):(\d+):/);
 					if (special_match !== null) {
 						line_num = parseInt(special_match[1]);
 						col_num = parseInt(special_match[2]);
@@ -198,7 +209,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
 					// // iterate through file content
 					let m: RegExpExecArray | null;
-					let pattern = /(.*)\n/g;
+					const pattern = /(.*)\n/g;
 					while (line_num > 0 && (m = pattern.exec(text))) {
 						// connection.console.log(`match: ${m[0]}, ${m.index}`);
 						start = m.index + col_num;
