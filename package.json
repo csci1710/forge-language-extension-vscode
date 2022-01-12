@@ -29,7 +29,8 @@
 				"forge"
 			  ],
 			  "extensions": [
-				".rkt"
+				".rkt",
+				".frg"
 			  ],
 			  "configuration": "./client/language-configuration.json"
 			}
