@@ -139,7 +139,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	const text = textDocument.getText();
 	// todo: this is a temporary solution to let it work, should ask about racket stdin
-	const filepath = "/tmp/forge-language-server.rkt"; // textDocument.uri.slice("file://".length);
+	const filepath = "/tmp/forge-language-server.frg"; // textDocument.uri.slice("file://".length);
 	const diagnostics: Diagnostic[] = [];
 	// todo: make sure the filepath is valid
 	// connection.console.log(filepath);
@@ -187,7 +187,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 				} else {
 					// or it could be evaluated error
-					const special_match = /rkt:(\d+):(\d+):/.exec(myStderr);
+					const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
 					if (special_match !== null) {
 						line_num = parseInt(special_match[1]);
 						col_num = parseInt(special_match[2]);
