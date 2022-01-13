@@ -17,6 +17,8 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 import { ChildProcess, spawn } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -138,107 +140,113 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
 
 	const text = textDocument.getText();
-	// todo: this is a temporary solution to let it work, should ask about racket stdin
-	const filepath = "/tmp/forge-language-server.frg"; // textDocument.uri.slice("file://".length);
 	const diagnostics: Diagnostic[] = [];
-	// todo: make sure the filepath is valid
-	// connection.console.log(filepath);
+	let myStderr = "\n";
 
-	// write to tmp
-	const echo = spawn(`echo '${text}' > ${filepath}`, { shell: true });
-	// when echo is done, we try to launch racket to eval
-	echo.on('exit', (code: string) => {
-		let myStderr = "\n";
-		// if there exists a racket we need to term it first
-		if (racket) {
-			racket.kill('SIGTERM');
-		}
-		// spawn racket
-		racket = spawn(`echo '(load "${filepath}")' | racket`, { shell: true });
-		if (!racket) {
-			throw new Error("cannot launch racket"); // console.error("cannot launch racket");
-		}
-		// receive stderr
-		if (racket.stderr) {
-			racket.stderr.on('data', (data: string) => {
-				myStderr += data;
-				// connection.console.log(`Racket Err: ${data}`);
-			});
-		}
+	// write to this tmp file
+	const filepath = path.resolve(__dirname, 'forge-language-server.frg');
+	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
 
-		// when racket finishes eval, we parse the received stderr and send diagnostics to client
-		racket.on('exit', (code: string) => {
-			if (myStderr !== "\n") {
-				let start = 0;
-				let end = 0;
+	try {
+		fs.writeFileSync(filepath, text);
+	} catch (err: any) {
+		connection.console.error(err.message);
+		throw new Error(err.message);
+	}
 
-				const line_match = /line=(\d+)/.exec(myStderr);
-				const column_match = /column=(\d+)/.exec(myStderr);
-				// let offset_match = parser(myStderr, /offset=(\d+)/);
+	// create a racket bg process to do syntax check
 
-				let line_num = 0;
-				let col_num = 0;
+	// if there exists a racket we need to term it first
+	if (racket) {
+		racket.kill('SIGTERM');
+	}
+	// spawn racket
+	racket = spawn("racket", [syntaxCheck, filepath], { shell: true });
+	if (!racket) {
+		throw new Error("cannot launch racket"); // console.error("cannot launch racket");
+	}
+	// receive stderr
+	if (racket.stderr) {
+		racket.stderr.on('data', (data: string) => {
+			myStderr += data;
+			// connection.console.log(`Racket Err: ${data}`);
+		});
+	}
 
-				// the stderr could be tokenization issues
-				if (line_match !== null && column_match !== null) {
-					// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
-					line_num = parseInt(line_match[0].slice("line=".length));
-					col_num = parseInt(column_match[0].slice("column=".length));
+	// when racket finishes eval, we parse the received stderr and send diagnostics to client
+	racket.on('exit', (code: string) => {
+		connection.console.log(`racket process exited with code ${code}`);
+		if (myStderr !== "\n") {
+			let start = 0;
+			let end = 0;
 
-				} else {
-					// or it could be evaluated error
-					const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
-					if (special_match !== null) {
-						line_num = parseInt(special_match[1]);
-						col_num = parseInt(special_match[2]);
-					}
+			const line_match = /line=(\d+)/.exec(myStderr);
+			const column_match = /column=(\d+)/.exec(myStderr);
+			// let offset_match = parser(myStderr, /offset=(\d+)/);
+
+			let line_num = 0;
+			let col_num = 0;
+
+			// the stderr could be tokenization issues
+			if (line_match !== null && column_match !== null) {
+				// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
+				line_num = parseInt(line_match[0].slice("line=".length));
+				col_num = parseInt(column_match[0].slice("column=".length));
+
+			} else {
+				// or it could be evaluated error
+				const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
+				if (special_match !== null) {
+					line_num = parseInt(special_match[1]);
+					col_num = parseInt(special_match[2]);
 				}
-
-				// if we get some line/col number, we want to get the start and end of the error
-				if (line_num !== 0) {
-					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
-					let m: RegExpExecArray | null;
-					// iterate over each line
-					const pattern = /(.*)\n/g;
-					while (line_num > 0 && (m = pattern.exec(text))) {
-						// connection.console.log(`match: ${m[0]}, ${m.index}`);
-						start = m.index + col_num;
-						end = m.index + m[0].length;
-						line_num -= 1;
-					}
-					// connection.console.log(`start: ${start}, end: ${end}`);
-				}
-
-				const diagnostic: Diagnostic = {
-					severity: DiagnosticSeverity.Warning,
-					range: {
-						start: textDocument.positionAt(start),
-						end: textDocument.positionAt(end)
-					},
-					message: `Racket Evaluation Error: ${myStderr}`,
-					source: 'Racket REPL'
-				};
-				if (hasDiagnosticRelatedInformationCapability) {
-					diagnostic.relatedInformation = [
-						{
-							location: {
-								uri: textDocument.uri,
-								range: Object.assign({}, diagnostic.range)
-							},
-							message: `${myStderr}`
-						}
-					];
-				}
-				diagnostics.push(diagnostic);
 			}
 
-			// Send the computed diagnostics to VSCode.
-			connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+			// if we get some line/col number, we want to get the start and end of the error
+			if (line_num !== 0) {
+				// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
+				let m: RegExpExecArray | null;
+				// iterate over each line
+				const pattern = /(.*)\n/g;
+				while (line_num > 0 && (m = pattern.exec(text))) {
+					// connection.console.log(`match: ${m[0]}, ${m.index}`);
+					start = m.index + col_num;
+					end = m.index + m[0].length;
+					line_num -= 1;
+				}
+				// connection.console.log(`start: ${start}, end: ${end}`);
+			}
+
+			const diagnostic: Diagnostic = {
+				severity: DiagnosticSeverity.Warning,
+				range: {
+					start: textDocument.positionAt(start),
+					end: textDocument.positionAt(end)
+				},
+				message: `Forge Syntax Error: ${myStderr}`,
+				source: 'syntax_check.rkt'
+			};
+			if (hasDiagnosticRelatedInformationCapability) {
+				diagnostic.relatedInformation = [
+					{
+						location: {
+							uri: textDocument.uri,
+							range: Object.assign({}, diagnostic.range)
+						},
+						message: `${myStderr}`
+					}
+				];
+			}
+			diagnostics.push(diagnostic);
+		}
+
+		// Send the computed diagnostics to VSCode.
+		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 
 
-		});
-		// connection.console.log("end");
 	});
+	// connection.console.log("end");
+
 }
 
 connection.onDidChangeWatchedFiles(_change => {
