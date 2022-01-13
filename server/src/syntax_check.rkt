@@ -16,6 +16,6 @@
     (lambda (in) (port->string in))))
     
 (define args (current-command-line-arguments))
-(define content  (file-to-string (vector-ref args 0)))
+(define content (file-to-string (vector-ref args 0)))
     
 (my-check-syntax content)
