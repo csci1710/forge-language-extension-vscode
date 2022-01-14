@@ -122,8 +122,22 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	return result;
 }
 
+function getFilename(textDocument: TextDocument): string {
+	let filename = 'unnamed.frg';
+	if (textDocument.uri) {
+		const fname = textDocument.uri.split(/[/\\]/).pop();
+		if (fname) {
+			filename = fname;
+		}
+	}
+	return filename;
+}
+
 // Only keep settings for open documents
 documents.onDidClose(e => {
+	// remove the phantom file when user closes
+	const filepath = path.resolve(__dirname, getFilename(e.document));
+	fs.unlinkSync(filepath);
 	documentSettings.delete(e.document.uri);
 });
 
@@ -144,13 +158,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	let myStderr = '\n';
 
 	// write to this tmp file
-	let filename = 'unnamed.frg';
-	if (textDocument.uri) {
-		const fname = textDocument.uri.split(/[/\\]/).pop();
-		if (fname) {
-			filename = fname;
-		}
-	}
+	const filename = getFilename(textDocument);
 	// connection.console.error(filename);
 	const filepath = path.resolve(__dirname, filename);
 	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
