@@ -207,8 +207,8 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 			// the stderr could be tokenization issues
 			if (line_match !== null && column_match !== null) {
 				// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
-				line_num = parseInt(line_match[0].slice("line=".length));
-				col_num = parseInt(column_match[0].slice("column=".length));
+				line_num = parseInt(line_match[0].slice('line='.length));
+				col_num = parseInt(column_match[0].slice('column='.length));
 
 			} else {
 				// or it could be evaluated error
