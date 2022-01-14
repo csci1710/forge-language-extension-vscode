@@ -141,10 +141,18 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	const text = textDocument.getText();
 	const diagnostics: Diagnostic[] = [];
-	let myStderr = "\n";
+	let myStderr = '\n';
 
 	// write to this tmp file
-	const filepath = path.resolve(__dirname, 'forge-language-server.frg');
+	let filename = 'unnamed.frg';
+	if (textDocument.uri) {
+		const fname = textDocument.uri.split(/[/\\]/).pop();
+		if (fname) {
+			filename = fname;
+		}
+	}
+	// connection.console.error(filename);
+	const filepath = path.resolve(__dirname, filename);
 	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
 
 	try {
@@ -161,9 +169,9 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		racket.kill('SIGTERM');
 	}
 	// spawn racket
-	racket = spawn("racket", [syntaxCheck, filepath], { shell: true });
+	racket = spawn('racket', [syntaxCheck, filepath], { shell: true });
 	if (!racket) {
-		throw new Error("cannot launch racket"); // console.error("cannot launch racket");
+		throw new Error('cannot launch racket'); // console.error("cannot launch racket");
 	}
 	// receive stderr
 	if (racket.stderr) {
