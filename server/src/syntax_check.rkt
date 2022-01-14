@@ -17,5 +17,6 @@
     
 (define args (current-command-line-arguments))
 (define content (file-to-string (vector-ref args 0)))
-    
-(my-check-syntax content)
+
+; use exit code 3 to indicate syntax error to server
+(with-handlers ([exn:fail? (lambda (v) (displayln (exn-message v) (current-error-port)) (exit 3))]) (my-check-syntax content))

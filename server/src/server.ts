@@ -175,8 +175,9 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 	// when racket finishes eval, we parse the received stderr and send diagnostics to client
 	racket.on('exit', (code: string) => {
-		connection.console.log(`racket process exited with code ${code}`);
-		if (myStderr !== "\n") {
+		connection.console.log(`racket process exited with code ${code}, ${myStderr}`);
+		// I arbitrarily chose 3 to indicate syntax error
+		if (parseInt(code) == 3) {
 			let start = 0;
 			let end = 0;
 
