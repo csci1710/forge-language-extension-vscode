@@ -19,6 +19,8 @@ import {
 import { ChildProcess, spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as net from 'net';
+import { SSL_OP_EPHEMERAL_RSA } from 'constants';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -26,6 +28,7 @@ const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+const racket = spawnRacket();
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
@@ -133,11 +136,26 @@ function getFilename(textDocument: TextDocument): string {
 	return filename;
 }
 
+function spawnRacket(): ChildProcess {
+	// spawn racket
+	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
+	const racket = spawn('racket', [syntaxCheck], { shell: true });
+	if (!racket) {
+		connection.console.error("Cannot launch racket");
+		throw new Error("Cannot launch racket");
+	}
+	if (racket.stderr) {
+		racket.stderr.on('data', (data: string) => {
+			connection.console.error(`Racket Err: ${data}`);
+		});
+		// throw new Error("Racket stopped");
+	}
+	connection.console.log("Successfully spawned Racket");
+	return racket;
+}
+
 // Only keep settings for open documents
 documents.onDidClose(e => {
-	// remove the phantom file when user closes
-	const filepath = path.resolve(__dirname, getFilename(e.document));
-	fs.unlinkSync(filepath);
 	documentSettings.delete(e.document.uri);
 });
 
@@ -147,121 +165,101 @@ documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 });
 
-// make the racket child process global
-let racket: ChildProcess | null = null;
+// todo: connection.onExecuteCommand
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
 
 	const text = textDocument.getText();
 	const diagnostics: Diagnostic[] = [];
+
 	let myStderr = '\n';
+	connection.console.log(">>>>>>>>>> Connecting to socket");
 
-	// write to this tmp file
-	const filename = getFilename(textDocument);
-	// connection.console.error(filename);
-	const filepath = path.resolve(__dirname, filename);
-	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
+	const so = new net.Socket();
+	so.connect(8879, 'localhost');
 
-	try {
-		fs.writeFileSync(filepath, text);
-	} catch (err: any) {
-		connection.console.error(err.message);
-		throw new Error(err.message);
-	}
-
-	// create a racket bg process to do syntax check
-
-	// if there exists a racket we need to term it first
-	if (racket) {
-		racket.kill('SIGTERM');
-	}
-	// spawn racket
-	racket = spawn('racket', [syntaxCheck, filepath], { shell: true });
-	if (!racket) {
-		throw new Error('cannot launch racket'); // console.error("cannot launch racket");
-	}
-	// receive stderr
-	if (racket.stderr) {
-		racket.stderr.on('data', (data: string) => {
+	so.on('error', function (error) { connection.console.log(`client received error: ${error.toString()}`); });
+	so.on('connect', function () {
+		so.on('data', function (data) {
 			myStderr += data;
-			// connection.console.log(`Racket Err: ${data}`);
-		});
-	}
+			connection.console.log(data.toString());
+			connection.console.log(">>>>>>>>>> Ending socket");
 
-	// when racket finishes eval, we parse the received stderr and send diagnostics to client
-	racket.on('exit', (code: string) => {
-		connection.console.log(`racket process exited with code ${code}, ${myStderr}`);
-		// I arbitrarily chose 3 to indicate syntax error
-		if (parseInt(code) == 3) {
-			let start = 0;
-			let end = 0;
+			// when racket finishes eval, we parse the received stderr and send diagnostics to client
+			if (myStderr !== '\n') {
+				let start = 0;
+				let end = 0;
 
-			const line_match = /line=(\d+)/.exec(myStderr);
-			const column_match = /column=(\d+)/.exec(myStderr);
-			// let offset_match = parser(myStderr, /offset=(\d+)/);
+				const line_match = /line=(\d+)/.exec(myStderr);
+				const column_match = /column=(\d+)/.exec(myStderr);
+				// let offset_match = parser(myStderr, /offset=(\d+)/);
 
-			let line_num = 0;
-			let col_num = 0;
+				let line_num = 0;
+				let col_num = 0;
 
-			// the stderr could be tokenization issues
-			if (line_match !== null && column_match !== null) {
-				// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
-				line_num = parseInt(line_match[0].slice('line='.length));
-				col_num = parseInt(column_match[0].slice('column='.length));
+				// the stderr could be tokenization issues
+				if (line_match !== null && column_match !== null) {
+					connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
+					line_num = parseInt(line_match[0].slice('line='.length));
+					col_num = parseInt(column_match[0].slice('column='.length));
 
-			} else {
-				// or it could be evaluated error
-				const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
-				if (special_match !== null) {
-					line_num = parseInt(special_match[1]);
-					col_num = parseInt(special_match[2]);
-				}
-			}
-
-			// if we get some line/col number, we want to get the start and end of the error
-			if (line_num !== 0) {
-				// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
-				let m: RegExpExecArray | null;
-				// iterate over each line
-				const pattern = /(.*)\n/g;
-				while (line_num > 0 && (m = pattern.exec(text))) {
-					// connection.console.log(`match: ${m[0]}, ${m.index}`);
-					start = m.index + col_num;
-					end = m.index + m[0].length;
-					line_num -= 1;
-				}
-				// connection.console.log(`start: ${start}, end: ${end}`);
-			}
-
-			const diagnostic: Diagnostic = {
-				severity: DiagnosticSeverity.Warning,
-				range: {
-					start: textDocument.positionAt(start),
-					end: textDocument.positionAt(end)
-				},
-				message: `Forge Syntax Error: ${myStderr}`,
-				source: 'syntax_check.rkt'
-			};
-			if (hasDiagnosticRelatedInformationCapability) {
-				diagnostic.relatedInformation = [
-					{
-						location: {
-							uri: textDocument.uri,
-							range: Object.assign({}, diagnostic.range)
-						},
-						message: `${myStderr}`
+				} else {
+					// for now this would not happen
+					const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
+					if (special_match !== null) {
+						line_num = parseInt(special_match[1]);
+						col_num = parseInt(special_match[2]);
 					}
-				];
+				}
+
+				// if we get some line/col number, we want to get the start and end of the error
+				if (line_num !== 0) {
+					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
+					let m: RegExpExecArray | null;
+					// iterate over each line
+					const pattern = /(.*)\n/g;
+					while (line_num > 0 && (m = pattern.exec(text))) {
+						// connection.console.log(`match: ${m[0]}, ${m.index}`);
+						start = m.index + col_num;
+						end = m.index + m[0].length;
+						line_num -= 1;
+					}
+					// connection.console.log(`start: ${start}, end: ${end}`);
+				}
+
+				const diagnostic: Diagnostic = {
+					severity: DiagnosticSeverity.Warning,
+					range: {
+						start: textDocument.positionAt(start),
+						end: textDocument.positionAt(end)
+					},
+					message: `Forge Syntax Error: ${myStderr}`,
+					source: 'syntax_check.rkt'
+				};
+				if (hasDiagnosticRelatedInformationCapability) {
+					diagnostic.relatedInformation = [
+						{
+							location: {
+								uri: textDocument.uri,
+								range: Object.assign({}, diagnostic.range)
+							},
+							message: `${myStderr}`
+						}
+					];
+				}
+				diagnostics.push(diagnostic);
 			}
-			diagnostics.push(diagnostic);
-		}
+			// Send the computed diagnostics to VSCode.
+			connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+		});
 
-		// Send the computed diagnostics to VSCode.
-		connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-
-
+		connection.console.log("Connected to the socket");
+		so.write(text);
+		connection.console.log("write text to the racket server");
+		so.end();
 	});
+
 	// connection.console.log("end");
 
 }
@@ -313,3 +311,10 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
+
+connection.onExit(() => {
+	// kill racket
+	if (racket) {
+		racket.kill('SIGTERM');
+	}
+});

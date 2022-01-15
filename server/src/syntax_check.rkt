@@ -10,13 +10,20 @@
   (call-with-input-string str
     (lambda (in-port)
       (parse 'my-check-syntax-input (make-tokenizer in-port)))))
-      
-(define (file-to-string path)  
-  (call-with-input-file path 
-    (lambda (in) (port->string in))))
-    
-(define args (current-command-line-arguments))
-(define content (file-to-string (vector-ref args 0)))
 
-; use exit code 3 to indicate syntax error to server
-(with-handlers ([exn:fail? (lambda (v) (displayln (exn-message v) (current-error-port)) (exit 3))]) (my-check-syntax content))
+(define server (tcp-listen 8879))
+
+(define (start-accept) 
+  (define-values (s-in s-out) (tcp-accept server)) 
+  (process-content s-in s-out))
+
+(define (process-content s-in s-out) 
+  (with-handlers ([exn:fail? 
+                   (lambda (v) (displayln (exn-message v) (current-error-port)) (display (exn-message v) s-out) (close-output-port s-out))] 
+	              [exn:break:terminate? 
+				   (lambda (v) (tcp-close server) (exit))]) 
+	; todo: maybe concat the string here to be safe?
+	(my-check-syntax (read-string 10000 s-in)))
+  (start-accept))
+
+(start-accept)
