@@ -28,7 +28,7 @@ const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-// const racket = spawnRacket();
+const racket = spawnRacket();
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
@@ -320,7 +320,7 @@ connection.listen();
 
 connection.onExit(() => {
 	// kill racket
-	// if (racket) {
-	// 	racket.kill('SIGTERM');
-	// }
+	if (racket) {
+		racket.kill('SIGTERM');
+	}
 });
