@@ -29,26 +29,34 @@ export function activate(context: ExtensionContext) {
 	// todo: this seems to be overriding existing link provider?
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
-			const forgeFileReg = /[\\/]?([^\\/\n]*\.frg):(\d+):(\d+):?/;
+			const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
 			const matcher = (context.line as string).match(forgeFileReg);
 			if (matcher === undefined) {
 				return [];
 			} else {
-				console.log(`matched forge file: ${matcher}`);
+				// console.log(`matched forge file: ${matcher}`);
 
 				const filename = matcher[1];
 				// verify that filename matches?
+				const filePath = vscode.window.activeTextEditor.document.uri.fsPath;
+				const filePathFilename = filePath.split(/[/\\]/).pop();
+				console.log(`${filePath}: active filename: ${filePathFilename}; filename: ${filename}`);
+				if (filePathFilename !== filename) {
+					console.log("the line name is not the active filename");
+					return [];
+				}
+				
 				const line = parseInt(matcher[2]);
 				const col = parseInt(matcher[3]);
 
-				const tooltip = vscode.window.activeTextEditor.document.uri.fsPath + `:${line}:${col}`;
+				const tooltip = filePath + `:${line}:${col}`;
 
 				return [
 					{
 						startIndex: matcher.index,
 						length: matcher[0].length,
 						tooltip: tooltip,
-						filePath: vscode.window.activeTextEditor.document.uri.fsPath,
+						filePath: filePath,
 						line: line,
 						column: col
 					}
