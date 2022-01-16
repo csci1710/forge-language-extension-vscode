@@ -165,8 +165,6 @@ documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 });
 
-// todo: connection.onExecuteCommand
-
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	// const settings = await getDocumentSettings(textDocument.uri);
 
@@ -311,16 +309,39 @@ connection.onCompletionResolve(
 	}
 );
 
-// Make the text document manager listen on the connection
-// for open, change and close text document events
-documents.listen(connection);
-
-// Listen on the connection
-connection.listen();
-
 connection.onExit(() => {
 	// kill racket
 	if (racket) {
 		racket.kill('SIGTERM');
 	}
 });
+
+// todo: connection.onExecuteCommand
+
+connection.onExecuteCommand(async (params) => {
+	connection.console.log("Detected command execution!");
+	if (params.command !== 'forge.runFile' || params.arguments ===  undefined) {
+		return;
+	}
+	connection.console.log("Detected run execution!");
+
+	// const textDocument = documents.get(params.arguments[0]);
+	// if (textDocument === undefined) {
+	// 	return;
+	// }
+	// const newText = typeof params.arguments[1] === 'string' ? params.arguments[1] : 'Eclipse';
+	// connection.workspace.applyEdit({
+	// 	documentChanges: [
+	// 		TextDocumentEdit.create({ uri: textDocument.uri, version: textDocument.version }, [
+	// 			TextEdit.insert(Position.create(0, 0), newText)
+	// 		])
+	// 	]
+	// });
+});
+
+// Make the text document manager listen on the connection
+// for open, change and close text document events
+documents.listen(connection);
+
+// Listen on the connection
+connection.listen();

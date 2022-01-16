@@ -17,7 +17,8 @@
 		"vscode": "^1.43.0"
 	},
 	"activationEvents": [
-		"onLanguage:forge"
+		"onLanguage:forge",
+		"onCommand:forge.runFile"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
@@ -63,6 +64,25 @@
 					"description": "Traces the communication between VS Code and the language server."
 				}
 			}
+		},
+		"commands": [
+			{
+				"command": "forge.runFile",
+				"title": "Run Forge File",
+				"icon": {
+					"light": "./client/images/run.svg",
+					"dark": "./client/images/run.svg"
+				}
+			}
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"when": "editorLangId == forge",
+					"command": "forge.runFile",
+					"group": "navigation"
+				}
+			]
 		}
 	},
 	"scripts": {

@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { workspace, ExtensionContext } from 'vscode';
 
 import {
@@ -10,8 +11,42 @@ import {
 
 let client: LanguageClient;
 
+function getTerminal(fileURI: string): vscode.Terminal | null {
+	const terms = (<any>vscode.window).terminals;
+	const termLength = terms.length;
+	for (let i = 0; i < terms.length; i++){
+		if (terms[i].name === fileURI) {
+			return terms[i];
+		}
+	}
+	return null;
+}
+
 export function activate(context: ExtensionContext) {
 	// console.log("Forge Client activated!");
+
+	// The command has been defined in the package.json file
+	// Now provide the implementation of the command with registerCommand
+	// The commandId parameter must match the command field in package.json
+	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
+		// The code you place here will be executed every time your command is executed
+		console.log("runFile Command starts ...");
+		const filepath = vscode.window.activeTextEditor.document.uri.fsPath;
+		let terminal: vscode.Terminal | null = getTerminal(filepath);
+		if (!terminal){
+			terminal = vscode.window.createTerminal(`${filepath}`);
+		}
+
+		terminal.sendText(`clear`);
+		terminal.show();
+		terminal.sendText(`racket "${filepath}"`);
+
+		// Display a message box to the user
+		// vscode.window.showInformationMessage('Hello World!');
+	});
+
+	context.subscriptions.push(runFile);
+
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
