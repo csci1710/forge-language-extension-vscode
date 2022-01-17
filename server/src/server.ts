@@ -229,26 +229,28 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 				// the stderr could be tokenization issues
 				if (line_match !== null && column_match !== null) {
 					// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
+					// racket line/col num starts from 0
 					line_num = parseInt(line_match[0].slice('line='.length));
 					col_num = parseInt(column_match[0].slice('column='.length));
-
-				} else {
-					// for now this would not happen
-					const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
-					if (special_match !== null) {
-						line_num = parseInt(special_match[1]);
-						col_num = parseInt(special_match[2]);
-					}
 				}
+
+				// } else {
+				// 	// for now this would not happen
+				// 	const special_match = /frg:(\d+):(\d+):/.exec(myStderr);
+				// 	if (special_match !== null) {
+				// 		line_num = parseInt(special_match[1]);
+				// 		col_num = parseInt(special_match[2]);
+				// 	}
+				// }
 
 				// if we get some line/col number, we want to get the start and end of the error
 				if (line_num !== 0) {
 					// connection.console.log(`line num: ${line_num}, col num: ${col_num}`);
 					let m: RegExpExecArray | null;
 					// iterate over each line
-					const pattern = /(.*)\n/g;
+					const pattern = /(.*[\n\r\w])/g; // include the new line char and eof
 					while (line_num > 0 && (m = pattern.exec(text))) {
-						// connection.console.log(`match: ${m[0]}, ${m.index}`);
+						// connection.console.log(`match: ${m[0]}, ${m.index}, ${m[0].length}`);
 						start = m.index + col_num;
 						end = m.index + m[0].length;
 						line_num -= 1;
