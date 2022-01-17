@@ -17,7 +17,6 @@ import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
 import { ChildProcess, spawn } from 'child_process';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as net from 'net';
 import { Buffer } from 'buffer';
@@ -164,9 +163,13 @@ documents.onDidChangeContent(change => {
 	validateTextDocument(change.document);
 });
 
+let waitingForRacket = true;
+setTimeout(() => waitingForRacket = false, 3 * 1000); // need about ~2 second but to be safe here
+
 let timestamp = Date.now();
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+	if (waitingForRacket) return;
 	// const settings = await getDocumentSettings(textDocument.uri);
 	// when validate is called, we assign this validation a timestamp
 	const myTimestamp = Date.now();
@@ -181,7 +184,12 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	let myStderr = '\n';
 	connection.console.log(">>>>>>>>>> Connecting to socket");
 	const so = new net.Socket();
-	so.connect(8879, 'localhost');
+
+	if (myTimestamp < timestamp) {
+		connection.console.log(`oops I created socket too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
+	} else {
+		so.connect(8879, 'localhost');
+	}
 
 	so.on('error', function (error) { connection.console.log(`client received error: ${error.toString()}`); });
 	so.on('connect', function () {
