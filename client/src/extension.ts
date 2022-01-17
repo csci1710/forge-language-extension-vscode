@@ -31,7 +31,8 @@ export function activate(context: ExtensionContext) {
 		provideTerminalLinks: (context, token) => {
 			const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
 			const matcher = (context.line as string).match(forgeFileReg);
-			if (matcher === undefined) {
+			if (matcher === null) {
+				// console.log("not match");
 				return [];
 			} else {
 				// console.log(`matched forge file: ${matcher}`);
@@ -51,6 +52,7 @@ export function activate(context: ExtensionContext) {
 
 				const tooltip = filePath + `:${line}:${col}`;
 
+				// console.log("matched");
 				return [
 					{
 						startIndex: matcher.index,
