@@ -15,7 +15,7 @@
 
 (define (start-accept) 
   (define-values (s-in s-out) (tcp-accept server)) 
-  (process-content s-in s-out))
+  (thread (process-content s-in s-out)))
 
 (define (process-content s-in s-out) 
   (with-handlers ([exn:fail? 
@@ -27,7 +27,7 @@
 
     ; the client should first send an 4-byte integer to indicate the string length 
     ; (display "waiting for bytes\n")
-    
+
     (define count (with-handlers ([exn:fail? (lambda (v) 0)]) (integer-bytes->integer (read-bytes 4 s-in) #f #f)))
     ; (displayln count (current-error-port)) 
     ; (display "got some bytes\n")

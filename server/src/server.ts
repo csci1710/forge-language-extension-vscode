@@ -199,6 +199,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		if (myTimestamp < timestamp) {
 			connection.console.log(`oops I connected too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
 			so.end();
+			so.destroy();
 		} else {
 			so.write(buf);
 			connection.console.log(`>>>>>>>>  text size is: ${text.length} ${buf}`);
@@ -210,11 +211,13 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 		if (myTimestamp < timestamp) {
 			connection.console.log(`oops my data arrived too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
 			so.end();
+			so.destroy();
 		} else {
 			myStderr += data;
 			connection.console.log(data.toString());
 			connection.console.log(">>>>>>>>>> Ending socket");
 			so.end();
+			so.destroy();
 
 			// when racket finishes eval, we parse the received stderr and send diagnostics to client
 			if (myStderr !== '\n') {
