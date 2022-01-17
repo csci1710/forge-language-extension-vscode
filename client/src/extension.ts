@@ -26,7 +26,6 @@ export function activate(context: ExtensionContext) {
 	// console.log("Forge Client activated!");
 
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
-	// todo: this seems to be overriding existing link provider?
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
 			const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
