@@ -40,9 +40,9 @@ export function activate(context: ExtensionContext) {
 				// verify that filename matches?
 				const filePath = vscode.window.activeTextEditor.document.uri.fsPath;
 				const filePathFilename = filePath.split(/[/\\]/).pop();
-				console.log(`${filePath}: active filename: ${filePathFilename}; filename: ${filename}`);
+				// console.log(`${filePath}: active filename: ${filePathFilename}; filename: ${filename}`);
 				if (filePathFilename !== filename) {
-					console.log("the line name is not the active filename");
+					// console.log("the line name is not the active filename");
 					return [];
 				}
 				
@@ -66,7 +66,7 @@ export function activate(context: ExtensionContext) {
 		handleTerminalLink: (link: any) => {
 
 			if (link.line !== undefined) {
-				console.log(`link.line detected: ${link.filePath}`);
+				// console.log(`link.line detected: ${link.filePath}`);
 				const start = new vscode.Position(link.line, link.column);
 				const end = new vscode.Position(link.line, link.column);
 				const range = new vscode.Range(start, end);
@@ -88,7 +88,7 @@ export function activate(context: ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
 		// The code you place here will be executed every time your command is executed
-		console.log("runFile Command starts ...");
+		// console.log("runFile Command starts ...");
 		const filepath = vscode.window.activeTextEditor.document.uri.fsPath;
 		let terminal: vscode.Terminal | null = getTerminal(filepath);
 		if (!terminal) {
