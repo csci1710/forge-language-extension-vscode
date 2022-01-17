@@ -46,8 +46,8 @@ export function activate(context: ExtensionContext) {
 					return [];
 				}
 				
-				const line = parseInt(matcher[2]);
-				const col = parseInt(matcher[3]);
+				const line = parseInt(matcher[2]) - 1;
+				const col = parseInt(matcher[3]) - 1;
 
 				const tooltip = filePath + `:${line}:${col}`;
 
