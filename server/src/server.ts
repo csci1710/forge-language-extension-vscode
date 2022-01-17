@@ -182,40 +182,35 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	const diagnostics: Diagnostic[] = [];
 
 	let myStderr = '\n';
-	connection.console.log(">>>>>>>>>> Connecting to socket");
+	// connection.console.log(">>>>>>>>>> Connecting to socket");
 	const so = new net.Socket();
-
-	if (myTimestamp < timestamp) {
-		connection.console.log(`oops I created socket too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
-	} else {
-		so.connect(8879, 'localhost');
-	}
+	so.connect(8879, 'localhost');
 
 	so.on('error', function (error) { connection.console.log(`client received error: ${error.toString()}`); });
 	so.on('connect', function () {
-		connection.console.log("Connected to the socket");
+		// connection.console.log("Connected to the socket");
 		// it is possible that when we connect, there are already new validation being assigned
 		// in this case we want to quit to allow others to enter the socket
 		if (myTimestamp < timestamp) {
-			connection.console.log(`oops I connected too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
+			// connection.console.log(`oops I connected too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
 			so.end();
 			so.destroy();
 		} else {
 			so.write(buf);
-			connection.console.log(`>>>>>>>>  text size is: ${text.length} ${buf}`);
+			// connection.console.log(`>>>>>>>>  text size is: ${text.length} ${buf}`);
 			so.write(text);
-			connection.console.log("write text to the racket server");
+			// connection.console.log("write text to the racket server");
 		}
 	});
 	so.on('data', function (data) {
 		if (myTimestamp < timestamp) {
-			connection.console.log(`oops my data arrived too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
+			// connection.console.log(`oops my data arrived too late: current timestamp is ${timestamp}, my timestamp is ${myTimestamp}`);
 			so.end();
 			so.destroy();
 		} else {
 			myStderr += data;
 			connection.console.log(data.toString());
-			connection.console.log(">>>>>>>>>> Ending socket");
+			// connection.console.log(">>>>>>>>>> Ending socket");
 			so.end();
 			so.destroy();
 
@@ -233,7 +228,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 				// the stderr could be tokenization issues
 				if (line_match !== null && column_match !== null) {
-					connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
+					// connection.console.log(`line match: ${line_match[0]}, col match: ${column_match[0]}`);
 					line_num = parseInt(line_match[0].slice('line='.length));
 					col_num = parseInt(column_match[0].slice('column='.length));
 
