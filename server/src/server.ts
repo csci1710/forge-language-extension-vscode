@@ -148,7 +148,7 @@ function spawnRacket(): ChildProcess {
 	// 		connection.console.log(`Racket data: ${data}`);
 	// 	});
 	// }
-	connection.console.log("Successfully spawned Racket");
+	// connection.console.log("Successfully spawned Racket");
 	return racket;
 }
 
@@ -169,6 +169,8 @@ setTimeout(() => waitingForRacket = false, 3 * 1000); // need about ~2 second bu
 let timestamp = Date.now();
 
 async function validateTextDocument(textDocument: TextDocument): Promise<void> {
+
+	// connection.console.log(`${Diagnostics.get(textDocument.uri)}`);
 	if (waitingForRacket) return;
 	// const settings = await getDocumentSettings(textDocument.uri);
 	// when validate is called, we assign this validation a timestamp
@@ -286,7 +288,6 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	});
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
-
 }
 
 connection.onDidChangeWatchedFiles(_change => {

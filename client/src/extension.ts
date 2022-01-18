@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
 
 import {
 	LanguageClient,
@@ -8,18 +8,94 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
+import { ChildProcess, spawn } from 'child_process';
 
 let client: LanguageClient;
 
-function getTerminal(fileURI: string): vscode.Terminal | null {
+function getTerminal(name: string): vscode.Terminal | null {
 	const terms = (<any>vscode.window).terminals;
-	const termLength = terms.length;
 	for (let i = 0; i < terms.length; i++) {
-		if (terms[i].name === fileURI) {
+		if (terms[i].name === name) {
 			return terms[i];
 		}
 	}
 	return null;
+}
+
+const forgeOutput = vscode.window.createOutputChannel("Forge Output");
+let racket: ChildProcess | null;
+
+function parseForgeOutput(line: string): RegExpMatchArray | null {
+	const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
+	const matcher = (line as string).match(forgeFileReg);
+	if (!matcher) {
+		return null;
+	}
+	return matcher;
+}
+
+function showFileWithOpts(filePath: string, line: number, column: number) {
+	const start = new vscode.Position(line, column);
+	const end = new vscode.Position(line, column);
+	const range = new vscode.Range(start, end);
+
+	const opts: vscode.TextDocumentShowOptions = {
+		selection: range
+	};
+
+	vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath), opts);
+}
+
+// languages.onDidChangeDiagnostics(change => {
+// 	for (let i=0; i < change.uris.length; i++) {
+// 		if (change.uris[i] === vscode.window.activeTextEditor.document.uri) {
+// 			console.log("diagnostics changed!");
+// 		}
+// 	}
+// });
+
+function sendEvalErrors(textLine: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
+	const matcher = parseForgeOutput(textLine);
+	if (matcher) {
+
+		const line = parseInt(matcher[2]) - 1; 
+		const col = parseInt(matcher[3]) - 1;
+
+		const diagnostics: Diagnostic[] = [];
+
+		const start = new vscode.Position(line, col);
+		const end = new vscode.Position(line, col + 1); // todo: add length?
+		const range = new vscode.Range(start, end);
+
+		const diagnostic: Diagnostic = {
+			severity: DiagnosticSeverity.Error,
+			range: range,
+			message: `Forge Evaluation Error: ${line}`,
+			source: 'Racket'
+		};
+		diagnostics.push(diagnostic);
+		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
+		showFileWithOpts(fileURI.fsPath, line, col);
+	}
+}
+
+function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnostics: vscode.DiagnosticCollection): void {
+
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(e => myDiagnostics.delete(e.document.uri))
+	);
+
+	context.subscriptions.push(
+		vscode.workspace.onDidCloseTextDocument(doc => myDiagnostics.delete(doc.uri))
+	);
+
+}
+
+function killRacket() {
+	if (racket) {
+		racket.kill();
+	}
+	racket = null;
 }
 
 export function activate(context: ExtensionContext) {
@@ -28,14 +104,10 @@ export function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
-			const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
-			const matcher = (context.line as string).match(forgeFileReg);
-			if (matcher === null) {
-				// console.log("not match");
+			const matcher = parseForgeOutput(context.line);
+			if (!matcher) {
 				return [];
 			} else {
-				// console.log(`matched forge file: ${matcher}`);
-
 				const filename = matcher[1];
 				// verify that filename matches?
 				const filePath = vscode.window.activeTextEditor.document.uri.fsPath;
@@ -45,7 +117,7 @@ export function activate(context: ExtensionContext) {
 					// console.log("the line name is not the active filename");
 					return [];
 				}
-				
+
 				const line = parseInt(matcher[2]) - 1;
 				const col = parseInt(matcher[3]) - 1;
 
@@ -67,16 +139,7 @@ export function activate(context: ExtensionContext) {
 		handleTerminalLink: (link: any) => {
 
 			if (link.line !== undefined) {
-				// console.log(`link.line detected: ${link.filePath}`);
-				const start = new vscode.Position(link.line, link.column);
-				const end = new vscode.Position(link.line, link.column);
-				const range = new vscode.Range(start, end);
-
-				const opts: vscode.TextDocumentShowOptions = {
-					selection: range
-				};
-
-				vscode.commands.executeCommand("vscode.open", vscode.Uri.file(link.filePath), opts);
+				showFileWithOpts(link.filePath, link.line, link.column);
 			}
 			else {
 				vscode.commands.executeCommand('vscode.open', vscode.Uri.file(link.filePath));
@@ -84,29 +147,62 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
+	const forgeEvalDiagnostics = languages.createDiagnosticCollection("Forge Eval");
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
-		// The code you place here will be executed every time your command is executed
-		// console.log("runFile Command starts ...");
-		const filepath = vscode.window.activeTextEditor.document.uri.fsPath;
-		let terminal: vscode.Terminal | null = getTerminal(filepath);
-		if (!terminal) {
-			terminal = vscode.window.createTerminal(`${filepath}`);
+		// // The code you place here will be executed every time your command is executed
+		const fileURI = vscode.window.activeTextEditor.document.uri;
+		const filepath = fileURI.fsPath;
+
+		// try to only run active forge file
+		if (filepath.split(/\./).pop() !== "frg") {
+			vscode.window.showInformationMessage('Click on the Forge file first before hitting the run button :)');
+			console.log(`cannot run file ${filepath}`);
+			return;
 		}
 
-		// hack for forge error display
+		forgeOutput.clear();
+		forgeOutput.show();
 
-		terminal.sendText(`clear`);
-		terminal.show();
-		terminal.sendText(`racket "${filepath}"`);
+		//Write to output.
+		forgeOutput.appendLine(`Running file ${filepath} ...`);
 
-		// Display a message box to the user
-		// vscode.window.showInformationMessage('Hello World!');
+		// if existing racket, kill it first
+		killRacket();
+
+		racket = spawn('racket', [filepath], { shell: true });
+		if (!racket) {
+			console.error("Cannot spawn Racket process");
+		}
+
+		racket.stdout.on('data', (data: string) => {
+			forgeOutput.appendLine(data);
+		});
+
+		let myStderr = "";
+		racket.stderr.on('data', (err: string) => {
+			forgeOutput.appendLine(err);
+			myStderr += err;
+		});
+
+		racket.on('exit', (code: string) => {
+			forgeOutput.appendLine(`Finished running.`);
+			if (myStderr !== "") {
+				sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
+			}
+		});
 	});
 
-	context.subscriptions.push(runFile);
+	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
+		killRacket();
+	});
+
+	context.subscriptions.push(runFile, stopRun, forgeEvalDiagnostics);
+
+	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 
 	// The server is implemented in node
 	const serverModule = context.asAbsolutePath(

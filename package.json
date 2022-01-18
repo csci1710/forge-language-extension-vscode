@@ -73,6 +73,14 @@
 					"light": "./client/images/run.svg",
 					"dark": "./client/images/run.svg"
 				}
+			},
+			{
+				"command": "forge.stopRun",
+				"title": "Stop Current Run",
+				"icon": {
+					"light": "./client/images/stop.svg",
+					"dark": "./client/images/stop.svg"
+				}
 			}
 		],
 		"menus": {
@@ -80,6 +88,11 @@
 				{
 					"when": "editorLangId == forge",
 					"command": "forge.runFile",
+					"group": "navigation"
+				},
+				{
+					"when": "editorLangId == forge",
+					"command": "forge.stopRun",
 					"group": "navigation"
 				}
 			]
