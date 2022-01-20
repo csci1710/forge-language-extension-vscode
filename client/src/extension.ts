@@ -153,12 +153,15 @@ export function activate(context: ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
+		// always auto-save before any run
+		vscode.window.activeTextEditor.document.save();
+
 		// // The code you place here will be executed every time your command is executed
 		const fileURI = vscode.window.activeTextEditor.document.uri;
 		const filepath = fileURI.fsPath;
 
 		// try to only run active forge file
-		if (filepath.split(/\./).pop() !== "frg") {
+		if (filepath.split(/\./).pop() !== 'frg') {
 			vscode.window.showInformationMessage('Click on the Forge file first before hitting the run button :)');
 			console.log(`cannot run file ${filepath}`);
 			return;
@@ -182,7 +185,7 @@ export function activate(context: ExtensionContext) {
 			forgeOutput.appendLine(data);
 		});
 
-		let myStderr = "";
+		let myStderr = '';
 		racket.stderr.on('data', (err: string) => {
 			forgeOutput.appendLine(err);
 			myStderr += err;
@@ -243,7 +246,7 @@ export function activate(context: ExtensionContext) {
 
 	// Start the client. This will also launch the server
 	client.start();
-	console.log("Client and Server launched");
+	console.log('Client and Server launched');
 }
 
 export function deactivate(): Thenable<void> | undefined {
