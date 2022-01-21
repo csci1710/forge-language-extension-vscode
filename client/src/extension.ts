@@ -9,6 +9,7 @@ import {
 	TransportKind
 } from 'vscode-languageclient/node';
 import { ChildProcess, spawn } from 'child_process';
+import { error } from 'console';
 
 let client: LanguageClient;
 
@@ -34,16 +35,21 @@ function parseForgeOutput(line: string): RegExpMatchArray | null {
 	return matcher;
 }
 
-function showFileWithOpts(filePath: string, line: number, column: number) {
-	const start = new vscode.Position(line, column);
-	const end = new vscode.Position(line, column);
-	const range = new vscode.Range(start, end);
+function showFileWithOpts(filePath: string, line: number|null, column: number|null) {
 
-	const opts: vscode.TextDocumentShowOptions = {
-		selection: range
-	};
+	if (line === null || column === null) {
+		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath));
+	} else {
+		const start = new vscode.Position(line, column);
+		const end = new vscode.Position(line, column);
+		const range = new vscode.Range(start, end);
 
-	vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath), opts);
+		const opts: vscode.TextDocumentShowOptions = {
+			selection: range
+		};
+
+		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath), opts);
+	}
 }
 
 // languages.onDidChangeDiagnostics(change => {
@@ -76,6 +82,8 @@ function sendEvalErrors(textLine: string, fileURI: vscode.Uri, diagnosticCollect
 		diagnostics.push(diagnostic);
 		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
 		showFileWithOpts(fileURI.fsPath, line, col);
+	} else {
+		showFileWithOpts(fileURI.fsPath, null, null);
 	}
 }
 
@@ -91,9 +99,13 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 
 }
 
+let racketKilled = false;
 function killRacket() {
 	if (racket) {
 		racket.kill();
+		racketKilled = true;
+		// this is only to inform the user, the process could still be waiting to exit
+		forgeOutput.appendLine('Forge process terminated.');
 	}
 	racket = null;
 }
@@ -137,7 +149,7 @@ export function activate(context: ExtensionContext) {
 			}
 		},
 		handleTerminalLink: (link: any) => {
-
+			// todo: need to double check if line could be undefined or null
 			if (link.line !== undefined) {
 				showFileWithOpts(link.filePath, link.line, link.column);
 			}
@@ -167,18 +179,18 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
+		// if existing racket, kill it first
+		killRacket();
+
 		forgeOutput.clear();
 		forgeOutput.show();
 
 		//Write to output.
 		forgeOutput.appendLine(`Running file ${filepath} ...`);
 
-		// if existing racket, kill it first
-		killRacket();
-
 		racket = spawn('racket', [filepath], { shell: true });
 		if (!racket) {
-			console.error("Cannot spawn Racket process");
+			console.error('Cannot spawn Racket process');
 		}
 
 		racket.stdout.on('data', (data: string) => {
@@ -187,14 +199,22 @@ export function activate(context: ExtensionContext) {
 
 		let myStderr = '';
 		racket.stderr.on('data', (err: string) => {
-			forgeOutput.appendLine(err);
+			// forgeOutput.appendLine(err);
 			myStderr += err;
 		});
 
 		racket.on('exit', (code: string) => {
-			forgeOutput.appendLine(`Finished running.`);
-			if (myStderr !== "") {
-				sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
+			if (!racketKilled){
+				if (myStderr !== '') {
+					forgeOutput.appendLine(myStderr);
+					sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
+				} else {
+					showFileWithOpts(fileURI.fsPath, null, null);
+					forgeOutput.appendLine('Finished running.');
+				}
+			} else {
+				racketKilled = false;
+				showFileWithOpts(fileURI.fsPath, null, null);
 			}
 		});
 	});
@@ -253,5 +273,7 @@ export function deactivate(): Thenable<void> | undefined {
 	if (!client) {
 		return undefined;
 	}
+	// kill racket process
+	killRacket();
 	return client.stop();
 }
