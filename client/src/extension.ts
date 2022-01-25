@@ -100,10 +100,10 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 }
 
 let racketKilled = false;
-function killRacket() {
+function killRacket(manual: boolean) {
 	if (racket) {
 		racket.kill();
-		racketKilled = true;
+		racketKilled = manual;
 		// this is only to inform the user, the process could still be waiting to exit
 		forgeOutput.appendLine('Forge process terminated.');
 	}
@@ -180,7 +180,7 @@ export function activate(context: ExtensionContext) {
 		}
 
 		// if existing racket, kill it first
-		killRacket();
+		killRacket(false);
 
 		forgeOutput.clear();
 		forgeOutput.show();
@@ -210,17 +210,17 @@ export function activate(context: ExtensionContext) {
 					sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
 				} else {
 					showFileWithOpts(fileURI.fsPath, null, null);
-					forgeOutput.appendLine('Finished running.');
 				}
+				forgeOutput.appendLine('Finished running.');
 			} else {
-				racketKilled = false;
 				showFileWithOpts(fileURI.fsPath, null, null);
 			}
+			racketKilled = false;
 		});
 	});
 
 	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
-		killRacket();
+		killRacket(true);
 	});
 
 	context.subscriptions.push(runFile, stopRun, forgeEvalDiagnostics);
@@ -274,6 +274,6 @@ export function deactivate(): Thenable<void> | undefined {
 		return undefined;
 	}
 	// kill racket process
-	killRacket();
+	killRacket(false);
 	return client.stop();
 }
