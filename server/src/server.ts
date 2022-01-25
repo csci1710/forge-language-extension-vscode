@@ -140,8 +140,8 @@ function spawnRacket(): ChildProcess {
 	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
 	const racket = spawn('racket', [syntaxCheck], { shell: true });
 	if (!racket) {
-		connection.console.error("Cannot launch racket");
-		throw new Error("Cannot launch racket");
+		connection.console.error('Cannot launch racket');
+		throw new Error('Cannot launch racket');
 	}
 	// if (racket.stderr) {
 	// 	racket.stderr.on('data', (data: string) => {
@@ -292,7 +292,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 
 connection.onDidChangeWatchedFiles(_change => {
 	// Monitored files have change in VSCode
-	connection.console.log('We received an file change event');
+	connection.console.log('We received a file change event');
 });
 
 // This handler provides the initial list of the completion items.

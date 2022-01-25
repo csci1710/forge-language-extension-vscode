@@ -23,7 +23,7 @@ function getTerminal(name: string): vscode.Terminal | null {
 	return null;
 }
 
-const forgeOutput = vscode.window.createOutputChannel("Forge Output");
+const forgeOutput = vscode.window.createOutputChannel('Forge Output');
 let racket: ChildProcess | null;
 
 function parseForgeOutput(line: string): RegExpMatchArray | null {
@@ -38,7 +38,7 @@ function parseForgeOutput(line: string): RegExpMatchArray | null {
 function showFileWithOpts(filePath: string, line: number|null, column: number|null) {
 
 	if (line === null || column === null) {
-		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath));
+		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
 	} else {
 		const start = new vscode.Position(line, column);
 		const end = new vscode.Position(line, column);
@@ -48,7 +48,7 @@ function showFileWithOpts(filePath: string, line: number|null, column: number|nu
 			selection: range
 		};
 
-		vscode.commands.executeCommand("vscode.open", vscode.Uri.file(filePath), opts);
+		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath), opts);
 	}
 }
 
@@ -159,7 +159,7 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
-	const forgeEvalDiagnostics = languages.createDiagnosticCollection("Forge Eval");
+	const forgeEvalDiagnostics = languages.createDiagnosticCollection('Forge Eval');
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
