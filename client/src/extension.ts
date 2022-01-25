@@ -20,7 +20,7 @@ function matchForgeError(line: string): RegExpMatchArray | null {
 	return (line as string).match(forgeFileReg);
 }
 
-function showFileWithOpts(filePath: string, line: number|null, column: number|null) {
+function showFileWithOpts(filePath: string, line: number | null, column: number | null) {
 	if (line === null || column === null) {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
 	} else {
@@ -38,7 +38,7 @@ function showFileWithOpts(filePath: string, line: number|null, column: number|nu
 
 function sendEvalErrors(textLines: string[], fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 	let matcher: RegExpMatchArray | null;
-	for (let i=0; i<textLines.length; i++){
+	for (let i = 0; i < textLines.length; i++) {
 		matcher = matchForgeError(textLines[i]);
 		if (matcher) {
 			// for now stops at the first error
@@ -49,7 +49,7 @@ function sendEvalErrors(textLines: string[], fileURI: vscode.Uri, diagnosticColl
 
 	if (matcher) {
 
-		const line = parseInt(matcher[2]) - 1; 
+		const line = parseInt(matcher[2]) - 1;
 		const col = parseInt(matcher[3]) - 1;
 
 		const diagnostics: Diagnostic[] = [];
@@ -177,7 +177,17 @@ export function activate(context: ExtensionContext) {
 		}
 
 		racket.stdout.on('data', (data: string) => {
-			forgeOutput.appendLine(data);
+			// forgeOutput.appendLine(data);
+			const lst = data.toString().split(/[\n]/);
+			// console.log(lst, lst.length);
+			for (let i = 0; i < lst.length; i++) {
+				// this is a bit ugly but trying to avoid confusing students
+				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
+					forgeOutput.appendLine('Sterling running. Hit Stop to stop service.');
+				} else {
+					forgeOutput.appendLine(lst[i]);
+				}
+			}
 		});
 
 		let myStderr = '';
@@ -187,7 +197,7 @@ export function activate(context: ExtensionContext) {
 		});
 
 		racket.on('exit', (code: string) => {
-			if (!racketKilledManually){
+			if (!racketKilledManually) {
 				if (myStderr !== '') {
 					forgeOutput.appendLine(myStderr);
 					sendEvalErrors(myStderr.split(/[\n\r]/), fileURI, forgeEvalDiagnostics);

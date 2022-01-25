@@ -72,7 +72,7 @@
 		"commands": [
 			{
 				"command": "forge.runFile",
-				"title": "Run Forge File",
+				"title": "Run",
 				"icon": {
 					"light": "./client/images/run.svg",
 					"dark": "./client/images/run.svg"
@@ -80,7 +80,7 @@
 			},
 			{
 				"command": "forge.stopRun",
-				"title": "Stop Current Run",
+				"title": "Stop",
 				"icon": {
 					"light": "./client/images/stop.svg",
 					"dark": "./client/images/stop.svg"
