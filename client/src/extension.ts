@@ -9,19 +9,8 @@ import {
 	TransportKind
 } from 'vscode-languageclient/node';
 import { ChildProcess, spawn } from 'child_process';
-import { error } from 'console';
 
 let client: LanguageClient;
-
-function getTerminal(name: string): vscode.Terminal | null {
-	const terms = (<any>vscode.window).terminals;
-	for (let i = 0; i < terms.length; i++) {
-		if (terms[i].name === name) {
-			return terms[i];
-		}
-	}
-	return null;
-}
 
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
 let racket: ChildProcess | null;
@@ -36,7 +25,6 @@ function parseForgeOutput(line: string): RegExpMatchArray | null {
 }
 
 function showFileWithOpts(filePath: string, line: number|null, column: number|null) {
-
 	if (line === null || column === null) {
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
 	} else {
@@ -51,14 +39,6 @@ function showFileWithOpts(filePath: string, line: number|null, column: number|nu
 		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath), opts);
 	}
 }
-
-// languages.onDidChangeDiagnostics(change => {
-// 	for (let i=0; i < change.uris.length; i++) {
-// 		if (change.uris[i] === vscode.window.activeTextEditor.document.uri) {
-// 			console.log("diagnostics changed!");
-// 		}
-// 	}
-// });
 
 function sendEvalErrors(textLine: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 	const matcher = parseForgeOutput(textLine);
@@ -99,11 +79,11 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 
 }
 
-let racketKilled = false;
+let racketKilledManually = false;
 function killRacket(manual: boolean) {
 	if (racket) {
 		racket.kill();
-		racketKilled = manual;
+		racketKilledManually = manual;
 		// this is only to inform the user, the process could still be waiting to exit
 		forgeOutput.appendLine('Forge process terminated.');
 	}
@@ -111,8 +91,6 @@ function killRacket(manual: boolean) {
 }
 
 export function activate(context: ExtensionContext) {
-	// console.log("Forge Client activated!");
-
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
@@ -154,7 +132,7 @@ export function activate(context: ExtensionContext) {
 				showFileWithOpts(link.filePath, link.line, link.column);
 			}
 			else {
-				vscode.commands.executeCommand('vscode.open', vscode.Uri.file(link.filePath));
+				showFileWithOpts(link.filePath, null, null);
 			}
 		}
 	});
@@ -204,7 +182,7 @@ export function activate(context: ExtensionContext) {
 		});
 
 		racket.on('exit', (code: string) => {
-			if (!racketKilled){
+			if (!racketKilledManually){
 				if (myStderr !== '') {
 					forgeOutput.appendLine(myStderr);
 					sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
@@ -215,7 +193,7 @@ export function activate(context: ExtensionContext) {
 			} else {
 				showFileWithOpts(fileURI.fsPath, null, null);
 			}
-			racketKilled = false;
+			racketKilledManually = false;
 		});
 	});
 
