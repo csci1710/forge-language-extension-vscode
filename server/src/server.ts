@@ -178,7 +178,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<void> {
 	timestamp = myTimestamp;
 
 	const text = textDocument.getText();
-	const buf = new Buffer(4);
+	const buf = Buffer.alloc(4);
 	buf.writeUInt32LE(text.length, 0);
 
 	const diagnostics: Diagnostic[] = [];
