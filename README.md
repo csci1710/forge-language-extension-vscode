@@ -1,6 +1,6 @@
 # Forge languager server 
 
-Adapted from the heavily [documented sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
+Adapted from the [documented sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
 
 ## Functionality
 
@@ -31,6 +31,6 @@ This Language Server works for the language Forge. It has the following language
 - Select `Launch Client` from the drop down.
 - Run the launch config.
 - If you want to debug the server as well use the launch configuration `Attach to Server`
-- In the [Extension Development Host] instance of VSCode, open a document in 'plain text' language mode.
-  - Type `j` or `t` to see `Javascript` and `TypeScript` completion.
-  - Enter text content such as `AAA aaa BBB`. The extension will emit diagnostics for all words in all-uppercase.
+- In the [Extension Development Host] instance of VSCode, open a document in 'Forge' language mode.
+  - Enter Forge code. The extension will emit diagnostics for syntax errors.
+  - Run Forge code with the run button. The extension will emit diagnostics for evaluation errors.
