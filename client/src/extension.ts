@@ -15,13 +15,9 @@ let client: LanguageClient;
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
 let racket: ChildProcess | null;
 
-function parseForgeOutput(line: string): RegExpMatchArray | null {
+function matchForgeError(line: string): RegExpMatchArray | null {
 	const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
-	const matcher = (line as string).match(forgeFileReg);
-	if (!matcher) {
-		return null;
-	}
-	return matcher;
+	return (line as string).match(forgeFileReg);
 }
 
 function showFileWithOpts(filePath: string, line: number|null, column: number|null) {
@@ -40,8 +36,17 @@ function showFileWithOpts(filePath: string, line: number|null, column: number|nu
 	}
 }
 
-function sendEvalErrors(textLine: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
-	const matcher = parseForgeOutput(textLine);
+function sendEvalErrors(textLines: string[], fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
+	let matcher: RegExpMatchArray | null;
+	for (let i=0; i<textLines.length; i++){
+		matcher = matchForgeError(textLines[i]);
+		if (matcher) {
+			// for now stops at the first error
+			// this could be risky if there are frg files in the source code
+			break;
+		}
+	}
+
 	if (matcher) {
 
 		const line = parseInt(matcher[2]) - 1; 
@@ -94,7 +99,7 @@ export function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
-			const matcher = parseForgeOutput(context.line);
+			const matcher = matchForgeError(context.line);
 			if (!matcher) {
 				return [];
 			} else {
@@ -185,7 +190,7 @@ export function activate(context: ExtensionContext) {
 			if (!racketKilledManually){
 				if (myStderr !== '') {
 					forgeOutput.appendLine(myStderr);
-					sendEvalErrors(myStderr.split(/[\n\r]/)[0], fileURI, forgeEvalDiagnostics);
+					sendEvalErrors(myStderr.split(/[\n\r]/), fileURI, forgeEvalDiagnostics);
 				} else {
 					showFileWithOpts(fileURI.fsPath, null, null);
 				}

@@ -124,17 +124,6 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	return result;
 }
 
-function getFilename(textDocument: TextDocument): string {
-	let filename = 'unnamed.frg';
-	if (textDocument.uri) {
-		const fname = textDocument.uri.split(/[/\\]/).pop();
-		if (fname) {
-			filename = fname;
-		}
-	}
-	return filename;
-}
-
 function spawnRacket(): ChildProcess {
 	// spawn racket
 	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
