@@ -3,7 +3,6 @@
 	"description": "VSCode part of the forge language server",
 	"author": "",
 	"license": "",
-	"version": "0.0.1",
 	"publisher": "forge",
 	"repository": {
 		"type": "git",
