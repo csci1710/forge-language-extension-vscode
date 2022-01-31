@@ -169,9 +169,9 @@ export function activate(context: ExtensionContext) {
 		forgeOutput.show();
 
 		//Write to output.
-		forgeOutput.appendLine(`Running file ${filepath} ...`);
+		forgeOutput.appendLine(`Running file "${filepath}" ...`);
 
-		racket = spawn('racket', [filepath], { shell: true });
+		racket = spawn('racket', [`"${filepath}"`], { shell: true });
 		if (!racket) {
 			console.error('Cannot spawn Racket process');
 		}

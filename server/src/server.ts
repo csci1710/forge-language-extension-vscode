@@ -127,7 +127,7 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 function spawnRacket(): ChildProcess {
 	// spawn racket
 	const syntaxCheck = path.resolve(__dirname, '../src/syntax_check.rkt');
-	const racket = spawn('racket', [syntaxCheck], { shell: true });
+	const racket = spawn('racket', [`"${syntaxCheck}"`], { shell: true });
 	if (!racket) {
 		connection.console.error('Cannot launch racket');
 		throw new Error('Cannot launch racket');
