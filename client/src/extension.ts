@@ -100,6 +100,19 @@ function killRacket(manual: boolean) {
 	racket = null;
 }
 
+
+function genLogObject(filePath, content) {
+
+	var fileName = path.parse(filePath).base;
+
+	return {
+		filename: fileName,
+		filepath: filePath,
+		fileContent: content,
+	}
+
+}
+
 export function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
@@ -236,9 +249,8 @@ export function activate(context: ExtensionContext) {
 
             const documentText = document.getText();
 			const fileName = document.isUntitled ? "untitled" : document.fileName;
-
-			logger.info(documentText, fileName);
-			
+			let logobj = genLogObject(fileName, documentText);
+			logger.info(logobj);
 		}
 
 

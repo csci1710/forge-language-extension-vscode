@@ -3,5 +3,5 @@
     "databaseURL": "https://pyret-examples.firebaseio.com",
     "projectId": "pyret-examples",
     "storageBucket": "pyret-examples.appspot.com",
-    "collectionName": "cs-22-lean"
+    "collectionName": "forge-vscode-logs"
 }

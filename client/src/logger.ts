@@ -29,9 +29,9 @@ export class Logger {
         }
     }
 
-    async info(payload: any, fn : string)
+    async info(payload: any)
     {
-        let p = this.payload(payload, fn, "info");
+        let p = this.payload(payload, "info");
 
         let log = doc(this.log_target);
         await setDoc(log, p);
