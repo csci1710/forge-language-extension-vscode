@@ -18,11 +18,10 @@ export class Logger {
         this.log_target = collection(this.db, config.collectionName);
     }
  
-    payload(payload: any, fn : string, loglevel: string)
+    payload(payload: any, loglevel: string)
     {
         return {
             user: this.user,
-            filename: fn,
             content: payload,
             timestamp: Date.now(),
             loglevel: loglevel
