@@ -10,6 +10,11 @@ import {
 } from 'vscode-languageclient/node';
 import { ChildProcess, spawn } from 'child_process';
 
+
+import { Logger } from "./logger";
+var os = require("os");
+var hostname = os.hostname();
+
 let client: LanguageClient;
 
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
@@ -144,6 +149,12 @@ export function activate(context: ExtensionContext) {
 
 	const forgeEvalDiagnostics = languages.createDiagnosticCollection('Forge Eval');
 
+
+	// Designed to be run in GitPod
+	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("non-gitpod-user-" + hostname)
+	var logger = new Logger(userid);
+
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -212,6 +223,26 @@ export function activate(context: ExtensionContext) {
 			}
 			racketKilledManually = false;
 		});
+
+
+		/* Simple logging goes here. */
+
+
+
+		const editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+			const document = editor.document;
+
+            const documentText = document.getText();
+			const fileName = document.isUntitled ? "untitled" : document.fileName;
+
+			logger.info(documentText, fileName);
+			
+		}
+
+
+		/* ******end logging **********/
 	});
 
 	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
