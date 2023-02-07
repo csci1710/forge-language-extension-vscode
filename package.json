@@ -24,27 +24,27 @@
 	"contributes": {
 		"languages": [
 			{
-			  "id": "forge",
-			  "aliases": [
-				"Forge",
-				"forge"
-			  ],
-			  "extensions": [
-				".frg"
-			  ],
-			  "configuration": "./client/language-configuration.json",
-			  "icon": {
-				"light": "./client/images/icon.png",
-				"dark": "./client/images/icon.png"
-			  }
+				"id": "forge",
+				"aliases": [
+					"Forge",
+					"forge"
+				],
+				"extensions": [
+					".frg"
+				],
+				"configuration": "./client/language-configuration.json",
+				"icon": {
+					"light": "./client/images/icon.png",
+					"dark": "./client/images/icon.png"
+				}
 			}
-		  ],
+		],
 		"grammars": [
-		{
-			"language": "forge",
-			"scopeName": "source.forge",
-			"path": "./client/syntaxes/forge.tmLanguage.json"
-		}
+			{
+				"language": "forge",
+				"scopeName": "source.forge",
+				"path": "./client/syntaxes/forge.tmLanguage.json"
+			}
 		],
 		"configuration": {
 			"type": "object",
@@ -116,13 +116,14 @@
 		"@typescript-eslint/eslint-plugin": "^4.23.0",
 		"@typescript-eslint/parser": "^4.23.0",
 		"eslint": "^7.26.0",
-		"mocha": "^8.3.2",
+		"mocha": "^8.4.0",
 		"typescript": "^4.4.3"
 	},
 	"dependencies": {
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
+		"glob": "^8.1.0",
 		"openai": "^3.1.0",
 		"uuid": "^9.0.0"
 	}
