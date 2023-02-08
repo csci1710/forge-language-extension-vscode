@@ -164,7 +164,7 @@ export function activate(context: ExtensionContext) {
 
 
 	// Designed to be run in GitPod
-	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("non-gitpod-user-" + hostname)
+	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
 	var logger = new Logger(userid);
 
 
@@ -172,12 +172,16 @@ export function activate(context: ExtensionContext) {
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
-		// always auto-save before any run
-		vscode.window.activeTextEditor.document.save();
 
-		// // The code you place here will be executed every time your command is executed
 		const fileURI = vscode.window.activeTextEditor.document.uri;
 		const filepath = fileURI.fsPath;
+		
+		// always auto-save before any run
+		if (!vscode.window.activeTextEditor.document.save())
+		{
+			console.error(`Could not save ${filepath}`);
+		}
+
 
 		// try to only run active forge file
 		if (filepath.split(/\./).pop() !== 'frg') {
@@ -239,8 +243,6 @@ export function activate(context: ExtensionContext) {
 
 
 		/* Simple logging goes here. */
-
-
 
 		const editor = vscode.window.activeTextEditor;
 
