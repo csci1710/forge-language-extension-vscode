@@ -2,7 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, setDoc } from 'firebase/firestore/lite';
 const execSync = require('child_process').execSync;
 
-        // I would also like to get the Forge lang version here.
+
+
+// Enum for log levels
+export enum LogLevel {
+    INFO = "info",
+    DEBUG = "debug",
+    WARNING = "warning",
+    ERROR = "error"
+}
 
 
 import config from "./logging_config.json";
@@ -29,7 +37,7 @@ export class Logger {
         this.log_target = collection(this.db, config.collectionName);
     }
  
-    payload(payload: any, loglevel: string)
+    payload(payload: any, loglevel: LogLevel)
     {
         return {
             user: this.user,
@@ -39,10 +47,14 @@ export class Logger {
         }
     }
 
-    async info(payload: any)
-    {
-        let p = this.payload(payload, "info");
+
+    async log_payload(payload: any, loglevel: LogLevel) {
+        let p = this.payload(payload, loglevel);
         let log = doc(this.log_target);
-        var res = await setDoc(log, p);
+        try {
+            await setDoc(log, p);
+        } catch (error) {
+            console.error("Log failure ", error);
+        }
     }
   }

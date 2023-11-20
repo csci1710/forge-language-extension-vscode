@@ -11,7 +11,8 @@ import {
 import { ChildProcess, spawn } from 'child_process';
 
 
-import { Logger } from "./logger";
+import { Logger, LogLevel } from "./logger";
+
 var os = require("os");
 var hostname = os.hostname();
 
@@ -252,7 +253,7 @@ export function activate(context: ExtensionContext) {
             const documentText = document.getText();
 			const fileName = document.isUntitled ? "untitled" : document.fileName;
 			let logobj = genLogObject(fileName, documentText);
-			logger.info(logobj);
+			logger.log_payload(logobj, LogLevel.INFO);
 		}
 
 
