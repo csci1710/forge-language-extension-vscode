@@ -102,16 +102,18 @@ function killRacket(manual: boolean) {
 }
 
 
-function genLogObject(filePath, content) {
+function genLogObject(d, focusedDoc) {
 
-	var fileName = path.parse(filePath).base;
+	const content = d.getText();
+	const filePath = d.isUntitled ? "untitled" : d.fileName;
+	const fileName = path.parse(filePath).base;
 
 	return {
+		focused : focusedDoc,
 		filename: fileName,
 		filepath: filePath,
 		fileContent: content,
-	}
-
+	};
 }
 
 export function activate(context: ExtensionContext) {
@@ -243,20 +245,19 @@ export function activate(context: ExtensionContext) {
 		});
 
 
-		/* Simple logging goes here. */
+		/* Logging *******/
 
+		const loggingEnabled = vscode.workspace.getConfiguration().get<boolean>('forge-enable-logging');
 		const editor = vscode.window.activeTextEditor;
+		if (loggingEnabled && editor) {
+							 
+			const documentData = vscode.workspace.textDocuments.map((d) => {
+				const focusedDoc = (d === editor.document);
+				return genLogObject(d, focusedDoc);
+			});
 
-		if (editor) {
-			const document = editor.document;
-
-            const documentText = document.getText();
-			const fileName = document.isUntitled ? "untitled" : document.fileName;
-			let logobj = genLogObject(fileName, documentText);
-			logger.log_payload(logobj, LogLevel.INFO);
+			logger.log_payload(documentData, LogLevel.INFO);
 		}
-
-
 		/* ******end logging **********/
 	});
 
