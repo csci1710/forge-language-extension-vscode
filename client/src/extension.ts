@@ -101,8 +101,9 @@ function killRacket(manual: boolean) {
 	racket = null;
 }
 
-
-function genLogObject(d, focusedDoc) {
+// TODO: Want to make this an extension method
+// on TextDocument, but cannot wrangle it.
+function textDocumentToLog(d, focusedDoc) {
 
 	const content = d.getText();
 	const filePath = d.isUntitled ? "untitled" : d.fileName;
@@ -253,7 +254,7 @@ export function activate(context: ExtensionContext) {
 							 
 			const documentData = vscode.workspace.textDocuments.map((d) => {
 				const focusedDoc = (d === editor.document);
-				return genLogObject(d, focusedDoc);
+				return textDocumentToLog(d, focusedDoc);
 			});
 
 			logger.log_payload(documentData, LogLevel.INFO);
