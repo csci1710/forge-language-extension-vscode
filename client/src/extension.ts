@@ -247,7 +247,7 @@ export function activate(context: ExtensionContext) {
 
 		/* Logging *******/
 
-		const loggingEnabled = vscode.workspace.getConfiguration().get<boolean>('forge-enable-logging');
+		const loggingEnabled = vscode.workspace.getConfiguration().get<boolean>('enable-logging');
 		const editor = vscode.window.activeTextEditor;
 		if (loggingEnabled && editor) {
 							 

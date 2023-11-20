@@ -17,5 +17,11 @@
 	"devDependencies": {
 		"@types/vscode": "^1.52.0",
 		"@vscode/test-electron": "^1.6.1"
+	},
+	"enable-logging": {
+		"type": "boolean",
+		"default": false,
+		"description": "Enable or disable logging for the Forge extension."
 	}
+	
 }
