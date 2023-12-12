@@ -1,0 +1,60 @@
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, setDoc } from 'firebase/firestore/lite';
+const execSync = require('child_process').execSync;
+
+
+
+// Enum for log levels
+export enum LogLevel {
+    INFO = "info",
+    DEBUG = "debug",
+    WARNING = "warning",
+    ERROR = "error"
+}
+
+
+import config from "./logging_config.json";
+
+export class Logger {
+
+    user; app; db; log_target; version;
+
+    constructor(userid: string)
+    {
+        let v = null;
+        try
+        {
+            v = execSync('raco pkg show --full-checksum forge');
+        }
+        catch {}
+
+        this.version = (v != null && v.length > 0) ? 
+                            new TextDecoder().decode(v) : "unknown";
+
+        this.user = userid;
+        this.app = initializeApp(config);
+        this.db = getFirestore(this.app)
+        this.log_target = collection(this.db, config.collectionName);
+    }
+ 
+    payload(payload: any, loglevel: LogLevel)
+    {
+        return {
+            user: this.user,
+            content: payload,
+            timestamp: Date.now(),
+            loglevel: loglevel
+        }
+    }
+
+
+    async log_payload(payload: any, loglevel: LogLevel) {
+        let p = this.payload(payload, loglevel);
+        let log = doc(this.log_target);
+        try {
+            await setDoc(log, p);
+        } catch (error) {
+            console.error("Log failure ", error);
+        }
+    }
+  }

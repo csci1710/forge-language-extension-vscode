@@ -10,6 +10,12 @@ import {
 } from 'vscode-languageclient/node';
 import { ChildProcess, spawn } from 'child_process';
 
+
+import { Logger, LogLevel } from "./logger";
+
+var os = require("os");
+var hostname = os.hostname();
+
 let client: LanguageClient;
 
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
@@ -95,6 +101,22 @@ function killRacket(manual: boolean) {
 	racket = null;
 }
 
+// TODO: Want to make this an extension method
+// on TextDocument, but cannot wrangle it.
+function textDocumentToLog(d, focusedDoc) {
+
+	const content = d.getText();
+	const filePath = d.isUntitled ? "untitled" : d.fileName;
+	const fileName = path.parse(filePath).base;
+
+	return {
+		focused : focusedDoc,
+		filename: fileName,
+		filepath: filePath,
+		fileContent: content,
+	};
+}
+
 export function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
@@ -144,16 +166,26 @@ export function activate(context: ExtensionContext) {
 
 	const forgeEvalDiagnostics = languages.createDiagnosticCollection('Forge Eval');
 
+
+	// Designed to be run in GitPod
+	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
+	var logger = new Logger(userid);
+
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
-		// always auto-save before any run
-		vscode.window.activeTextEditor.document.save();
 
-		// // The code you place here will be executed every time your command is executed
 		const fileURI = vscode.window.activeTextEditor.document.uri;
 		const filepath = fileURI.fsPath;
+		
+		// always auto-save before any run
+		if (!vscode.window.activeTextEditor.document.save())
+		{
+			console.error(`Could not save ${filepath}`);
+		}
+
 
 		// try to only run active forge file
 		if (filepath.split(/\./).pop() !== 'frg') {
@@ -212,6 +244,22 @@ export function activate(context: ExtensionContext) {
 			}
 			racketKilledManually = false;
 		});
+
+
+		/* Logging *******/
+
+		const loggingEnabled = vscode.workspace.getConfiguration().get<boolean>('enable-logging');
+		const editor = vscode.window.activeTextEditor;
+		if (loggingEnabled && editor) {
+							 
+			const documentData = vscode.workspace.textDocuments.map((d) => {
+				const focusedDoc = (d === editor.document);
+				return textDocumentToLog(d, focusedDoc);
+			});
+
+			logger.log_payload(documentData, LogLevel.INFO);
+		}
+		/* ******end logging **********/
 	});
 
 	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
