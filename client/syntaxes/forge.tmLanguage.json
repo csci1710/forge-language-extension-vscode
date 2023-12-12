@@ -176,7 +176,7 @@
                                     "name": "keyword.other.operator.forge"
                                 },
                                 {
-                                    "match": "\\b(and|or|iff|implies|else|in)\\b",
+                                    "match": "\\b(and|or|iff|implies|else|in|ni)\\b",
                                     "name": "keyword.other.operator.forge"
                                 },
                                 {
