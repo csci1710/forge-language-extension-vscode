@@ -288,7 +288,29 @@ export function activate(context: ExtensionContext) {
 		vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', false);
 	});
 
-	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, forgeEvalDiagnostics);
+
+	const halp = vscode.commands.registerCommand('forge.halp', () => {
+		
+		
+		// Need to do a bunch of things here.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	});
+
+
+
+
+	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 

@@ -93,6 +93,10 @@
 			{
 				"command": "forge.disableLogging",
 				"title": "Disable Logging"
+			},
+			{
+				"command": "forge.halp",
+				"title": "HALp"
 			}
 		],
 		"menus": {
@@ -115,6 +119,11 @@
 				{
 					"when": "forge.isLoggingEnabled && (editorLangId == forge)",
 					"command": "forge.disableLogging",
+					"group": "navigation"
+				},
+				{
+					"command": "forge.halp",
+					"when": "(editorLangId == 'forge' && resourceExt == '.test.frg')",
 					"group": "navigation"
 				}
 
