@@ -21,6 +21,9 @@ let client: LanguageClient;
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
 let racket: ChildProcess | null;
 
+
+
+
 function matchForgeError(line: string): RegExpMatchArray | null {
 	const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
 	return (line as string).match(forgeFileReg);
@@ -164,6 +167,11 @@ export function activate(context: ExtensionContext) {
 		}
 	});
 
+
+	context.globalState.update('forge.isLoggingEnabled', true);
+	vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
+
+
 	const forgeEvalDiagnostics = languages.createDiagnosticCollection('Forge Eval');
 
 
@@ -171,11 +179,15 @@ export function activate(context: ExtensionContext) {
 	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
 	var logger = new Logger(userid);
 
-
+	
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
+
+		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
+		const editor = vscode.window.activeTextEditor;
+
 
 		const fileURI = vscode.window.activeTextEditor.document.uri;
 		const filepath = fileURI.fsPath;
@@ -248,9 +260,8 @@ export function activate(context: ExtensionContext) {
 
 		/* Logging *******/
 
-		const loggingEnabled = vscode.workspace.getConfiguration().get<boolean>('enable-logging');
-		const editor = vscode.window.activeTextEditor;
-		if (loggingEnabled && editor) {
+
+		if (isLoggingEnabled && editor) {
 							 
 			const documentData = vscode.workspace.textDocuments.map((d) => {
 				const focusedDoc = (d === editor.document);
@@ -266,7 +277,18 @@ export function activate(context: ExtensionContext) {
 		killRacket(true);
 	});
 
-	context.subscriptions.push(runFile, stopRun, forgeEvalDiagnostics);
+
+	const enableLogging = vscode.commands.registerCommand('forge.enableLogging', () => {
+		context.globalState.update('forge.isLoggingEnabled', true);
+		vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
+	});
+
+	const disableLogging = vscode.commands.registerCommand('forge.disableLogging', () => {
+		context.globalState.update('forge.isLoggingEnabled', false);
+		vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', false);
+	});
+
+	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, forgeEvalDiagnostics);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 

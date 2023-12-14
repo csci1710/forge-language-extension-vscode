@@ -85,6 +85,14 @@
 					"light": "./client/images/stop.svg",
 					"dark": "./client/images/stop.svg"
 				}
+			},
+			{
+				"command": "forge.enableLogging",
+				"title": "Enable Logging"
+			},
+			{
+				"command": "forge.disableLogging",
+				"title": "Disable Logging"
 			}
 		],
 		"menus": {
@@ -98,7 +106,18 @@
 					"when": "editorLangId == forge",
 					"command": "forge.stopRun",
 					"group": "navigation"
+				},
+				{
+					"command": "forge.enableLogging",
+					"when": "!forge.isLoggingEnabled && (editorLangId == forge)",
+					"group": "navigation"
+				},
+				{
+					"when": "forge.isLoggingEnabled && (editorLangId == forge)",
+					"command": "forge.disableLogging",
+					"group": "navigation"
 				}
+
 			]
 		}
 	},
