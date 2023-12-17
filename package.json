@@ -126,7 +126,6 @@
 					"when": "(editorLangId == 'forge' && resourceExt == '.test.frg')",
 					"group": "navigation"
 				}
-
 			]
 		}
 	},
@@ -151,6 +150,7 @@
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
-		"glob": "^8.1.0"
+		"glob": "^8.1.0",
+		"vscode-languageserver": "^9.0.1"
 	}
 }
