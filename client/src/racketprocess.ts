@@ -31,7 +31,6 @@ export class RacketProcess {
 		const fileURI = vscode.window.activeTextEditor.document.uri;
 
 		this.kill(false);
-		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
 
 		let myStderr = '';
 		this.childProcess.on('exit', (code: string) => {
