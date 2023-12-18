@@ -2,9 +2,9 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-function runHalp(studentTests: string, testFileName: string): string {
+async function runHalp(studentTests: string, testFileName: string): Promise<string> {
 	
-	const forgeOutput = vscode.window.createOutputChannel('Forge Output');
+	const forgeOutput = vscode.window.createOutputChannel('HALP Output');
 	const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 	let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
@@ -20,6 +20,60 @@ function runHalp(studentTests: string, testFileName: string): string {
 
 		// Need to examine and interpret results here.
 		let r = racket.runFile(tempFilePath);
+
+		if (!r) {
+			console.error('Cannot spawn Forge process');
+			return "HALP run failed."
+		}
+
+
+		let stdoutput = "";
+		r.stdout.on('data', (data: string) => {
+			stdoutput += data;
+		});
+
+		let stderrput = "";
+
+		r.stderr.on('data', (err: string) => {
+			stderrput += err;
+		});
+
+		// wait till r exits
+		await new Promise((resolve) => {
+			r.on('exit', resolve);
+		});
+		
+
+		// parse its output looking for the failing test name.
+
+		// Generate the hint related to the failing test name.
+
+		// This bit is a bit fuzzy -- how do I really get an idea
+		// of what's going on. Say we have a bunch of properties for
+		// undirected tree. Should we look at how their test interacts with these
+		// properties? This is complicated.
+		// Instead, should we be looking at the wheat?
+		// So find their test that fails the wheat -- now what do we do?
+		// We need to understand ''why'' the test fails the wheat right?
+
+		// So why does the test fail the wheat? We can look at the counterexample.
+		// Or we can somehow encode some autograder properties in the wheat?
+		// hmm.
+
+		// We know : The failing test
+		// Have a counter example (maybe?) 
+		// Let us not generate hints for examples.
+		// Instead lets focus on assertions.
+		// Can we use this counter example to understand anything? We can also determine if the (test iff wheat)
+		// is an over or under constraint.
+
+
+
+		// Alternatively we could do the classic chaff approach of havign all
+		// the potential hint variants and running all of them, til one fails?
+		// I was hoping we could do better here though!
+
+
 
 		return "";
 	} finally {

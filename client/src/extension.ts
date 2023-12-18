@@ -108,13 +108,56 @@ export function activate(context: ExtensionContext) {
 
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 		const editor = vscode.window.activeTextEditor;
-		const filepath = editor.document.uri.fsPath;
+		const fileURI = editor.document.uri;
+		const filepath = fileURI.fsPath;
+
 
 		forgeOutput.clear();
 		forgeOutput.show();
-		forgeOutput.appendLine(`Running file "${filepath}" ...`);
 
-		racket.runFile(filepath);
+		// try to only run active forge file
+		if (filepath.split(/\./).pop() !== 'frg') {
+			vscode.window.showInformationMessage('Click on the Forge file first before hitting the run button :)');
+			console.log(`cannot run file ${filepath}`);
+			return;
+		}
+
+		forgeOutput.appendLine(`Running file "${filepath}" ...`);
+		let racketProcess = racket.runFile(filepath);
+
+		if (!racketProcess) {
+			console.error('Cannot spawn Forge process');
+		}
+
+		racketProcess.stdout.on('data', (data: string) => {
+			const lst = data.toString().split(/[\n]/);
+			for (let i = 0; i < lst.length; i++) {
+				// this is a bit ugly but trying to avoid confusing students
+				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
+					forgeOutput.appendLine('Sterling running. Hit Stop to stop service.');
+				} else {
+					forgeOutput.appendLine(lst[i]);
+				}
+			}
+		});
+
+		let myStderr = '';
+		racketProcess.stderr.on('data', (err: string) => {
+			myStderr += err;
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
 		if (isLoggingEnabled && editor) {
 							 
 			const documentData = vscode.workspace.textDocuments.map((d) => {

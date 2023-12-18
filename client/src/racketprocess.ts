@@ -20,54 +20,23 @@ export class RacketProcess {
 
 
 
-	runFile(filePath : string) {
-
-		const fileURI = vscode.window.activeTextEditor.document.uri;
+	runFile(filePath : string) : ChildProcess | null {
 		// always auto-save before any run
 		if (!vscode.window.activeTextEditor.document.save())
 		{
 			console.error(`Could not save ${filePath}`);
-		}
-
-
-		// try to only run active forge file
-		if (filePath.split(/\./).pop() !== 'frg') {
-			vscode.window.showInformationMessage('Click on the Forge file first before hitting the run button :)');
-			console.log(`cannot run file ${filePath}`);
-			return;
+			return null;
 		}
 		
+		const fileURI = vscode.window.activeTextEditor.document.uri;
+
 		this.kill(false);
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
-		if (!this.childProcess) {
-			console.error('Cannot spawn Forge process');
-		}
-
-		this.childProcess.stdout.on('data', (data: string) => {
-			// this.userFacingOutput.appendLine(data);
-			const lst = data.toString().split(/[\n]/);
-			// console.log(lst, lst.length);
-			for (let i = 0; i < lst.length; i++) {
-				// this is a bit ugly but trying to avoid confusing students
-				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
-					this.userFacingOutput.appendLine('Sterling running. Hit Stop to stop service.');
-				} else {
-					this.userFacingOutput.appendLine(lst[i]);
-				}
-			}
-		});
 
 		let myStderr = '';
-		this.childProcess.stderr.on('data', (err: string) => {
-			// this.userFacingOutput.appendLine(err);
-			myStderr += err;
-		});
-
 		this.childProcess.on('exit', (code: string) => {
 			if (!this.racketKilledManually) {
 				if (myStderr !== '') {
-					// this.userFacingOutput.appendLine(myStderr);
-					// console.log(myStderr);
 					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
 				} else {
 					this.showFileWithOpts(fileURI.fsPath, null, null);
@@ -79,9 +48,10 @@ export class RacketProcess {
 			}
 			this.racketKilledManually = false;
 		});
-
-
+		return this.childProcess
 	}
+
+
 	destroy() {
 		if (this.childProcess) {
 			this.childProcess.kill();
