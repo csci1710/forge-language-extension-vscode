@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
-
+import { runHalp } from './halp';
 
 
 import {
@@ -21,6 +21,7 @@ let client: LanguageClient;
 
 const forgeOutput = vscode.window.createOutputChannel('Forge Output');
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
+const userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
 let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
 
@@ -99,8 +100,7 @@ export function activate(context: ExtensionContext) {
 	context.globalState.update('forge.isLoggingEnabled', true);
 	vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
 
-	// Designed to be run in GitPod
-	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
+
 	var logger = new Logger(userid);
 
 
@@ -147,17 +147,6 @@ export function activate(context: ExtensionContext) {
 		});
 
 
-
-
-
-
-
-
-
-
-
-
-
 		if (isLoggingEnabled && editor) {
 							 
 			const documentData = vscode.workspace.textDocuments.map((d) => {
@@ -186,23 +175,21 @@ export function activate(context: ExtensionContext) {
 
 	const halp = vscode.commands.registerCommand('forge.halp', () => {
 		
+		const editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+			throw new Error('An error occurred.');
+		}
+		const document = editor.document;
+		const content = document.getText();
+		const fileName = document.fileName;
 		
-		// Need to do a bunch of things here.
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+		runHalp(content, fileName)
+			.then((result) => {
+				// TODO: Figure out how to display the message here.
+				vscode.window.showInformationMessage(result);
+			});
 	});
-
-
 
 
 	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics);

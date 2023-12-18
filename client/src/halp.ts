@@ -2,7 +2,7 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-async function runHalp(studentTests: string, testFileName: string): Promise<string> {
+export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
 	
 	const forgeOutput = vscode.window.createOutputChannel('HALP Output');
 	const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
