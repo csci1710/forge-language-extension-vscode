@@ -19,7 +19,7 @@ var hostname = os.hostname();
 
 let client: LanguageClient;
 
-const forgeOutput = vscode.window.createOutputChannel('Forge Output');
+let forgeOutput = vscode.window.createOutputChannel('Forge Output');
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 const userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
 let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
@@ -115,6 +115,13 @@ export function activate(context: ExtensionContext) {
 		forgeOutput.clear();
 		forgeOutput.show();
 
+		// always auto-save before any run
+		if (!editor.document.save())
+		{
+			console.error(`Could not save ${filepath}`);
+			return null;
+		}
+
 		// try to only run active forge file
 		if (filepath.split(/\./).pop() !== 'frg') {
 			vscode.window.showInformationMessage('Click on the Forge file first before hitting the run button :)');
@@ -145,6 +152,25 @@ export function activate(context: ExtensionContext) {
 		racketProcess.stderr.on('data', (err: string) => {
 			myStderr += err;
 		});
+
+		racketProcess.on('exit', (code: string) => {
+
+
+			// This isn't showing anything.
+			if (racket.racketKilledManually) {
+				if (myStderr !== '') {
+					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
+				} else {
+					this.showFileWithOpts(filepath, null, null);
+					this.userFacingOutput.appendLine('Finished running.');
+				}
+			} else {
+				this.showFileWithOpts(filepath, null, null);
+				this.userFacingOutput.appendLine('Forge process terminated.');
+			}
+		});
+
+
 
 
 		if (isLoggingEnabled && editor) {
@@ -177,18 +203,22 @@ export function activate(context: ExtensionContext) {
 		
 		const editor = vscode.window.activeTextEditor;
 
-		if (editor) {
+		if (!editor) {
 			throw new Error('An error occurred.');
 		}
 		const document = editor.document;
 		const content = document.getText();
 		const fileName = document.fileName;
 		
-		runHalp(content, fileName)
-			.then((result) => {
-				// TODO: Figure out how to display the message here.
-				vscode.window.showInformationMessage(result);
-			});
+		if (fileName.endsWith('.test.frg')) {
+			runHalp(content, fileName)
+				.then((result) => {
+					// TODO: Figure out how to display the message here.
+					vscode.window.showInformationMessage(result);
+				});
+		} else {
+			vscode.window.showInformationMessage('Functionality unavailable, requires a test (.test.frg) file.');
+		}
 	});
 
 

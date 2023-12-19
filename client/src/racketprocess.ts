@@ -6,7 +6,7 @@ import { Diagnostic, DiagnosticCollection, DiagnosticSeverity } from 'vscode';
 export class RacketProcess {
 		
 	private childProcess: ChildProcess | null;
-	private racketKilledManually : boolean;
+	public racketKilledManually : boolean;
 	private userFacingOutput : vscode.OutputChannel;
 	private evalDiagnostics : vscode.DiagnosticCollection;
 	
@@ -28,23 +28,32 @@ export class RacketProcess {
 			return null;
 		}
 		
-		const fileURI = vscode.window.activeTextEditor.document.uri;
+		
 
 		this.kill(false);
+		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
+		// Need to move this?
 
-		let myStderr = '';
+
+
+		// This is broken. Need to understand and fix.
+		const fileURI = vscode.window.activeTextEditor.document.uri;
+
 		this.childProcess.on('exit', (code: string) => {
+
+			/*
 			if (!this.racketKilledManually) {
 				if (myStderr !== '') {
 					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
 				} else {
-					this.showFileWithOpts(fileURI.fsPath, null, null);
+					this.showFileWithOpts(filePath, null, null);
 					this.userFacingOutput.appendLine('Finished running.');
 				}
 			} else {
-				this.showFileWithOpts(fileURI.fsPath, null, null);
+				this.showFileWithOpts(filePath, null, null);
 				this.userFacingOutput.appendLine('Forge process terminated.');
 			}
+			*/
 			this.racketKilledManually = false;
 		});
 		return this.childProcess
@@ -69,7 +78,7 @@ export class RacketProcess {
 
 
 
-		
+	// This is broken		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 		let matcher: RegExpMatchArray | null;
 		const textLines = text.split(/[\n\r]/);
