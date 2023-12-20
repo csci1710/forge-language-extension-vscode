@@ -6,32 +6,34 @@ import * as path from 'path';
 
 const WHEATSTORE = "https://sidprasad.github.io/dirtree";
 
-export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
-	
-	const w = await getWheat(testFileName);
 
+const assertion_regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
+const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
+const test_regex = /Failed test (\w+)\./;
+
+export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
+
+	const w = await getWheat(testFileName);
 	if (w === "") {
 		return "HALP could not connect to the internet. Terminating run.";
 	}
 
 	const  w_o = await runTestsAgainstModel(studentTests, w);
+	const testName = getFailingTestName(w_o);
+	const defaultHint = `${testName} is not consistent with the problem specification.`;
 
 	if (w_o === "") {
 		return "Your tests were consistent with the problem specification.";
 	}
 
-	if (w_o.includes("Invalid example")) {
+	if (example_regex.test(w_o)) {
 		return w_o;
 	}
-
-	// Add one for test-expect.
 			
-	const regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
-	const match = w_o.match(regex);
+	const match = w_o.match(assertion_regex);
 
 	if (match) {
 		const lhs_pred = match[1];
-		
 		const op = match[2];
 		const rhs_pred = match[3];
 
@@ -104,18 +106,14 @@ export async function runHalp(studentTests: string, testFileName: string): Promi
 		const ag_output = await runTestsAgainstModel(autograderTests, w_wrapped);
 		const tName = getFailingTestName(ag_output);
 
-		if (tName == "") {
-			return "COULD NOT GENERATE HINT. "
-		}
 
-		// Now parse the output (look for the failing test?) if none, no hint.
-		// If there is a failing test, then we can provide a hint.
 
-		return `${tName} failed, corresponding hint was blah di blah`;
+		var hint_text = getHintMap(testFileName)[tName] || defaultHint;
+		return hint_text;
+
 	}
-	// Could not generate a hint, perhaps because this was a test but not a ...
-	// At best, we can say, test is not valid.
-	return "HINT DEFAULT";
+
+	return defaultHint;
 }
 
 
@@ -190,39 +188,50 @@ function combineTestsWithWheat(wheatText: string, studentTests: string) : string
 	return wheatText + "\n" + studentTestsAfterSeparator;
 }
 
-async function getWheat(testFileName: string): Promise<string> {
-	const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
-	
-	let wheatURI = `${WHEATSTORE}/${wheatName}`;
-	const response = await fetch(wheatURI);
+async function downloadFile(url: string): Promise<string>  {
+
+	const response = await fetch(url);
 	if (response.ok) {
-		const wheatText = await response.text();
-		return wheatText;
+		const t = await response.text();
+		return t;
 	} else {
 		// ERROR
 		return "";
 	}
+
+}
+
+async function getWheat(testFileName: string): Promise<string> {
+	const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
+	const wheatURI = `${WHEATSTORE}/${wheatName}`;
+	return await downloadFile(wheatURI);
+	
 }
 
 
 
 async function getAutograderTests(testFileName: string): Promise<string> {
 	const graderName = path.parse(testFileName.replace('.test.frg', '.grader')).base;
-	const response = await fetch(`${WHEATSTORE}/${graderName}`);
-	if (response.ok) {
-		const graderText = await response.text();
-		return graderText;
-	} else {
-		// ERROR
-		return "";
+	const graderURI = `${WHEATSTORE}/${graderName}`;
+	return await downloadFile(graderURI);
+}
+
+async function getHintMap(testFileName: string): Promise<Object> {
+	const graderName = path.parse(testFileName.replace('.test.frg', '.grader.json')).base;
+	const graderURI = `${WHEATSTORE}/${graderName}`;
+	const jsonString = await downloadFile(graderURI);
+	try {
+		const jsonObject = JSON.parse(jsonString);
+		return jsonObject;
+	}
+	catch {
+		return {};
 	}
 }
 
 function getFailingTestName(o: string): string {
 
-	const assertion_regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
-	const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
-	const test_regex = /Failed test (\w+)\./;
+
 
 	if (assertion_regex.test(o)) {
 		const match = o.match(assertion_regex);
