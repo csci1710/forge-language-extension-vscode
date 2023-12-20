@@ -2,7 +2,9 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-
+/*
+	Potential issues : Name clash between student files and grader files.
+*/
 
 const WHEATSTORE = "https://sidprasad.github.io/dirtree";
 
@@ -11,8 +13,10 @@ const assertion_regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
 const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
 const test_regex = /Failed test (\w+)\./;
 
-export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
 
+const SATTESTNAME = "satisfiability"
+
+export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
 	const w = await getWheat(testFileName);
 	if (w === "") {
 		return "HALP could not connect to the internet. Terminating run.";
@@ -20,7 +24,7 @@ export async function runHalp(studentTests: string, testFileName: string): Promi
 
 	const  w_o = await runTestsAgainstModel(studentTests, w);
 	const testName = getFailingTestName(w_o);
-	const defaultHint = `${testName} is not consistent with the problem specification.`;
+	const defaultFeedback = `${testName} is not consistent with the problem specification.`;
 
 	if (w_o === "") {
 		return "Your tests were consistent with the problem specification.";
@@ -29,91 +33,17 @@ export async function runHalp(studentTests: string, testFileName: string): Promi
 	if (example_regex.test(w_o)) {
 		return w_o;
 	}
-			
-	const match = w_o.match(assertion_regex);
-
-	if (match) {
-		const lhs_pred = match[1];
-		const op = match[2];
-		const rhs_pred = match[3];
-
-		const lhs_pred_inner = lhs_pred + "_inner";
-		const rhs_pred_inner = rhs_pred + "_inner";
-
-		const isLhsPredContained = new RegExp(`\\b${lhs_pred}\\b`).test(w);
-		const isRhsPredContained = new RegExp(`\\b${rhs_pred}\\b`).test(w); 
 
 
-		if (isLhsPredContained && isRhsPredContained) {
-			return "No student code detected in failing assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
-		}
-		else if (!isLhsPredContained && !isRhsPredContained) {
-			return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred + " is not consistent with the assignment specification. HALp can only provide further feedback if the assertion explicitly references predicates defined in the assignment specification.";
-		}
-
-		var w_wrapped = "";
-		var added_pred = "";		
-						
-
-		// Now we want to append the new predicate, to the file.
-		// TODO: 	// DOUBLE CHECK THESE
-		if (isLhsPredContained) {
-
-			w_wrapped = w.replace(new RegExp("\\b" + lhs_pred + "\\b", 'g'), lhs_pred_inner);
-
-			added_pred = (op == 'sufficient') ? 
-						`
-						pred ${lhs_pred} 
-						{ 
-							${lhs_pred_inner}
-							${lhs_pred_inner} implies ${rhs_pred}
-						}
-						` : 
-						`
-						pred ${lhs_pred} 
-						{ 
-							${lhs_pred_inner}
-							${rhs_pred} implies ${lhs_pred_inner}
-						}
-						`;
-		}
-		else {
-
-		
-			w_wrapped = w.replace(new RegExp("\\b" + rhs_pred + "\\b", 'g'), rhs_pred_inner);
-			
-			added_pred = (op == 'sufficient') ? 
-						`
-						pred ${rhs_pred} 
-						{ 
-							${rhs_pred_inner}
-							${lhs_pred} implies ${rhs_pred_inner}
-						}
-						` : 
-						`
-						pred ${rhs_pred} 
-						{ 
-							${rhs_pred_inner} 
-							${rhs_pred_inner} implies ${lhs_pred}
-						}
-						`;
-
-		}
-
-		w_wrapped = w_wrapped + added_pred;
-
-		const autograderTests = await getAutograderTests(testFileName);
-		const ag_output = await runTestsAgainstModel(autograderTests, w_wrapped);
-		const tName = getFailingTestName(ag_output);
-
-
-
-		var hint_text = getHintMap(testFileName)[tName] || defaultHint;
-		return hint_text;
-
+	///// BUG !!!! /////
+	// The following code is broken. Need to fix. The issue here is that we need *all* the predicates the student wrote.
+	// but not their tests. So we need to parse the student's code and extract all the predicates. (And potentially any instances.)
+	// then we need to add this to the wheat!
+	if (assertion_regex.test(w_o)) {
+		const hint = await tryGetHintFromAssertion(testFileName, w, w_o);
+		return hint + defaultFeedback;
 	}
-
-	return defaultHint;
+	return defaultFeedback;
 }
 
 
@@ -180,12 +110,15 @@ function tempFile(): string {
 
 function combineTestsWithWheat(wheatText: string, studentTests: string) : string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
+
+
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 
-	const startIndex = studentTests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-	const studentTestsAfterSeparator = studentTests.substring(startIndex).trim();
-
-	return wheatText + "\n" + studentTestsAfterSeparator;
+	if (studentTests.includes(TEST_SEPARATOR)) {
+		const startIndex = studentTests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+		studentTests = studentTests.substring(startIndex).trim();
+	}
+	return wheatText + "\n" + studentTests;
 }
 
 async function downloadFile(url: string): Promise<string>  {
@@ -246,5 +179,93 @@ function getFailingTestName(o: string): string {
 		const match = o.match(example_regex);
 		return match[1];
 	} 
+	return "";
+}
+
+// w : wheat
+// w_o : wheat output
+async function tryGetHintFromAssertion(testFileName: string, w : string, w_o : string) : Promise<string> {
+	const match = w_o.match(assertion_regex);
+
+	if (match) {
+		const lhs_pred = match[1];
+		const op = match[2];
+		const rhs_pred = match[3];
+
+		const lhs_pred_inner = lhs_pred + "_inner";
+		const rhs_pred_inner = rhs_pred + "_inner";
+
+		const isLhsPredContained = new RegExp(`\\b${lhs_pred}\\b`).test(w);
+		const isRhsPredContained = new RegExp(`\\b${rhs_pred}\\b`).test(w); 
+
+
+		if (isLhsPredContained && isRhsPredContained) {
+			return "No student code detected in failing assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
+		}
+		else if (!isLhsPredContained && !isRhsPredContained) {
+			return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred + " is not consistent with the assignment specification. HALp can only provide further feedback if the assertion explicitly references predicates defined in the assignment specification.";
+		}
+
+		var w_wrapped = "";
+		var added_pred = "";		
+
+		if (isLhsPredContained) {
+			w_wrapped = w.replace(new RegExp("\\b" + lhs_pred + "\\b", 'g'), lhs_pred_inner);
+
+			added_pred = (op == 'sufficient') ? 
+			`
+			pred ${lhs_pred} { 
+				${lhs_pred_inner}
+				${lhs_pred_inner} implies ${rhs_pred}
+			}
+			` : 
+			`
+			pred ${lhs_pred} { 
+				${lhs_pred_inner}
+				${rhs_pred} implies ${lhs_pred_inner}
+			}
+			`;
+
+			added_pred += `
+			test expect {
+				${SATTESTNAME} : {${lhs_pred_inner} and ${rhs_pred}} is sat
+			}
+			`
+		}
+		else {
+
+		
+			w_wrapped = w.replace(new RegExp("\\b" + rhs_pred + "\\b", 'g'), rhs_pred_inner);
+			
+			added_pred = (op == 'sufficient') ? 
+			`
+			pred ${rhs_pred} { 
+				${rhs_pred_inner}
+				${lhs_pred} implies ${rhs_pred_inner}
+			}
+			` : 
+			`
+			pred ${rhs_pred} { 
+				${rhs_pred_inner} 
+				${rhs_pred_inner} implies ${lhs_pred}
+			}
+			`;
+			added_pred += `test expect {
+				${SATTESTNAME} : {${lhs_pred} and ${rhs_pred_inner}} is sat
+			}
+			`;
+		}
+		w_wrapped = w_wrapped + added_pred;
+
+		const autograderTests = await getAutograderTests(testFileName);
+		const ag_output = await runTestsAgainstModel(autograderTests, w_wrapped);
+		const tName = getFailingTestName(ag_output);
+
+		var hint_text = getHintMap(testFileName)[tName] || "";
+		if (tName == SATTESTNAME) {
+			return "Can both predicates in this assertion hold simultaneously?"
+		}
+		return  hint_text;
+	}
 	return "";
 }

@@ -32,28 +32,9 @@ export class RacketProcess {
 
 		this.kill(false);
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
-		// Need to move this?
-
-
 
 		// This is broken. Need to understand and fix.
-		const fileURI = vscode.window.activeTextEditor.document.uri;
-
 		this.childProcess.on('exit', (code: string) => {
-
-			/*
-			if (!this.racketKilledManually) {
-				if (myStderr !== '') {
-					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
-				} else {
-					this.showFileWithOpts(filePath, null, null);
-					this.userFacingOutput.appendLine('Finished running.');
-				}
-			} else {
-				this.showFileWithOpts(filePath, null, null);
-				this.userFacingOutput.appendLine('Forge process terminated.');
-			}
-			*/
 			this.racketKilledManually = false;
 		});
 		return this.childProcess
