@@ -157,7 +157,7 @@ export function activate(context: ExtensionContext) {
 
 
 			// This isn't showing anything.
-			if (racket.racketKilledManually) {
+			if (!racket.racketKilledManually) {
 				if (myStderr !== '') {
 					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
 				} else {
