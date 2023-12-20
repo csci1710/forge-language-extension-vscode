@@ -2,6 +2,7 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { getPredicatesOnly } from './forge-utilities'; 
 /*
 	Potential issues : Name clash between student files and grader files.
 */
@@ -16,32 +17,54 @@ const test_regex = /Failed test (\w+)\./;
 
 const SATTESTNAME = "satisfiability"
 
+
+
 export async function runHalp(studentTests: string, testFileName: string): Promise<string> {
 	const w = await getWheat(testFileName);
 	if (w === "") {
-		return "HALP could not connect to the internet. Terminating run.";
+		return "Network error. Terminating run.";
 	}
 
 	const  w_o = await runTestsAgainstModel(studentTests, w);
-	const testName = getFailingTestName(w_o);
-	const defaultFeedback = `${testName} is not consistent with the problem specification.`;
-
 	if (w_o === "") {
 		return "Your tests were consistent with the problem specification.";
 	}
 
+	const testName = getFailingTestName(w_o);
+
+
+
+
+	// TODO: This default text  is what is shown where we are in the modelling space
+	// (or more correctly, NOT an example and NOT in the autograder space)
+	// It's not that they are right, we do not know if they are specifically wrong.
+	// Ask Tim what to do here!
+	const defaultFeedback = `Cannot provide feedback around ${testName}.
+							Since this HALp can only provide feedback one test at a time,
+							you may want to comment out this test and run the HALp again
+							if you want feedback on any *other* tests.`;
 	if (example_regex.test(w_o)) {
 		return w_o;
 	}
+
+
 
 
 	///// BUG !!!! /////
 	// The following code is broken. Need to fix. The issue here is that we need *all* the predicates the student wrote.
 	// but not their tests. So we need to parse the student's code and extract all the predicates. (And potentially any instances.)
 	// then we need to add this to the wheat!
+
+
+	// We can start with only predicates (A language server would be nice here!!)
+
 	if (assertion_regex.test(w_o)) {
-		const hint = await tryGetHintFromAssertion(testFileName, w, w_o);
-		return hint + defaultFeedback;
+		const student_preds = getPredicatesOnly(studentTests); 
+
+		const hint = await tryGetHintFromAssertion(testFileName, w, student_preds, w_o);
+		if (hint != "") {
+			return `${testName} is not consistent with the problem specification.` + hint;
+		}
 	}
 	return defaultFeedback;
 }
@@ -53,7 +76,7 @@ async function runTestsAgainstModel (tests: string, model: string): Promise<stri
 	const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 	let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
-	const toRun = combineTestsWithWheat(model, tests);
+	const toRun = combineTestsWithModel(model, tests);
 
 	// Write the contents of toRun to a temporary file
 	const tempFilePath = tempFile();
@@ -108,7 +131,7 @@ function tempFile(): string {
 }
 
 
-function combineTestsWithWheat(wheatText: string, studentTests: string) : string {
+function combineTestsWithModel(wheatText: string, studentTests: string) : string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 
 
@@ -163,9 +186,6 @@ async function getHintMap(testFileName: string): Promise<Object> {
 }
 
 function getFailingTestName(o: string): string {
-
-
-
 	if (assertion_regex.test(o)) {
 		const match = o.match(assertion_regex);
 		const lhs_pred = match[1];	
@@ -184,7 +204,7 @@ function getFailingTestName(o: string): string {
 
 // w : wheat
 // w_o : wheat output
-async function tryGetHintFromAssertion(testFileName: string, w : string, w_o : string) : Promise<string> {
+async function tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
 	const match = w_o.match(assertion_regex);
 
 	if (match) {
@@ -200,12 +220,14 @@ async function tryGetHintFromAssertion(testFileName: string, w : string, w_o : s
 
 
 		if (isLhsPredContained && isRhsPredContained) {
-			return "No student code detected in failing assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
+			return "No student code detected in failing assertion.";
 		}
 		else if (!isLhsPredContained && !isRhsPredContained) {
-			return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred + " is not consistent with the assignment specification. HALp can only provide further feedback if the assertion explicitly references predicates defined in the assignment specification.";
+			return "This tool can only provide further feedback if the assertion explicitly references predicates defined in the assignment specification.";
 		}
 
+
+		w = w + "\n" + student_preds + "\n";
 		var w_wrapped = "";
 		var added_pred = "";		
 
@@ -232,11 +254,8 @@ async function tryGetHintFromAssertion(testFileName: string, w : string, w_o : s
 			}
 			`
 		}
-		else {
-
-		
+		else {	
 			w_wrapped = w.replace(new RegExp("\\b" + rhs_pred + "\\b", 'g'), rhs_pred_inner);
-			
 			added_pred = (op == 'sufficient') ? 
 			`
 			pred ${rhs_pred} { 
@@ -265,7 +284,7 @@ async function tryGetHintFromAssertion(testFileName: string, w : string, w_o : s
 		if (tName == SATTESTNAME) {
 			return "Can both predicates in this assertion hold simultaneously?"
 		}
-		return  hint_text;
+		return hint_text;
 	}
 	return "";
 }

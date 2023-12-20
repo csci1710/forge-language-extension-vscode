@@ -200,7 +200,7 @@ export function activate(context: ExtensionContext) {
 
 
 	const halp = vscode.commands.registerCommand('forge.halp', () => {
-		
+		vscode.window.showInformationMessage('Running Halp...');
 		const editor = vscode.window.activeTextEditor;
 
 		if (!editor) {
@@ -214,7 +214,7 @@ export function activate(context: ExtensionContext) {
 			runHalp(content, fileName)
 				.then((result) => {
 					// TODO: Figure out how to display the message here.
-					vscode.window.showInformationMessage(result);
+					vscode.window.showInformationMessage("HALp run completed: \n" + result);
 				});
 		} else {
 			vscode.window.showInformationMessage('Functionality unavailable, requires a test (.test.frg) file.');
