@@ -20,6 +20,9 @@ var hostname = os.hostname();
 let client: LanguageClient;
 
 let forgeOutput = vscode.window.createOutputChannel('Forge Output');
+let halpOutput = vscode.window.createOutputChannel('HALp Output');
+
+
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 const userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
 let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
@@ -200,11 +203,16 @@ export function activate(context: ExtensionContext) {
 
 
 	const halp = vscode.commands.registerCommand('forge.halp', () => {
-		vscode.window.showInformationMessage('Running Halp...');
+		
+		halpOutput.clear();
+		halpOutput.show();
+		halpOutput.appendLine('Running Halp...');
+
 		const editor = vscode.window.activeTextEditor;
 
 		if (!editor) {
-			throw new Error('An error occurred.');
+			halpOutput.appendLine('No active editor. Please open a .frg file.');
+			return;
 		}
 		const document = editor.document;
 		const content = document.getText();
@@ -214,15 +222,16 @@ export function activate(context: ExtensionContext) {
 			runHalp(content, fileName)
 				.then((result) => {
 					// TODO: Figure out how to display the message here.
-					vscode.window.showInformationMessage("HALp run completed: \n" + result);
+					halpOutput.appendLine("HALp run completed: \n" + result);
 				});
 		} else {
-			vscode.window.showInformationMessage('Functionality unavailable, requires a test (.test.frg) file.');
+			halpOutput.appendLine('Functionality unavailable, requires a test (.test.frg) file.');
 		}
 	});
 
 
-	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics);
+	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
+								 forgeOutput, halpOutput);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 

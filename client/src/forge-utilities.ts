@@ -1,3 +1,7 @@
+/*
+	Utilites related to Forge syntax.
+	Could change with Forge updates and/or a language server.
+*/
 
 // Returns only the predicates from the input text.
 export function getPredicatesOnly(inputText : string) : string {
@@ -6,11 +10,14 @@ export function getPredicatesOnly(inputText : string) : string {
 }
 
 
+export function removeForgeComments(inputText: string): string {
+	return removeInlineComments(removeCStyleComments(inputText));
+}
+
 function removeCStyleComments(inputText: string): string {
 	const regex = /\/\*[\s\S]*?\*\/|\/\/.*/g;
 	return inputText.replace(regex, '');
 }
-
 
 function removeInlineComments(inputText: string): string {
 	const regex = /--.*$/gm;
@@ -20,12 +27,8 @@ function removeInlineComments(inputText: string): string {
 
 // Need to test this, but hopefully works.
 function findForgePredicates(inputText : string) : [string] {
-
-
-	inputText = removeCStyleComments(inputText);
-	inputText = removeInlineComments(inputText);
-
-    const lines = inputText.split('\n');
+	const withoutComments = removeForgeComments(inputText);
+    const lines = withoutComments.split('\n');
     let inPredicate = false;
     let braceLevel = 0;
     let currentPredicate = '';

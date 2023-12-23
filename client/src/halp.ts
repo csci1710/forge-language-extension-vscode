@@ -108,8 +108,6 @@ function tempFile(): string {
 
 function combineTestsWithModel(wheatText: string, studentTests: string) : string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
-
-
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 
 	if (studentTests.includes(TEST_SEPARATOR)) {
@@ -136,10 +134,7 @@ async function getWheat(testFileName: string): Promise<string> {
 	const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
 	const wheatURI = `${WHEATSTORE}/${wheatName}`;
 	return await downloadFile(wheatURI);
-	
 }
-
-
 
 async function getAutograderTests(testFileName: string): Promise<string> {
 	const graderName = path.parse(testFileName.replace('.test.frg', '.grader')).base;
