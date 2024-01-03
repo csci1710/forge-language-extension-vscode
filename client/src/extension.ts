@@ -139,6 +139,7 @@ export async function activate(context: ExtensionContext) {
 		if (!editor.document.save())
 		{
 			console.error(`Could not save ${filepath}`);
+
 			return null;
 		}
 
@@ -153,6 +154,12 @@ export async function activate(context: ExtensionContext) {
 		let racketProcess = racket.runFile(filepath);
 
 		if (!racketProcess) {
+
+			const log = textDocumentToLog(editor.document, true);
+			log['error'] = 'Cannot spawn Forge process';
+
+			logger.log_payload(log, LogLevel.ERROR);
+
 			console.error('Cannot spawn Forge process');
 		}
 
@@ -244,7 +251,7 @@ export async function activate(context: ExtensionContext) {
 					var documentData = textDocumentToLog(document, true);
 					documentData['halp_output'] = result;
 
-					logger.log_payload([documentData], LogLevel.ASSISTANCE_REQUEST);
+					logger.log_payload(documentData, LogLevel.ASSISTANCE_REQUEST);
 
 					// TODO: Figure out how to get a question from a hint!
 

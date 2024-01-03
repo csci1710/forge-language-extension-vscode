@@ -27,8 +27,6 @@ export class RacketProcess {
 			console.error(`Could not save ${filePath}`);
 			return null;
 		}
-		
-		
 
 		this.kill(false);
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
