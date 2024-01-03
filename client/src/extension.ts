@@ -15,6 +15,8 @@ import { Logger, LogLevel } from "./logger";
 import {RacketProcess} from './racketprocess';
 
 var os = require("os");
+import { v4 as uuidv4 } from 'uuid';
+
 var hostname = os.hostname();
 
 let client: LanguageClient;
@@ -24,7 +26,22 @@ let halpOutput = vscode.window.createOutputChannel('HALp Output');
 
 
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
-const userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
+
+async function getUserId(context) {
+	const UID_KEY = "FORGE_UID";
+	try
+	{
+		return context.secrets.get(UID_KEY);
+
+	}
+	catch {
+		const uid = uuidv4();
+		await context.secrets.store(UID_KEY, uid);
+	}
+
+}
+
+
 let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
 
@@ -54,7 +71,7 @@ function textDocumentToLog(d, focusedDoc) {
 	};
 }
 
-export function activate(context: ExtensionContext) {
+export async function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
@@ -103,7 +120,7 @@ export function activate(context: ExtensionContext) {
 	context.globalState.update('forge.isLoggingEnabled', true);
 	vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
 
-
+	const userid = await getUserId(context);
 	var logger = new Logger(userid);
 
 
@@ -219,9 +236,18 @@ export function activate(context: ExtensionContext) {
 		const fileName = document.fileName;
 		
 		if (fileName.endsWith('.test.frg')) {
+
 			runHalp(content, fileName)
 				.then((result) => {
-					// TODO: Figure out how to display the message here.
+
+
+					var documentData = textDocumentToLog(document, true);
+					documentData['halp_output'] = result;
+
+					logger.log_payload([documentData], LogLevel.ASSISTANCE_REQUEST);
+
+					// TODO: Figure out how to get a question from a hint!
+
 					halpOutput.appendLine("HALp run completed: \n" + result);
 				});
 		} else {

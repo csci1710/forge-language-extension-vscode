@@ -9,7 +9,8 @@ export enum LogLevel {
     INFO = "info",
     DEBUG = "debug",
     WARNING = "warning",
-    ERROR = "error"
+    ERROR = "error",
+    ASSISTANCE_REQUEST = "assistance_request" // Adding so we can filter out HALP runs.
 }
 
 
