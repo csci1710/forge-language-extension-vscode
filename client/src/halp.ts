@@ -35,7 +35,6 @@ export async function runHalp(studentTests: string, testFileName: string): Promi
 	}
 	if (assertion_regex.test(w_o)) {
 		const student_preds = getPredicatesOnly(studentTests); 
-
 		const hint = await tryGetHintFromAssertion(testFileName, w, student_preds, w_o);
 		if (hint != "") {
 			return `${testName} is not consistent with the problem specification.` + hint;
@@ -177,6 +176,11 @@ function getFailingTestName(o: string): string {
 async function tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
 
 	let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
+
+	// We should log all the conceptual mutants we generate!!
+	// LOG w_wrapped
+
+
 	const autograderTests = await getAutograderTests(testFileName);
 	const ag_output = await runTestsAgainstModel(autograderTests, w_wrapped);
 	const tName = getFailingTestName(ag_output);
