@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
-import { runHalp } from './halp';
+import { HalpRunner } from './halp';
 
 
 import {
@@ -243,18 +243,13 @@ export async function activate(context: ExtensionContext) {
 		const fileName = document.fileName;
 		
 		if (fileName.endsWith('.test.frg')) {
-
-			runHalp(content, fileName)
+			var h = new HalpRunner(logger);
+			h.runHalp(content, fileName)
 				.then((result) => {
-
-
+					// TODO: Move this log to inside the HalpRunner
 					var documentData = textDocumentToLog(document, true);
 					documentData['halp_output'] = result;
-
 					logger.log_payload(documentData, LogLevel.ASSISTANCE_REQUEST);
-
-					// TODO: Figure out how to get a question from a hint!
-
 					halpOutput.appendLine("HALp run completed: \n" + result);
 				});
 		} else {
