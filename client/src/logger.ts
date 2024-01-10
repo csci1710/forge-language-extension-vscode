@@ -9,9 +9,19 @@ export enum LogLevel {
     INFO = "info",
     DEBUG = "debug",
     WARNING = "warning",
-    ERROR = "error",
-    ASSISTANCE_REQUEST = "assistance_request" // Adding so we can filter out HALP runs.
+    ERROR = "error"
 }
+
+// Add this to the logging
+export enum Event {
+    ASSISTANCE_REQUEST = "assistance_request",
+    CONCEPTUAL_MUTANT = "conceptual_mutant",
+    HALP_RESULT = "halp_failure",
+    FORGE_RUN_RESULT = "forge_run_result",
+    FORGE_RUN = "forge_run"
+}
+
+
 
 
 import config from "./logging_config.json";
@@ -38,19 +48,20 @@ export class Logger {
         this.log_target = collection(this.db, config.collectionName);
     }
  
-    payload(payload: any, loglevel: LogLevel)
+    payload(payload: any, loglevel: LogLevel, event: Event)
     {
         return {
             user: this.user,
             content: payload,
             timestamp: Date.now(),
-            loglevel: loglevel
+            loglevel: loglevel,
+            event : event
         }
     }
 
 
-    async log_payload(payload: any, loglevel: LogLevel) {
-        let p = this.payload(payload, loglevel);
+    async log_payload(payload: any, loglevel: LogLevel, event: Event) {
+        let p = this.payload(payload, loglevel, event);
         let log = doc(this.log_target);
         try {
             await setDoc(log, p);

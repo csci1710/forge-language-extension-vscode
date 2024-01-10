@@ -11,13 +11,11 @@ import {
 	TransportKind
 } from 'vscode-languageclient/node';
 
-import { Logger, LogLevel } from "./logger";
+import { Logger, LogLevel, Event } from "./logger";
 import {RacketProcess} from './racketprocess';
 
 var os = require("os");
 import { v4 as uuidv4 } from 'uuid';
-
-var hostname = os.hostname();
 
 let client: LanguageClient;
 
@@ -66,7 +64,7 @@ function textDocumentToLog(d, focusedDoc) {
 	return {
 		focused : focusedDoc,
 		filename: fileName,
-		filepath: filePath,
+		//filepath: filePath, // shouldn't log this, seems too much.
 		fileContent: content,
 	};
 }
@@ -132,6 +130,8 @@ export async function activate(context: ExtensionContext) {
 		const filepath = fileURI.fsPath;
 
 
+		const runId = uuidv4();
+
 		forgeOutput.clear();
 		forgeOutput.show();
 
@@ -139,7 +139,6 @@ export async function activate(context: ExtensionContext) {
 		if (!editor.document.save())
 		{
 			console.error(`Could not save ${filepath}`);
-
 			return null;
 		}
 
@@ -157,8 +156,9 @@ export async function activate(context: ExtensionContext) {
 
 			const log = textDocumentToLog(editor.document, true);
 			log['error'] = 'Cannot spawn Forge process';
+			log['runId'] = runId;
 
-			logger.log_payload(log, LogLevel.ERROR);
+			logger.log_payload(log, LogLevel.ERROR, Event.FORGE_RUN);
 
 			console.error('Cannot spawn Forge process');
 		}
@@ -181,6 +181,7 @@ export async function activate(context: ExtensionContext) {
 		});
 
 		racketProcess.on('exit', (code: string) => {
+			
 
 
 			// This isn't showing anything.
@@ -195,6 +196,12 @@ export async function activate(context: ExtensionContext) {
 				this.showFileWithOpts(filepath, null, null);
 				this.userFacingOutput.appendLine('Forge process terminated.');
 			}
+
+			var payload = {
+				"output" : this.userFacingOutput.getText(),
+				"runId" : runId 
+			}
+			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
 		});
 
 
@@ -206,7 +213,10 @@ export async function activate(context: ExtensionContext) {
 				const focusedDoc = (d === editor.document);
 				return textDocumentToLog(d, focusedDoc);
 			});
-			logger.log_payload(documentData, LogLevel.INFO);
+
+			documentData['runId'] = runId;
+
+			logger.log_payload(documentData, LogLevel.INFO, Event.FORGE_RUN);
 		}
 	});
 
@@ -231,6 +241,7 @@ export async function activate(context: ExtensionContext) {
 		halpOutput.clear();
 		halpOutput.show();
 		halpOutput.appendLine('Running Halp...');
+		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
 
 		const editor = vscode.window.activeTextEditor;
 
@@ -249,14 +260,13 @@ export async function activate(context: ExtensionContext) {
 					// TODO: Move this log to inside the HalpRunner
 					var documentData = textDocumentToLog(document, true);
 					documentData['halp_output'] = result;
-					logger.log_payload(documentData, LogLevel.ASSISTANCE_REQUEST);
+					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 					halpOutput.appendLine("HALp run completed: \n" + result);
 				});
 		} else {
 			halpOutput.appendLine('Functionality unavailable, requires a test (.test.frg) file.');
 		}
 	});
-
 
 	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
 								 forgeOutput, halpOutput);

@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly } from './forge-utilities'; 
-import { LogLevel, Logger } from './logger';
+import { LogLevel, Logger, Event } from './logger';
 /*
 	Potential issues : Name clash between student files and grader files.
 */
@@ -189,7 +189,6 @@ export class HalpRunner {
 		// LOG w_wrapped
 
 		const payload = {
-			"type": "conceptual_mutant",
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
 			"student_preds": student_preds,
@@ -197,7 +196,7 @@ export class HalpRunner {
 			"conceptual_mutant": w_wrapped
 		}
 
-		this.logger.log_payload(payload, LogLevel.INFO)
+		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
