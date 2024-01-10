@@ -240,13 +240,13 @@ export async function activate(context: ExtensionContext) {
 		
 		halpOutput.clear();
 		halpOutput.show();
-		halpOutput.appendLine('Running Halp...');
+		halpOutput.appendLine('🐸: Analyzing your tests...');
 		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
 
 		const editor = vscode.window.activeTextEditor;
 
 		if (!editor) {
-			halpOutput.appendLine('No active editor. Please open a .frg file.');
+			halpOutput.appendLine('❗No active editor. Please open a .frg file.');
 			return;
 		}
 		const document = editor.document;
@@ -261,10 +261,10 @@ export async function activate(context: ExtensionContext) {
 					var documentData = textDocumentToLog(document, true);
 					documentData['halp_output'] = result;
 					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
-					halpOutput.appendLine("HALp run completed: \n" + result);
+					halpOutput.appendLine("💡 :" + result);
 				});
 		} else {
-			halpOutput.appendLine('Functionality unavailable, requires a test (.test.frg) file.');
+			halpOutput.appendLine('❗I can only analyze test (.test.frg) files.');
 		}
 	});
 

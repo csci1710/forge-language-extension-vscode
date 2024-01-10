@@ -6,6 +6,11 @@ import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunde
 import { LogLevel, Logger, Event } from './logger';
 /*
 	Potential issues : Name clash between student files and grader files.
+
+	Should we present this as a 'Smart TA' rather than a hinting mechanism? Examplar
+	hinting suggests students perhaps don't want to *ask* for hints? Pride?
+
+	Perhaps the name of the frog that backs the course? Could list it on the course page.
 */
 
 export class HalpRunner {
@@ -25,7 +30,12 @@ export class HalpRunner {
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
 		if (w_o === "") {
-			return "Your tests were consistent with the problem specification.";
+			return `Your tests are consistent with the problem specification.`;
+			
+			// TODO: Can we add some sort of thoroughness metric?
+			/*This means that all of your tests are passing, 
+			 but you may want to add more tests to ensure your code explores more aspects of the problem.`;
+			 */
 		}
 
 		const testName = this.getFailingTestName(w_o);
@@ -35,9 +45,8 @@ export class HalpRunner {
 		// It's not that they are right, we do not know if they are specifically wrong.
 		// Ask Tim what to do here!
 		const defaultFeedback = `Cannot provide feedback around ${testName}.
-								Since this HALp can only provide feedback one test at a time,
-								you may want to comment out this test and run the HALp again
-								if you want feedback on any *other* tests.`;
+		You may want to comment out this test and run me again if you want feedback on any *other* tests.`;
+		
 		if (example_regex.test(w_o)) {
 			return w_o;
 		}

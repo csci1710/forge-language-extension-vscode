@@ -88,15 +88,18 @@
 			},
 			{
 				"command": "forge.enableLogging",
-				"title": "Enable Logging"
+				"title": "Enable Logging",
+				"icon": "$(eye-closed)"
 			},
 			{
 				"command": "forge.disableLogging",
-				"title": "Disable Logging"
+				"title": "Disable Logging",
+				"icon": "$(eye)"
 			},
 			{
 				"command": "forge.halp",
-				"title": "HALp"
+				"title": "Ask Toadus Ponens!",
+				"icon":  "./client/images/toadus.png"
 			}
 		],
 		"menus": {
@@ -114,7 +117,7 @@
 				{
 					"command": "forge.enableLogging",
 					"when": "!forge.isLoggingEnabled && (editorLangId == forge)",
-					"group": "navigation"
+					"group": "navigation"					
 				},
 				{
 					"when": "forge.isLoggingEnabled && (editorLangId == forge)",
