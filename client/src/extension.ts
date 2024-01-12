@@ -16,6 +16,7 @@ import {RacketProcess} from './racketprocess';
 
 var os = require("os");
 import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
 
 let client: LanguageClient;
 
@@ -55,19 +56,27 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 }
 
 // TODO: Want to make this an extension method on TextDocument, but cannot wrangle it.
-function textDocumentToLog(d, focusedDoc) {
 
+
+function textDocumentToLog(d, focusedDoc) {
 	const content = d.getText();
 	const filePath = d.isUntitled ? "untitled" : d.fileName;
 	const fileName = path.parse(filePath).base;
+	const fileExtension = path.extname(fileName);
+
+	// Don't log files if they do not have '.frg' extension.
+	if (fileExtension !== '.frg') {
+		return {};
+	}
 
 	return {
-		focused : focusedDoc,
+		focused: focusedDoc,
 		filename: fileName,
-		//filepath: filePath, // shouldn't log this, seems too much.
-		fileContent: content,
+		fileContent: content
 	};
 }
+
+
 
 export async function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
@@ -208,11 +217,12 @@ export async function activate(context: ExtensionContext) {
 
 
 		if (isLoggingEnabled && editor) {
-							 
+				 
 			const documentData = vscode.workspace.textDocuments.map((d) => {
 				const focusedDoc = (d === editor.document);
 				return textDocumentToLog(d, focusedDoc);
-			});
+			}).filter((data) => Object.keys(data).length > 0);
+			
 
 			documentData['runId'] = runId;
 
@@ -237,16 +247,22 @@ export async function activate(context: ExtensionContext) {
 
 
 	const halp = vscode.commands.registerCommand('forge.halp', () => {
-		
 		halpOutput.clear();
 		halpOutput.show();
+		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
+
+		if (!isLoggingEnabled) {
+			halpOutput.appendLine('❗🐸❗ I can only be used if logging is enabled.');
+			return;
+		}
+
 		halpOutput.appendLine('🐸: Analyzing your tests...');
 		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
 
 		const editor = vscode.window.activeTextEditor;
 
 		if (!editor) {
-			halpOutput.appendLine('❗No active editor. Please open a .frg file.');
+			halpOutput.appendLine('❗🐸❗ No active editor. Please open a .frg file.');
 			return;
 		}
 		const document = editor.document;
@@ -261,10 +277,10 @@ export async function activate(context: ExtensionContext) {
 					var documentData = textDocumentToLog(document, true);
 					documentData['halp_output'] = result;
 					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
-					halpOutput.appendLine("💡 :" + result);
+					halpOutput.appendLine("💡🐸💡 " + result);
 				});
 		} else {
-			halpOutput.appendLine('❗I can only analyze test (.test.frg) files.');
+			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');
 		}
 	});
 

@@ -36,3 +36,19 @@ This Language Server works for the language Forge. It has the following language
 - In the `[Extension Development Host]`` instance of VSCode, open a document in 'Forge' language mode.
   - Enter Forge code. The extension will emit diagnostics for syntax errors.
   - Run Forge code with the run button. The extension will emit diagnostics for evaluation errors.
+
+
+## HALP
+
+HALp is a 24 hour TA for the course, that helps students understand why their tests may not be consistent with the problem specification. It does so by running student tests against a correct implementation (`wheat`).
+
+If a test fails and:
+
+-  is an example, HALp lets users know that the example is invalid.
+-  is a general `test expect``, HALp offers no help.
+-  is an assertion, HALp leverages the structure of implications to generate a mutation of the `wheat` that reflects the misconception embodied in the failing assertion. 
+   -  This is then run against an auto-grader, whose results are used to generate feedback.
+
+In doing so, HALp does not focus on every potential mismatch between the `wheat` and the student's tests. Rather, it focuses on those deemed important by the instructor (as reflected in the autograder), and uses those to generate feedback.
+
+Feedback on failing tests currently has to be instructor-provided. We suggest work to phrase these hints as Socratic questions. Instructors must annotate each autograder test with corresponding question(s).
