@@ -51,4 +51,4 @@ If a test fails and:
 
 In doing so, HALp does not focus on every potential mismatch between the `wheat` and the student's tests. Rather, it focuses on those deemed important by the instructor (as reflected in the autograder), and uses those to generate feedback.
 
-Feedback on failing tests currently has to be instructor-provided. We suggest work to phrase these hints as Socratic questions. Instructors must annotate each autograder test with corresponding question(s).
+Feedback on failing tests currently has to be instructor-provided. We suggest phrasing these hints as Socratic questions. Instructors must annotate each autograder test with corresponding question(s).
