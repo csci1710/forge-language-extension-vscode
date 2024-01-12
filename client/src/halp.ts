@@ -4,7 +4,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
+import * as crypto from 'crypto';
+import {SymmetricEncryptor} from './encryption-util';
+
+
 /*
+	HALP currently does not work with obfuscated wheats. Can we do some simple hiding here?
+	(wheats on server are encrypted, and then are decrypted *in memory* here?)
+
 	Potential issues : Name clash between student files and grader files.
 
 	Should we present this as a 'Smart TA' rather than a hinting mechanism? Examplar
@@ -17,6 +24,7 @@ export class HalpRunner {
 
 	static WHEATSTORE = "https://sidprasad.github.io/dirtree";
 	logger : Logger;
+	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
 
 	constructor(logger: Logger) {
 		this.logger = logger;
@@ -32,6 +40,20 @@ export class HalpRunner {
 		if (w_o === "") {
 			return `Your tests are consistent with the problem specification.`;
 			
+			/*
+				This is where we could (would?) add some sort of metric around thoroughness.
+
+				1. We could check coverage of their tests against the wheat (somehow). 
+					Cons: We don't care about the parts of the wheat that are not super important to the problem.
+				
+				2. We could straight up *count* the number of tests. Is every predicate in the solution covered?
+					-- This seems overly constrictive, we would also have to identify (somehow) every exported predicate in
+					the wheat.
+				3.
+
+			*/
+
+
 			// TODO: Can we add some sort of thoroughness metric?
 			/*This means that all of your tests are passing, 
 			 but you may want to add more tests to ensure your code explores more aspects of the problem.`;
@@ -135,12 +157,13 @@ export class HalpRunner {
 
 	private async downloadFile(url: string): Promise<string>  {
 
-		const response = await fetch(url);
+				const response = await fetch(url);
 		if (response.ok) {
 			const t = await response.text();
-			return t;
+			return this.encryptor.decrypt(t);
 		} else {
 			// ERROR
+			this.logger.log_payload({"url": url}, LogLevel.ERROR, Event.FILE_DOWNLOAD)
 			return "";
 		}
 

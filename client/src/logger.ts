@@ -16,9 +16,10 @@ export enum LogLevel {
 export enum Event {
     ASSISTANCE_REQUEST = "assistance_request",
     CONCEPTUAL_MUTANT = "conceptual_mutant",
-    HALP_RESULT = "halp_failure",
+    HALP_RESULT = "halp_result",
     FORGE_RUN_RESULT = "forge_run_result",
-    FORGE_RUN = "forge_run"
+    FORGE_RUN = "forge_run",
+    FILE_DOWNLOAD = "file_download",
 }
 
 
