@@ -4,8 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
-import * as crypto from 'crypto';
-import {SymmetricEncryptor} from './encryption-util';
+import { SymmetricEncryptor } from './encryption-util';
 
 
 /*
