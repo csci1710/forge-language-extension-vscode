@@ -214,8 +214,13 @@ export class HalpRunner {
 	// w_o : wheat output
 	private async tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
 
-		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
-
+		var w_wrapped = "";
+		try {
+			w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
+		} catch (e) {
+			const eText = e.toString();
+			return eText;
+		}
 		// We should log all the conceptual mutants we generate!!
 		// LOG w_wrapped
 

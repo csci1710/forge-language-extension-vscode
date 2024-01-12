@@ -4,7 +4,7 @@ exports.SymmetricEncryptor = void 0;
 var crypto = require("crypto");
 var SymmetricEncryptor = /** @class */ (function () {
     function SymmetricEncryptor() {
-        this.key = "b3d93477f35b5b55f23218de7b5f48b3db89755f42d0326ddfa224af2caa3fc6";
+        this.key = "b3d93477f35b5b55f23218de7b5f48b3";
     }
     SymmetricEncryptor.prototype.encrypt = function (plainText) {
         var iv = crypto.randomBytes(16);

@@ -84,10 +84,10 @@ export function adjustWheatToStudentMisunderstanding(testFileName: string, w : s
 
 
 	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		return "No student code detected in failing assertion.";
+		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. Please be sure to directly reference only one predicate from the assignment statement.");
 	}
 	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-		return "This tool can only provide further feedback if the assertion explicitly references predicates defined in the assignment specification.";
+		throw new Error("I cannot provide you with any more feedback, since you authored both predicates in the assertion. Please be sure to directly reference one predicate from the assignment statement.");
 	}
 
 	w = w + "\n" + student_preds + "\n";
@@ -128,7 +128,7 @@ export function adjustWheatToStudentMisunderstanding(testFileName: string, w : s
 			return constrainPredicate(w, rhs_pred, lhs_pred)
 		}
 	}
-	return "Something went wrong!";
+	throw new Error("Something went wrong!");
 }
 
 

@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 
 export class SymmetricEncryptor {
 	
-	private key : string = "b3d93477f35b5b55f23218de7b5f48b3db89755f42d0326ddfa224af2caa3fc6"; 
+	private key : string = "b3d93477f35b5b55f23218de7b5f48b3"; 
 	
 	encrypt(plainText) {
 		const iv = crypto.randomBytes(16);
