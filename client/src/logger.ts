@@ -20,6 +20,7 @@ export enum Event {
     FORGE_RUN_RESULT = "forge_run_result",
     FORGE_RUN = "forge_run",
     FILE_DOWNLOAD = "file_download",
+    AMBIGUOUS_TEST =   "ambiguous_test"
 }
 
 

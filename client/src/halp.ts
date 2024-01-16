@@ -37,7 +37,8 @@ export class HalpRunner {
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
 		if (w_o === "") {
-			return `Your tests are consistent with the problem specification.`;
+			return `Your tests are all consistent with the assignment specification.
+			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
 			
 			/*
 				This is where we could (would?) add some sort of metric around thoroughness.
@@ -59,7 +60,7 @@ export class HalpRunner {
 			 */
 		}
 
-		const formurl = "<FORM URL>"
+		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		const testName = this.getFailingTestName(w_o);
 
 		// TODO: This default text  is what is shown where we are in the modelling space
@@ -98,15 +99,15 @@ export class HalpRunner {
 			If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
 		}
 		
-		/*
 
-			TODO: Log the test file here.
+		const payload = {
 
-		*/
-		
+			"studentTests": studentTests,
+			"wheat_output" : w_o,
+			"testFile" : testFileName
+		}
+		this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST)	
 		return defaultFeedback;
-
-
 	}
 
 
