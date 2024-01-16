@@ -35,8 +35,8 @@ async function getUserId(context) {
 	catch {
 		const uid = uuidv4();
 		await context.secrets.store(UID_KEY, uid);
+		return uid;
 	}
-
 }
 
 
@@ -196,6 +196,7 @@ export async function activate(context: ExtensionContext) {
 			if (!racket.racketKilledManually) {
 				if (myStderr !== '') {
 					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
+					this.userFacingOutput.appendLine(myStderr);
 				} else {
 					this.showFileWithOpts(filepath, null, null);
 					this.userFacingOutput.appendLine('Finished running.');

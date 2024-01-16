@@ -49,7 +49,7 @@ export class HalpRunner {
 				2. We could straight up *count* the number of tests. Is every predicate in the solution covered?
 					-- This seems overly constrictive, we would also have to identify (somehow) every exported predicate in
 					the wheat.
-				3.
+				
 
 			*/
 
