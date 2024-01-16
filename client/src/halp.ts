@@ -2,7 +2,7 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly } from './forge-utilities'; 
+import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 
@@ -59,26 +59,54 @@ export class HalpRunner {
 			 */
 		}
 
+		const formurl = "<FORM URL>"
 		const testName = this.getFailingTestName(w_o);
 
 		// TODO: This default text  is what is shown where we are in the modelling space
 		// (or more correctly, NOT an example and NOT in the autograder space)
 		// It's not that they are right, we do not know if they are specifically wrong.
 		// Ask Tim what to do here!
-		const defaultFeedback = `Cannot provide feedback around ${testName}.
-		You may want to comment out this test and run me again if you want feedback on any *other* tests.`;
+		const defaultFeedback = `${testName} examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+		This test is not necessarily incorrect, but I cannot provide feedback around it. 
+		If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+		
+		If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+		please fill out this form: ${formurl}`;
 		
 		if (example_regex.test(w_o)) {
 			return w_o;
 		}
 		if (assertion_regex.test(w_o)) {
 			const student_preds = getPredicatesOnly(studentTests); 
-			const hint = await this.tryGetHintFromAssertion(testFileName, w, student_preds, w_o);
+
+			try {
+				var hint = await this.tryGetHintFromAssertion(testFileName, w, student_preds, w_o);
+			}
+			catch (e)
+			{
+				if (e instanceof BothPredsStudentError) {
+					return `Sorry! I cannot provide feedback around ${testName}. ` + e.message;
+				} 
+				hint = e.message;
+			}
 			if (hint != "") {
-				return `${testName} is not consistent with the problem specification.` + hint;
+				return `${testName} is not consistent with the problem specification. ` + hint;
 			}
 		}
+		else if (test_regex.test(w_o)) {
+			return `Sorry! I cannot provide feedback around ${testName}.
+			If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
+		}
+		
+		/*
+
+			TODO: Log the test file here.
+
+		*/
+		
 		return defaultFeedback;
+
+
 	}
 
 
@@ -214,13 +242,7 @@ export class HalpRunner {
 	// w_o : wheat output
 	private async tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
 
-		var w_wrapped = "";
-		try {
-			w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
-		} catch (e) {
-			const eText = e.toString();
-			return eText;
-		}
+		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
 		// We should log all the conceptual mutants we generate!!
 		// LOG w_wrapped
 

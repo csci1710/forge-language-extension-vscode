@@ -3,6 +3,14 @@
 	Could change with Forge updates and/or a language server.
 */
 
+// Raise when an assertion is student predicates on both sides.
+export class BothPredsStudentError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'BothPredsStudentError';
+	}
+}
+
 // Returns only the predicates from the input text.
 export function getPredicatesOnly(inputText : string) : string {
 	const predicates = findForgePredicates(inputText);
@@ -84,10 +92,11 @@ export function adjustWheatToStudentMisunderstanding(testFileName: string, w : s
 
 
 	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. Please be sure to directly reference only one predicate from the assignment statement.");
+		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
 	}
 	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since you authored both predicates in the assertion. Please be sure to directly reference one predicate from the assignment statement.");
+
+		throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
 	}
 
 	w = w + "\n" + student_preds + "\n";
