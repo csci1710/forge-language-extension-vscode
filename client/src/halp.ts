@@ -67,12 +67,13 @@ export class HalpRunner {
 		// (or more correctly, NOT an example and NOT in the autograder space)
 		// It's not that they are right, we do not know if they are specifically wrong.
 		// Ask Tim what to do here!
-		const defaultFeedback = `${testName} examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-		This test is not necessarily incorrect, but I cannot provide feedback around it. 
-		If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
-		
-		If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-		please fill out this form: ${formurl}`;
+		const defaultFeedback = 
+`${testName} examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+This test is not necessarily incorrect, but I cannot provide feedback around it. 
+If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+
+If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+please fill out this form: ${formurl}`;
 		
 		if (example_regex.test(w_o)) {
 			return w_o;
@@ -129,7 +130,7 @@ export class HalpRunner {
 
 			if (!r) {
 				console.error('Cannot spawn Forge process');
-				return "HALP run failed."
+				return "Toadus Ponens run failed."
 			}
 
 

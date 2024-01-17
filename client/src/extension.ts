@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 let client: LanguageClient;
 
 let forgeOutput = vscode.window.createOutputChannel('Forge Output');
-let halpOutput = vscode.window.createOutputChannel('HALp Output');
+let halpOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 
 
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
