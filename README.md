@@ -38,7 +38,7 @@ This Language Server works for the language Forge. It has the following language
   - Run Forge code with the run button. The extension will emit diagnostics for evaluation errors.
 
 
-## HALP
+## HALP / Toadus Ponens
 
 HALp is a 24 hour TA for the course, that helps students understand why their tests may not be consistent with the problem specification. It does so by running student tests against a correct implementation (`wheat`).
 
@@ -54,3 +54,8 @@ In doing so, HALp does not focus on every potential mismatch between the `wheat`
 Feedback on failing tests currently has to be instructor-provided. We suggest phrasing these hints as Socratic questions. Instructors must annotate each autograder test with corresponding question(s).
 
 Logo available under creative commons : https://www.rawpixel.com/image/6864843/vector-sticker-public-domain-green
+
+### TODO
+
+- HALP ignores bounds on tests, which may be complicated.
+  
