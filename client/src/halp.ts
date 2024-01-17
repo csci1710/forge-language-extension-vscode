@@ -113,7 +113,7 @@ export class HalpRunner {
 
 	private async runTestsAgainstModel (tests: string, model: string): Promise<string> {
 
-		const forgeOutput = vscode.window.createOutputChannel('HALP Output');
+		const forgeOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
