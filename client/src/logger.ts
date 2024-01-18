@@ -23,9 +23,6 @@ export enum Event {
     AMBIGUOUS_TEST =   "ambiguous_test"
 }
 
-
-
-
 import config from "./logging_config.json";
 
 export class Logger {

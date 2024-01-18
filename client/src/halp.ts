@@ -7,6 +7,8 @@ import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 
 
+const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
+
 /*
 	HALP currently does not work with obfuscated wheats. Can we do some simple hiding here?
 	(wheats on server are encrypted, and then are decrypted *in memory* here?)
@@ -33,6 +35,9 @@ export class HalpRunner {
 		const w = await this.getWheat(testFileName);
 		if (w === "") {
 			return "Network error. Terminating run.";
+		}
+		else if (w === NOT_ENABLED_MESSAGE) {
+			return NOT_ENABLED_MESSAGE;
 		}
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
@@ -186,13 +191,21 @@ please fill out this form: ${formurl}`;
 
 	private async downloadFile(url: string): Promise<string>  {
 
-				const response = await fetch(url);
+		const response = await fetch(url);
+
+		
+
 		if (response.ok) {
 			const t = await response.text();
 			return this.encryptor.decrypt(t);
-		} else {
+		} 
+		
+		this.logger.log_payload({"url": url}, LogLevel.ERROR, Event.FILE_DOWNLOAD)
+		if (response.status === 404) {
+			return NOT_ENABLED_MESSAGE;
+		}
+		else {
 			// ERROR
-			this.logger.log_payload({"url": url}, LogLevel.ERROR, Event.FILE_DOWNLOAD)
 			return "";
 		}
 
