@@ -83,7 +83,8 @@ export class HalpRunner {
 
 		// TODO: Remove [abcdef-...].rkt from w_o.
 
-		const assertionsBetter = "\n\u{2139} In general, I am able to provide more feedback around assertions than examples.";
+		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. 
+		I am better at providing more detailed feedback when analyzing assertions than examples.`;
 
 		const defaultFeedback = `I found a runtime or syntax error in your tests:
 ${w_o}`;
@@ -96,30 +97,12 @@ ${w_o}`;
 
 			try {
 				var hint = await this.tryGetHintFromExample(testName, testFileName, w, studentTests, w_o);
-				if (hint != "") {
+				if (hint != "")
+				{
 					return `${testName} is not consistent with the problem specification. ` + hint;
 				}
-	
-				const payload = {
-	
-					"studentTests": studentTests,
-					"wheat_output" : w_o,
-					"testFile" : testFileName
-				}
-				this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
-	
-				// Else, return this feedback around no hint found.
-				return `"${testName}" examines behaviors that are either ambiguous or not clearly defined in the problem specification.
-	This test is not necessarily incorrect, but I cannot provide feedback around it. 
-	If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
-	
-	If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-	please fill out this form: ${formurl}`;
-
-
 			}
 			catch (e) {
-				console.log(e);
 			}
 
 			return w_o + assertionsBetter;
