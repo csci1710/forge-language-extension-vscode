@@ -95,6 +95,9 @@ ${w_o}`;
 		
 		if (example_regex.test(w_o)) {
 
+			// Fundamentally the issue is that the characteristic predicate from a 
+			// positive example gives us such a *specific* modification to a predicate,
+			// that it is rare for us to offer meaningful feedback.
 			try {
 				var hint = await this.tryGetHintFromExample(testName, testFileName, w, studentTests, w_o);
 				if (hint != "")
