@@ -41,7 +41,7 @@ export class HalpRunner {
 		}
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
-		if (w_o === "") {
+		if (w_o == "") {
 			return `Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
 			
@@ -65,20 +65,22 @@ export class HalpRunner {
 			 */
 		}
 
+
+
+
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		const testName = this.getFailingTestName(w_o);
 
-		// TODO: This default text  is what is shown where we are in the modelling space
-		// (or more correctly, NOT an example and NOT in the autograder space)
-		// It's not that they are right, we do not know if they are specifically wrong.
-		// Ask Tim what to do here!
-		const defaultFeedback = 
-`${testName} examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-This test is not necessarily incorrect, but I cannot provide feedback around it. 
-If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+		// TODO: Remove [abcdef-...].rkt from w_o.
 
-If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-please fill out this form: ${formurl}`;
+
+
+		const defaultFeedback = `I found a runtime or syntax error in your tests:
+${w_o}`;
+		if (testName == "") {
+			return defaultFeedback;
+		}
+
 		
 		if (example_regex.test(w_o)) {
 			return w_o;
@@ -99,20 +101,31 @@ please fill out this form: ${formurl}`;
 			if (hint != "") {
 				return `${testName} is not consistent with the problem specification. ` + hint;
 			}
+
+			const payload = {
+
+				"studentTests": studentTests,
+				"wheat_output" : w_o,
+				"testFile" : testFileName
+			}
+			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+
+			// Else, return this feedback around no hint found.
+			return `"${testName}" examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+This test is not necessarily incorrect, but I cannot provide feedback around it. 
+If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+
+If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+please fill out this form: ${formurl}`;
+
 		}
 		else if (test_regex.test(w_o)) {
-			return `Sorry! I cannot provide feedback around ${testName}.
+			return `Sorry! I cannot provide feedback around the test "${testName}".
 			If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
 		}
 		
 
-		const payload = {
 
-			"studentTests": studentTests,
-			"wheat_output" : w_o,
-			"testFile" : testFileName
-		}
-		this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST)	
 		return defaultFeedback;
 	}
 
