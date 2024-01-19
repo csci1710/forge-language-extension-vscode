@@ -4,7 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { 
 	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
-	findAllExamples, exampleToPred, getSigList, getPredList, findExampleByName
+	findAllExamples, exampleToPred, getSigList, getPredList, findExampleByName,
+	removeForgeComments
 
 
 } from './forge-utilities'; 
@@ -37,6 +38,10 @@ export class HalpRunner {
 	}
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
+
+		
+		studentTests = studentTests.replace(/\r/g, "\n");
+
 		const w = await this.getWheat(testFileName);
 		if (w === "") {
 			return "Network error. Terminating run.";
@@ -177,6 +182,8 @@ please fill out this form: ${formurl}`;
 		try {
 			fs.writeFileSync(tempFilePath, toRun);
 
+			console.log(__dirname);
+
 			// Need to examine and interpret results here.
 			let r = racket.runFile(tempFilePath);
 
@@ -261,7 +268,8 @@ please fill out this form: ${formurl}`;
 	private async getWheat(testFileName: string): Promise<string> {
 		const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
 		const wheatURI = `${HalpRunner.WHEATSTORE}/${wheatName}`;
-		return await this.downloadFile(wheatURI);
+		const wheat = await this.downloadFile(wheatURI);
+		return removeForgeComments(wheat);
 	}
 
 	private async getAutograderTests(testFileName: string): Promise<string> {
@@ -320,10 +328,8 @@ please fill out this form: ${formurl}`;
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
-		const tName = this.getFailingTestName(ag_output);
-		const hint_map = await this.getHintMap(testFileName)
-		const hint_text = hint_map[tName] || "";
-		return hint_text;
+		
+		return await this.get_hint_from_autograder_output(ag_output, testFileName);
 	}
 
 
@@ -331,25 +337,27 @@ please fill out this form: ${formurl}`;
 
 
 	
-	// w : wheat
-	// w_o : wheat output
+	// TODO: Does not play nice with parameterized predicates.
 	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
-
-		// const matchingExamples = findAllExamples(studentTests).filter(example => example.exampleName == testName);
-		// const failedExample = matchingExamples[0];
-
+		
+		// Remove student comments as much as possible.
+		studentTests = removeForgeComments(studentTests);
 		const failedExample = findExampleByName(studentTests, testName);
 
 		const sigNames = getSigList(w);
 		const wheatPredNames = getPredList(w);
+
+
+		
+
 
 		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
 		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";
 
 
 		// Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
-
-		const student_belief = `${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate}`;
+		// TODO:  This is a hack to re-use code. I should fix it.
+		const student_belief = `Theorem Assertion ${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate} failed.`; 
 		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, student_belief);
 		
 		const payload = {
@@ -364,9 +372,21 @@ please fill out this form: ${formurl}`;
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
+		return await this.get_hint_from_autograder_output(ag_output, testFileName);
+	}
+
+
+	async get_hint_from_autograder_output(ag_output : string, testFileName : string) {
+		
+		if (ag_output == "") {
+			return "";
+		}
 		const tName = this.getFailingTestName(ag_output);
-		const hint_map = await this.getHintMap(testFileName)
-		const hint_text = hint_map[tName] || "";
-		return hint_text;
+		const hint_map = await this.getHintMap(testFileName);
+
+		if (tName in hint_map) {
+			return hint_map[tName];
+		}
+		throw new Error("Something went wrong when generating further feedback around this test. Please contact course staff fif you need more feedback.");
 	}
 }

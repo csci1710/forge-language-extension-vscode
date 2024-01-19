@@ -67,6 +67,40 @@ function findForgePredicates(inputText : string) : [string] {
 }
 
 
+export function findForgeExamples(inputText) {
+    const withoutComments = removeForgeComments(inputText);
+    const lines = withoutComments.split('\n');
+    let inExample = false;
+    let braceLevel = 0;
+    let currentExample = '';
+    let examples = [];
+
+    for (let line of lines) {
+        if (inExample) {
+            currentExample += line + '\n';
+            braceLevel += (line.match(/\{/g) || []).length;
+            braceLevel -= (line.match(/\}/g) || []).length;
+
+            if (braceLevel === 0) {
+                examples.push(currentExample.trim());
+                currentExample = '';
+                inExample = false;
+            }
+        } else {
+            // Adjusted regex to match the example syntax
+            const match = line.match(/\bexample\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+is\s+(.*?)\s+for\s*\{/);
+            if (match) {
+                inExample = true;
+                braceLevel = 1;
+                currentExample = line + '\n';
+            }
+        }
+    }
+
+    return examples;
+}
+
+
 export const assertion_regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
 export const test_regex = /Failed test (\w+)\./;
@@ -176,17 +210,20 @@ function easePredicate(w : string, i : string, s : string) : string {
 
 
 export function getSigList(s : string) : string[] {
-	const sigs = s.match(/sig\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(\[(.*?)\])?\s*\{/g);
-	if (sigs == null) {
-		return [];
-	}
-	const sigNames = sigs.map(sig => sig.split(' ')[1].split('[')[0]);
-	return sigNames;
+	var pattern = /\bsig\s+(\w+)/g;
+
+    // Find all matches in the text
+    var matches = [];
+    var match;
+    while ((match = pattern.exec(s)) !== null) {
+        matches.push(match[1]);
+    }
+
+    return matches;
 }
 
-// TODO: What about predicates that have [] in them?
 export function getPredList(fileContent: string): string[] {
-	const predicateRegex = /pred\s+(\w+)(\s|\{|\[)/g;
+	const predicateRegex = /\bpred\s+(\w+)(\s|\{|\[)/g;
 	const predicates: string[] = [];
 	let match;
 
@@ -236,8 +273,15 @@ export function findAllExamples(fileContent : string) {
 // Finds a specific example by name
 export function findExampleByName(fileContent : string, exampleName: string) {
 	
+	// NEED TO FIGURE OUT HOW TO PARSE MULTIPLE EXAMPLES! This is super hacky and slow.
+
+	const all_examples = findForgeExamples(fileContent);
+	const r = new RegExp(`\\b${exampleName}\\b`);
+	var to_search = all_examples.filter(e => r.test(e))[0];
+
+
 	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*)}`);
-	const match = exampleRegex.exec(fileContent);
+	const match = exampleRegex.exec(to_search);
 
 	if (match == null) {
 		return null;
@@ -263,6 +307,8 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const examplePredicate = example.examplePredicate;
     const exampleBody = example.exampleBody;
 
+	
+
 
 	if (!wheatPredNames.includes(examplePredicate)) {
 		// examplePred is not in wheatPredNames
@@ -275,38 +321,74 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 	// examplePred directly tests a wheat predicate
 
 	// Returns a list of form :  [{variable: 'Board', value: '`Board0'}]
+
+	// TODO: This has a bug. It puts everything in assignments. What if they are not in assignments?
 	function extractAssignments() {
+
+
+		function assignmentContinued(x)  {
+			let t = x
+					.replace(/\(/g, "")
+					.replace(/\)/g, "")
+					.replace(/\{/g, "")
+					.replace(/\}/g, "")
+					.trim();
+
+			return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
+		}
+
 		// Split the instance string into lines
 		const lines = exampleBody.split('\n');
+		
+		let expressions = [];
 		let assignments = [];
+		
 		let currentAssignment = { variable: '', value: '' };
 		let isAssignmentContinued = false;
 	
-		lines.forEach(line => {
-			if (line.trim() === '') return; // Skip empty lines
+		lines.forEach(l => {
+
+			var line = l.trim();
+			if (line === '') return; // Skip empty lines
 	
-			// Check if line is the start of a new assignment
-			if (/^\s*\w+\s*=/.test(line)) {
-				if (isAssignmentContinued) {
-					// Add the previous assignment to the list
-					assignments.push({...currentAssignment});
-				}
-				// Start a new assignment
-				let parts = line.split('=');
-				currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
-				isAssignmentContinued = true;
-			} else if (isAssignmentContinued) {
+			isAssignmentContinued = assignmentContinued(line);
+
+
+			if (isAssignmentContinued) {
 				// Continuation of the current assignment
 				currentAssignment.value += ' ' + line.trim();
+			} else
+			{
+				assignments.push({...currentAssignment});
+				if (/^\s*\w+\s*=/.test(line)) {
+
+					// If we are in the middle of an assignment, add the previous assignment to the list
+					// Do we want this test here though?
+					// if (isAssignmentContinued) {
+					// 	// Add the previous assignment to the list
+					// 	
+					// }
+					// Start a new assignment
+					let parts = line.split('=');
+					currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
+				} else {
+
+					expressions.push(line);
+
+				}
 			}
 		});
 	
+
+		// BUT WHAT IF THE ASSIGNMENT IS NOT IN THE SIG LIST?
+
+		
 		// Add the last assignment if there is one
 		if (isAssignmentContinued) {
 			assignments.push({...currentAssignment});
 		}
 	
-		return assignments;
+		return [assignments, expressions];
 	}
 
 
@@ -316,13 +398,13 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 	// But what about the explicit relations here. We want to capture those too.
 	// Node = `A + `B should become:
 	// some disj a, b : Node | Node = a + b 
-	function sigToExpr(assignment): string {
+	function sigToExpr(assignment) {
 		const atom_name = assignment.variable;
 		var atom_rhs = assignment.value.replace(/`/g, '');
 		const atom_rhs_list = atom_rhs
 			.replace(/\s+|\n|\r/g, '') // Replace all whitespace, newline, or return with empty string
-			.replace('+', ' ')
-			.replace('->', ' ')
+			.replace(/\+/g, ' ')
+			.replace(/->/g, ' ')
 			.split(' ').map(item => item.trim());
 
 		// Remove any elements that are in sigNames
@@ -330,19 +412,57 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		// Remove any duplicates
 		const atom_rhs_comma_sep = Array.from(atom_rhs_set).join(', ');
 
-		return `some disj ${atom_rhs_comma_sep} : ${atom_name} | ${atom_name} = {${atom_rhs_comma_sep}}
-		`;
+		var quantifier = "";
+		var constraint = "";
+		if (atom_rhs_comma_sep != '') {
+
+
+		 quantifier = sigNames.includes(atom_name) ? `some disj ${atom_rhs_comma_sep} : ${atom_name} | {\n` : '';
+		 constraint = `${atom_name} = ${atom_rhs}`;
+		}
+
+		return {
+			quantifier,
+			constraint
+		};
+
 	}
 
 	
-	const assignments = extractAssignments();
-	const sigExpressions = assignments.map(sigToExpr);
-	const sigExpressionsString = sigExpressions.join('\n');
+	const [assignments, expressions] = extractAssignments();
 
+	// All the expressions go on the outside.
+	const expressionString = expressions.join('\n');
+
+
+
+	const sigExpressions = assignments.map(sigToExpr);
+
+	const sigQuantifiers = sigExpressions.map(a => a.quantifier).filter(a => a != '');
+	const sigQuantifiersAsString = sigQuantifiers.join("\n");
+	const sigConstraints = sigExpressions.map(a => a.constraint).join("\n");
+	const sigAssignmentsPostfix = '}'.repeat(sigQuantifiers.length) + "\n";
+
+
+	// We need to put ALL the assignments on sigs on the outside, and then expressions and relations inside.
+		/*
+			some disj ${atom_rhs_comma_sep} : ${atom_name} | {
+				${atom_name} = ${atom_rhs}
+					.... etc
+
+				expressions
+				relations
+			}
+
+		*/
+	// TODO: BUG: What if the example has a some disj quantifier in its body? That would break this.
 	const exampleAsPred = `pred ${exampleName} {
-		 ${sigExpressionsString}
-		}
-		`;
+		${sigQuantifiersAsString}
+		${sigConstraints}
+		${expressionString}
+		${sigAssignmentsPostfix}
+	}`;
 
 	return exampleAsPred;
 }
+
