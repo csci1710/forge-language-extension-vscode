@@ -171,3 +171,160 @@ function easePredicate(w : string, i : string, s : string) : string {
 }
 
 
+
+
+
+
+export function getSigList(s : string) : string[] {
+	const sigs = s.match(/sig\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(\[(.*?)\])?\s*\{/g);
+	if (sigs == null) {
+		return [];
+	}
+	const sigNames = sigs.map(sig => sig.split(' ')[1].split('[')[0]);
+	return sigNames;
+}
+
+
+/*
+example diagonalPasses is {some brd: Board | winningDiag[brd, X] } for {
+  Board = `Board0
+  X = `X0 
+  O = `O0
+  A = `A0 
+  B = `B0 
+  C = `C0
+  inverse = A->C + B->B + C->A
+  places = Board -> (A -> A + B -> B + C -> C ) -> X
+}
+*/
+export function findAllExamples(fileContent : string) {
+    const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/;
+    let match;
+    let examples = [];
+
+    while ((match = exampleRegex.exec(fileContent)) !== null) {
+        const exampleName = match[1];
+        const examplePredicate = match[2].trim();
+        const exampleBody = match[3].trim();
+
+        examples.push({
+            exampleName,
+            examplePredicate,
+            exampleBody
+        });
+    }
+
+    return examples;
+}
+
+// Converts an example to a predicate reflecting the characteristics of the example.
+export function exampleToPred(example, sigNames: string[], wheatPredNames : string[] ) : string {
+	
+	// Now we break the example into its bits ( examples name is {expr})
+	// expr becomes a predicate, unless it already IS a predicate. p
+	const exampleName = example.exampleName;
+    const examplePredicate = example.examplePredicate;
+    const exampleBody = example.exampleBody;
+
+
+	if (!wheatPredNames.includes(examplePredicate)) {
+		// examplePred is not in wheatPredNames
+		// 	// (what do we do for negative examples that have failed the wheat? Well, the hint is clear : this *is* an instance.)
+
+		// Cannot really provide help for now :(
+			throw new Error("Some message about how we cannot help unless it is a positive example explicitly testing a predicate defined in the assignment.");
+	}
+
+	// examplePred directly tests a wheat predicate
+
+	// Returns a list of form :  [{variable: 'Board', value: '`Board0'}]
+	function extractAssignments() {
+		// Split the instance string into lines
+		const lines = exampleBody.split('\n');
+		let assignments = [];
+		let currentAssignment = { variable: '', value: '' };
+		let isAssignmentContinued = false;
+	
+		lines.forEach(line => {
+			if (line.trim() === '') return; // Skip empty lines
+	
+			// Check if line is the start of a new assignment
+			if (/^\s*\w+\s*=/.test(line)) {
+				if (isAssignmentContinued) {
+					// Add the previous assignment to the list
+					assignments.push({...currentAssignment});
+				}
+				// Start a new assignment
+				let parts = line.split('=');
+				currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
+				isAssignmentContinued = true;
+			} else if (isAssignmentContinued) {
+				// Continuation of the current assignment
+				currentAssignment.value += ' ' + line.trim();
+			}
+		});
+	
+		// Add the last assignment if there is one
+		if (isAssignmentContinued) {
+			assignments.push({...currentAssignment});
+		}
+	
+		return assignments;
+	}
+
+
+
+
+	// Converts every sig assignment into a predicate	
+	// But what about the explicit relations here. We want to capture those too.
+	// Node = `A + `B should become:
+	// some disj a, b : Node | Node = a + b 
+	function sigToExpr(assignment): string {
+		const atom_name = assignment.variable;
+		var atom_rhs = assignment.value.replace(/`/g, '');
+		const atom_rhs_list = atom_rhs
+			.replace(/\s+|\n|\r/g, '') // Replace all whitespace, newline, or return with empty string
+			.replace('+', ' ')
+			.replace('->', ' ')
+			.split(' ').map(item => item.trim());
+
+		// Remove any elements that are in sigNames
+		const atom_rhs_set = new Set(atom_rhs_list.filter(item => !sigNames.includes(item)));
+		// Remove any duplicates
+		const atom_rhs_comma_sep = Array.from(atom_rhs_set).join(', ');
+
+		return `some disj ${atom_rhs_comma_sep} : ${atom_name} | ${atom_name} = {${atom_rhs_comma_sep}}
+		`;
+	}
+
+	
+	const assignments = extractAssignments();
+	const sigExpressions = assignments.map(sigToExpr);
+	const sigExpressionsString = sigExpressions.join('\n');
+
+	const exampleAsPred = `pred ${exampleName} {
+		 ${sigExpressionsString}
+		}
+		`;
+
+	return exampleAsPred;
+
+	// Now we have sufficiency: sigExpressions => examplePredicate 
+
+	// Now, how do we translate this to intent/ wheat
+
+	
+	return "";
+	}
+
+	// (what do we do for negative examples that have failed the wheat? Well, the hint is clear : this *is* an instance.)
+	
+	// Now we have sufficiency: p_bounds => p 
+
+	// Now, how do we translate this to intent/ wheat
+
+
+
+
+	return "";
+}

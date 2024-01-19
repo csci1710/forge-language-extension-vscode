@@ -2,7 +2,12 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError } from './forge-utilities'; 
+import { 
+	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
+	findAllExamples, exampleToPred, getSigList
+
+
+} from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 
@@ -83,6 +88,35 @@ ${w_o}`;
 
 		
 		if (example_regex.test(w_o)) {
+
+			try {
+				var hint = await this.tryGetHintFromExample(testName, testFileName, w, studentTests, w_o);
+				if (hint != "") {
+					return `${testName} is not consistent with the problem specification. ` + hint;
+				}
+	
+				const payload = {
+	
+					"studentTests": studentTests,
+					"wheat_output" : w_o,
+					"testFile" : testFileName
+				}
+				this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+	
+				// Else, return this feedback around no hint found.
+				return `"${testName}" examines behaviors that are either ambiguous or not clearly defined in the problem specification.
+	This test is not necessarily incorrect, but I cannot provide feedback around it. 
+	If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+	
+	If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+	please fill out this form: ${formurl}`;
+
+
+			}
+			catch (e) {
+				console.log(e);
+			}
+
 			return w_o + assertionsBetter;
 		}
 		if (assertion_regex.test(w_o)) {
@@ -274,6 +308,48 @@ please fill out this form: ${formurl}`;
 		// We should log all the conceptual mutants we generate!!
 		// LOG w_wrapped
 
+		const payload = {
+			"testFileName": testFileName,
+			"assignment": testFileName.replace('.test.frg', ''),
+			"student_preds": student_preds,
+			"test_failure_message": w_o,
+			"conceptual_mutant": w_wrapped
+		}
+
+		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
+
+		const autograderTests = await this.getAutograderTests(testFileName);
+		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
+		const tName = this.getFailingTestName(ag_output);
+		const hint_map = await this.getHintMap(testFileName)
+		const hint_text = hint_map[tName] || "";
+		return hint_text;
+	}
+
+
+
+
+
+	
+	// w : wheat
+	// w_o : wheat output
+	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
+
+		const matchingExamples = findAllExamples(studentTests).filter(example => example.exampleName === testName);
+		const failedExample = matchingExamples[0];
+
+		const sigNames = getSigList(w);
+		const wheatPredNames = [];
+
+		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
+		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";
+
+
+		// Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
+
+		const student_belief = `${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate}`;
+		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, student_belief);
+		
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
