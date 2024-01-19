@@ -1,6 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
+import { HalpRunner } from './halp';
+
 
 import {
 	LanguageClient,
@@ -8,80 +10,41 @@ import {
 	ServerOptions,
 	TransportKind
 } from 'vscode-languageclient/node';
-import { ChildProcess, spawn } from 'child_process';
 
-
-import { Logger, LogLevel } from "./logger";
+import { Logger, LogLevel, Event } from "./logger";
+import {RacketProcess} from './racketprocess';
 
 var os = require("os");
-var hostname = os.hostname();
+import { v4 as uuidv4 } from 'uuid';
 
 let client: LanguageClient;
 
-const forgeOutput = vscode.window.createOutputChannel('Forge Output');
-let racket: ChildProcess | null;
+let forgeOutput = vscode.window.createOutputChannel('Forge Output');
+let halpOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 
 
+const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 
-
-function matchForgeError(line: string): RegExpMatchArray | null {
-	const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
-	return (line as string).match(forgeFileReg);
+// TODO: This is broken
+async function getUserId(context) {
+	const UID_KEY = "FORGE_UID";
+	
+	try
+	{
+		var uid = await  context.secrets.get(UID_KEY);
+		return uid.toString();
+	}
+	catch {
+		uid = uuidv4().toString();
+		await context.secrets.store(UID_KEY, uid);
+	}
+	forgeOutput.appendLine(`You anonymous ID is ${uid}`);
+	return uid;
 }
 
-function showFileWithOpts(filePath: string, line: number | null, column: number | null) {
-	if (line === null || column === null) {
-		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
-	} else {
-		const start = new vscode.Position(line, column);
-		const end = new vscode.Position(line, column);
-		const range = new vscode.Range(start, end);
 
-		const opts: vscode.TextDocumentShowOptions = {
-			selection: range
-		};
+let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
-		vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath), opts);
-	}
-}
-
-function sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
-	let matcher: RegExpMatchArray | null;
-	const textLines = text.split(/[\n\r]/);
-	for (let i = 0; i < textLines.length; i++) {
-		matcher = matchForgeError(textLines[i]);
-		if (matcher) {
-			// for now stops at the first error
-			// this could be risky if there are frg files in the source code
-			break;
-		}
-	}
-
-	if (matcher) {
-		forgeOutput.appendLine(text);
-
-		const line = parseInt(matcher[2]) - 1;
-		const col = parseInt(matcher[3]) - 1;
-
-		const diagnostics: Diagnostic[] = [];
-
-		const start = new vscode.Position(line, col);
-		const end = new vscode.Position(line, col + 1); // todo: add length?
-		const range = new vscode.Range(start, end);
-
-		const diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Error,
-			range: range,
-			message: `Forge Evaluation Error: ${line}`,
-			source: 'Racket'
-		};
-		diagnostics.push(diagnostic);
-		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
-		showFileWithOpts(fileURI.fsPath, line, col);
-	} else {
-		showFileWithOpts(fileURI.fsPath, null, null);
-	}
-}
 
 function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnostics: vscode.DiagnosticCollection): void {
 
@@ -92,39 +55,36 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 	context.subscriptions.push(
 		vscode.workspace.onDidCloseTextDocument(doc => myDiagnostics.delete(doc.uri))
 	);
-
 }
 
-let racketKilledManually = false;
-function killRacket(manual: boolean) {
-	if (racket) {
-		racket.kill();
-		racketKilledManually = manual;
-	}
-	racket = null;
-}
+// TODO: Want to make this an extension method on TextDocument, but cannot wrangle it.
 
-// TODO: Want to make this an extension method
-// on TextDocument, but cannot wrangle it.
+
 function textDocumentToLog(d, focusedDoc) {
-
 	const content = d.getText();
 	const filePath = d.isUntitled ? "untitled" : d.fileName;
 	const fileName = path.parse(filePath).base;
+	const fileExtension = path.extname(fileName);
+
+	// Don't log files if they do not have '.frg' extension.
+	if (fileExtension !== '.frg') {
+		return {};
+	}
 
 	return {
-		focused : focusedDoc,
+		focused: focusedDoc,
 		filename: fileName,
-		filepath: filePath,
-		fileContent: content,
+		fileContent: content
 	};
 }
 
-export function activate(context: ExtensionContext) {
+
+
+export async function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
-			const matcher = matchForgeError(context.line);
+			const matcher = racket.matchForgeError(context.line);
 			if (!matcher) {
 				return [];
 			} else {
@@ -142,8 +102,6 @@ export function activate(context: ExtensionContext) {
 				const col = parseInt(matcher[3]) - 1;
 
 				const tooltip = filePath + `:${line}:${col}`;
-
-				// console.log("matched");
 				return [
 					{
 						startIndex: matcher.index,
@@ -159,10 +117,10 @@ export function activate(context: ExtensionContext) {
 		handleTerminalLink: (link: any) => {
 			// todo: need to double check if line could be undefined or null
 			if (link.line !== undefined) {
-				showFileWithOpts(link.filePath, link.line, link.column);
+				racket.showFileWithOpts(link.filePath, link.line, link.column);
 			}
 			else {
-				showFileWithOpts(link.filePath, null, null);
+				racket.showFileWithOpts(link.filePath, null, null);
 			}
 		}
 	});
@@ -171,33 +129,29 @@ export function activate(context: ExtensionContext) {
 	context.globalState.update('forge.isLoggingEnabled', true);
 	vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
 
-
-	const forgeEvalDiagnostics = languages.createDiagnosticCollection('Forge Eval');
-
-
-	// Designed to be run in GitPod
-	let userid = process.env.GITPOD_WORKSPACE_ID ?? ("autogen-id-" + hostname)
+	const userid = await getUserId(context);
 	var logger = new Logger(userid);
 
-	
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
+
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
 
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 		const editor = vscode.window.activeTextEditor;
-
-
-		const fileURI = vscode.window.activeTextEditor.document.uri;
+		const fileURI = editor.document.uri;
 		const filepath = fileURI.fsPath;
-		
+
+
+		const runId = uuidv4();
+
+		forgeOutput.clear();
+		forgeOutput.show();
+
 		// always auto-save before any run
-		if (!vscode.window.activeTextEditor.document.save())
+		if (!editor.document.save())
 		{
 			console.error(`Could not save ${filepath}`);
+			return null;
 		}
-
 
 		// try to only run active forge file
 		if (filepath.split(/\./).pop() !== 'frg') {
@@ -206,24 +160,22 @@ export function activate(context: ExtensionContext) {
 			return;
 		}
 
-		// if existing racket, kill it first
-		killRacket(false);
-
-		forgeOutput.clear();
-		forgeOutput.show();
-
-		//Write to output.
 		forgeOutput.appendLine(`Running file "${filepath}" ...`);
+		let racketProcess = racket.runFile(filepath);
 
-		racket = spawn('racket', [`"${filepath}"`], { shell: true });
-		if (!racket) {
-			console.error('Cannot spawn Racket process');
+		if (!racketProcess) {
+
+			const log = textDocumentToLog(editor.document, true);
+			log['error'] = 'Cannot spawn Forge process';
+			log['runId'] = runId;
+
+			logger.log_payload(log, LogLevel.ERROR, Event.FORGE_RUN);
+
+			console.error('Cannot spawn Forge process');
 		}
 
-		racket.stdout.on('data', (data: string) => {
-			// forgeOutput.appendLine(data);
+		racketProcess.stdout.on('data', (data: string) => {
 			const lst = data.toString().split(/[\n]/);
-			// console.log(lst, lst.length);
 			for (let i = 0; i < lst.length; i++) {
 				// this is a bit ugly but trying to avoid confusing students
 				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
@@ -235,46 +187,54 @@ export function activate(context: ExtensionContext) {
 		});
 
 		let myStderr = '';
-		racket.stderr.on('data', (err: string) => {
-			// forgeOutput.appendLine(err);
+		racketProcess.stderr.on('data', (err: string) => {
 			myStderr += err;
 		});
 
-		racket.on('exit', (code: string) => {
-			if (!racketKilledManually) {
+		racketProcess.on('exit', (code: string) => {
+			
+
+
+			// This isn't showing anything.
+			if (!racket.racketKilledManually) {
 				if (myStderr !== '') {
-					// forgeOutput.appendLine(myStderr);
-					// console.log(myStderr);
-					sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
+					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
+					this.userFacingOutput.appendLine(myStderr);
 				} else {
-					showFileWithOpts(fileURI.fsPath, null, null);
-					forgeOutput.appendLine('Finished running.');
+					this.showFileWithOpts(filepath, null, null);
+					this.userFacingOutput.appendLine('Finished running.');
 				}
 			} else {
-				showFileWithOpts(fileURI.fsPath, null, null);
-				forgeOutput.appendLine('Forge process terminated.');
+				this.showFileWithOpts(filepath, null, null);
+				this.userFacingOutput.appendLine('Forge process terminated.');
 			}
-			racketKilledManually = false;
+
+			var payload = {
+				"output" : this.userFacingOutput.getText(),
+				"runId" : runId 
+			}
+			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
 		});
 
 
-		/* Logging *******/
 
 
 		if (isLoggingEnabled && editor) {
-							 
+				 
 			const documentData = vscode.workspace.textDocuments.map((d) => {
 				const focusedDoc = (d === editor.document);
 				return textDocumentToLog(d, focusedDoc);
-			});
+			}).filter((data) => Object.keys(data).length > 0);
+			
 
-			logger.log_payload(documentData, LogLevel.INFO);
+			documentData['runId'] = runId;
+
+			logger.log_payload(documentData, LogLevel.INFO, Event.FORGE_RUN);
 		}
-		/* ******end logging **********/
 	});
 
 	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
-		killRacket(true);
+		racket.kill(true);
 	});
 
 
@@ -288,7 +248,47 @@ export function activate(context: ExtensionContext) {
 		vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', false);
 	});
 
-	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, forgeEvalDiagnostics);
+
+	const halp = vscode.commands.registerCommand('forge.halp', () => {
+		halpOutput.clear();
+		halpOutput.show();
+		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
+
+		if (!isLoggingEnabled) {
+			halpOutput.appendLine('❗🐸❗ I can only be used if logging is enabled.');
+			return;
+		}
+
+		halpOutput.appendLine('🐸: Analyzing your tests...');
+		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
+
+		const editor = vscode.window.activeTextEditor;
+
+		if (!editor) {
+			halpOutput.appendLine('❗🐸❗ No active editor. Please open a .frg file.');
+			return;
+		}
+		const document = editor.document;
+		const content = document.getText();
+		const fileName = document.fileName;
+		
+		if (fileName.endsWith('.test.frg')) {
+			var h = new HalpRunner(logger);
+			h.runHalp(content, fileName)
+				.then((result) => {
+					// TODO: Move this log to inside the HalpRunner
+					var documentData = textDocumentToLog(document, true);
+					documentData['halp_output'] = result;
+					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
+					halpOutput.appendLine("💡🐸💡 " + result);
+				});
+		} else {
+			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');
+		}
+	});
+
+	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
+								 forgeOutput, halpOutput);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 
@@ -339,6 +339,6 @@ export function deactivate(): Thenable<void> | undefined {
 		return undefined;
 	}
 	// kill racket process
-	killRacket(false);
+	racket.kill(false);
 	return client.stop();
 }

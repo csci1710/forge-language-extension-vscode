@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "1.0.1",
+	"version": "2.0.2",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -88,11 +88,18 @@
 			},
 			{
 				"command": "forge.enableLogging",
-				"title": "Enable Logging"
+				"title": "Enable Logging",
+				"icon": "$(eye-closed)"
 			},
 			{
 				"command": "forge.disableLogging",
-				"title": "Disable Logging"
+				"title": "Disable Logging",
+				"icon": "$(eye)"
+			},
+			{
+				"command": "forge.halp",
+				"title": "Ask Toadus Ponens!",
+				"icon":  "./client/images/toadus.png"
 			}
 		],
 		"menus": {
@@ -110,14 +117,18 @@
 				{
 					"command": "forge.enableLogging",
 					"when": "!forge.isLoggingEnabled && (editorLangId == forge)",
-					"group": "navigation"
+					"group": "navigation"					
 				},
 				{
 					"when": "forge.isLoggingEnabled && (editorLangId == forge)",
 					"command": "forge.disableLogging",
 					"group": "navigation"
+				},
+				{
+					"command": "forge.halp",
+					"when": "editorLangId == forge",
+					"group": "navigation"
 				}
-
 			]
 		}
 	},
@@ -142,6 +153,8 @@
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
-		"glob": "^8.1.0"
+		"glob": "^8.1.0",
+		"vscode-languageserver": "^9.0.1",
+		"vscode-languageserver-textdocument": "^1.0.11"
 	}
 }
