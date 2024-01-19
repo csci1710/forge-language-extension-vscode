@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { 
 	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
-	findAllExamples, exampleToPred, getSigList
+	findAllExamples, exampleToPred, getSigList, getPredList, findExampleByName
 
 
 } from './forge-utilities'; 
@@ -335,11 +335,13 @@ please fill out this form: ${formurl}`;
 	// w_o : wheat output
 	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
 
-		const matchingExamples = findAllExamples(studentTests).filter(example => example.exampleName === testName);
-		const failedExample = matchingExamples[0];
+		// const matchingExamples = findAllExamples(studentTests).filter(example => example.exampleName == testName);
+		// const failedExample = matchingExamples[0];
+
+		const failedExample = findExampleByName(studentTests, testName);
 
 		const sigNames = getSigList(w);
-		const wheatPredNames = [];
+		const wheatPredNames = getPredList(w);
 
 		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
 		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";

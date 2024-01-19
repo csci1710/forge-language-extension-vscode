@@ -184,6 +184,20 @@ export function getSigList(s : string) : string[] {
 	return sigNames;
 }
 
+// TODO: What about predicates that have [] in them?
+export function getPredList(fileContent: string): string[] {
+	const predicateRegex = /pred\s+(\w+)(\s|\{|\[)/g;
+	const predicates: string[] = [];
+	let match;
+
+	while ((match = predicateRegex.exec(fileContent)) !== null) {
+		const predicateName = match[1];
+		predicates.push(predicateName);
+	}
+
+	return predicates;
+}
+
 
 /*
 example diagonalPasses is {some brd: Board | winningDiag[brd, X] } for {
@@ -202,7 +216,7 @@ export function findAllExamples(fileContent : string) {
     let match;
     let examples = [];
 
-    while ((match = exampleRegex.exec(fileContent)) !== null) {
+    while ((match = exampleRegex.exec(fileContent)) != null) {
         const exampleName = match[1];
         const examplePredicate = match[2].trim();
         const exampleBody = match[3].trim();
@@ -216,6 +230,29 @@ export function findAllExamples(fileContent : string) {
 
     return examples;
 }
+
+
+// Write a function to find a specific example
+// Finds a specific example by name
+export function findExampleByName(fileContent : string, exampleName: string) {
+	
+	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*)}`);
+	const match = exampleRegex.exec(fileContent);
+
+	if (match == null) {
+		return null;
+	}
+
+	const examplePredicate = match[1].trim();
+	const exampleBody = match[2].trim();
+
+	return {
+		exampleName,
+		examplePredicate,
+		exampleBody
+	};
+}
+
 
 // Converts an example to a predicate reflecting the characteristics of the example.
 export function exampleToPred(example, sigNames: string[], wheatPredNames : string[] ) : string {
@@ -308,23 +345,4 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		`;
 
 	return exampleAsPred;
-
-	// Now we have sufficiency: sigExpressions => examplePredicate 
-
-	// Now, how do we translate this to intent/ wheat
-
-	
-	return "";
-	}
-
-	// (what do we do for negative examples that have failed the wheat? Well, the hint is clear : this *is* an instance.)
-	
-	// Now we have sufficiency: p_bounds => p 
-
-	// Now, how do we translate this to intent/ wheat
-
-
-
-
-	return "";
 }
