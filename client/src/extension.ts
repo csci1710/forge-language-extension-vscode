@@ -28,16 +28,18 @@ const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge 
 // TODO: This is broken
 async function getUserId(context) {
 	const UID_KEY = "FORGE_UID";
+	
 	try
 	{
-		var z = await  context.secrets.get(UID_KEY);
-		return z.toString();
+		var uid = await  context.secrets.get(UID_KEY);
+		return uid.toString();
 	}
 	catch {
-		const uid = uuidv4().toString();
+		uid = uuidv4().toString();
 		await context.secrets.store(UID_KEY, uid);
-		return uid;
 	}
+	forgeOutput.appendLine(`You anonymous ID is ${uid}`);
+	return uid;
 }
 
 
