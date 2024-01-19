@@ -55,20 +55,6 @@ export class HalpRunner {
 			return `Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
 			
-			/*
-				This is where we could (would?) add some sort of metric around thoroughness.
-
-				1. We could check coverage of their tests against the wheat (somehow). 
-					Cons: We don't care about the parts of the wheat that are not super important to the problem.
-				
-				2. We could straight up *count* the number of tests. Is every predicate in the solution covered?
-					-- This seems overly constrictive, we would also have to identify (somehow) every exported predicate in
-					the wheat.
-				
-
-			*/
-
-
 			// TODO: Can we add some sort of thoroughness metric?
 			/*This means that all of your tests are passing, 
 			 but you may want to add more tests to ensure your code explores more aspects of the problem.`;
@@ -76,12 +62,8 @@ export class HalpRunner {
 		}
 
 
-
-
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		const testName = this.getFailingTestName(w_o);
-
-		// TODO: Remove [abcdef-...].rkt from w_o.
 
 		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. 
 		I am better at providing more detailed feedback when analyzing assertions than examples.`;
@@ -149,8 +131,6 @@ please fill out this form: ${formurl}`;
 			If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
 		}
 		
-
-
 		return defaultFeedback;
 	}
 
@@ -299,9 +279,6 @@ please fill out this form: ${formurl}`;
 	private async tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
 
 		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
-		// We should log all the conceptual mutants we generate!!
-		// LOG w_wrapped
-
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
@@ -318,10 +295,6 @@ please fill out this form: ${formurl}`;
 		return await this.get_hint_from_autograder_output(ag_output, testFileName);
 	}
 
-
-
-
-
 	
 	// TODO: Does not play nice with parameterized predicates.
 	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
@@ -332,10 +305,6 @@ please fill out this form: ${formurl}`;
 
 		const sigNames = getSigList(w);
 		const wheatPredNames = getPredList(w);
-
-
-		
-
 
 		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
 		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";

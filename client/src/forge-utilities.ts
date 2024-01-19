@@ -308,6 +308,18 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const exampleBody = example.exampleBody;
 
 	
+	// We can do negative examples here as well.
+	//TODO:
+	/*
+		Generate the predicate for the example.
+		Modify the wheat to be 
+
+		i' {
+			i and (not s)	
+		}
+
+		Will take some munging, but can be done.
+	*/
 
 
 	if (!wheatPredNames.includes(examplePredicate)) {
