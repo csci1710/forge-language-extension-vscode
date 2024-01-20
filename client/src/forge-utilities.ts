@@ -190,7 +190,27 @@ function constrainPredicate(w : string, i : string, s : string) : string {
 	return w_wrapped + added_pred;
 }
 
-function easePredicate(w : string, i : string, s : string) : string {
+
+export function constrainPredicateByExclusion(w : string, i : string, s : string) : string {
+	const i_inner = i + "_inner";
+	// User believes that ! s => i, even thought s => i.
+	// So constrict i to be { i AND !s }
+	let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
+	let added_pred =
+		`
+		pred ${i} { 
+			${i_inner} 
+			not ${s}
+		}
+		`
+	return w_wrapped + added_pred;
+}
+
+
+
+
+
+export function easePredicate(w : string, i : string, s : string) : string {
 	const i_inner = i + "_inner";
 	// User believes that s => i (ie if s then i)
 	// So ease i to be { i or s }
@@ -308,35 +328,13 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const exampleBody = example.exampleBody;
 
 	
-	// We can do negative examples here as well.
-	//TODO:
-	/*
-		Generate the predicate for the example.
-		Modify the wheat to be 
-
-		i' {
-			i and (not s)	
-		}
-
-		Will take some munging, but can be done.
-	*/
-
-
 	if (!wheatPredNames.includes(examplePredicate)) {
-		// examplePred is not in wheatPredNames
-		// 	// (what do we do for negative examples that have failed the wheat? Well, the hint is clear : this *is* an instance.)
-
 		// Cannot really provide help for now :(
-			throw new Error("Some message about how we cannot help unless it is a positive example explicitly testing a predicate defined in the assignment.");
+		throw new Error("Some message about how we cannot help unless it is a positive example explicitly testing a predicate defined in the assignment.");
 	}
 
-	// examplePred directly tests a wheat predicate
 
-	// Returns a list of form :  [{variable: 'Board', value: '`Board0'}]
-
-	// TODO: This has a bug. It puts everything in assignments. What if they are not in assignments?
 	function extractAssignments() {
-
 
 		function assignmentContinued(x)  {
 			let t = x
@@ -345,13 +343,11 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 					.replace(/\{/g, "")
 					.replace(/\}/g, "")
 					.trim();
-
 			return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
 		}
 
 		// Split the instance string into lines
 		const lines = exampleBody.split('\n');
-		
 		let expressions = [];
 		let assignments = [];
 		
@@ -373,28 +369,14 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			{
 				assignments.push({...currentAssignment});
 				if (/^\s*\w+\s*=/.test(line)) {
-
-					// If we are in the middle of an assignment, add the previous assignment to the list
-					// Do we want this test here though?
-					// if (isAssignmentContinued) {
-					// 	// Add the previous assignment to the list
-					// 	
-					// }
-					// Start a new assignment
 					let parts = line.split('=');
 					currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
 				} else {
-
 					expressions.push(line);
-
 				}
 			}
 		});
 	
-
-		// BUT WHAT IF THE ASSIGNMENT IS NOT IN THE SIG LIST?
-
-		
 		// Add the last assignment if there is one
 		if (isAssignmentContinued) {
 			assignments.push({...currentAssignment});
@@ -403,13 +385,6 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		return [assignments, expressions];
 	}
 
-
-
-
-	// Converts every sig assignment into a predicate	
-	// But what about the explicit relations here. We want to capture those too.
-	// Node = `A + `B should become:
-	// some disj a, b : Node | Node = a + b 
 	function sigToExpr(assignment) {
 		const atom_name = assignment.variable;
 		var atom_rhs = assignment.value.replace(/`/g, '');
@@ -427,8 +402,6 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		var quantifier = "";
 		var constraint = "";
 		if (atom_rhs_comma_sep != '') {
-
-
 		 quantifier = sigNames.includes(atom_name) ? `some disj ${atom_rhs_comma_sep} : ${atom_name} | {\n` : '';
 		 constraint = `${atom_name} = ${atom_rhs}`;
 		}
@@ -437,7 +410,6 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			quantifier,
 			constraint
 		};
-
 	}
 
 	
@@ -445,9 +417,6 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 	// All the expressions go on the outside.
 	const expressionString = expressions.join('\n');
-
-
-
 	const sigExpressions = assignments.map(sigToExpr);
 
 	const sigQuantifiers = sigExpressions.map(a => a.quantifier).filter(a => a != '');
@@ -467,7 +436,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			}
 
 		*/
-	// TODO: BUG: What if the example has a some disj quantifier in its body? That would break this.
+	// TODO: ISSUE: What if the example has a some disj quantifier in its body? That would break this.
 	const exampleAsPred = `pred ${exampleName} {
 		${sigQuantifiersAsString}
 		${sigConstraints}

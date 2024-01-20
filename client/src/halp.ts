@@ -4,10 +4,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { 
 	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
-	findAllExamples, exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments
-
-
+	exampleToPred, getSigList, getPredList, findExampleByName,
+	removeForgeComments, constrainPredicateByExclusion, easePredicate
 } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
@@ -212,9 +210,6 @@ please fill out this form: ${formurl}`;
 	private async downloadFile(url: string): Promise<string>  {
 
 		const response = await fetch(url);
-
-		
-
 		if (response.ok) {
 			const t = await response.text();
 			return this.encryptor.decrypt(t);
@@ -225,10 +220,8 @@ please fill out this form: ${formurl}`;
 			return NOT_ENABLED_MESSAGE;
 		}
 		else {
-			// ERROR
-			return "";
+			return ""; 			// ERROR
 		}
-
 	}
 
 	private async getWheat(testFileName: string): Promise<string> {
@@ -286,35 +279,53 @@ please fill out this form: ${formurl}`;
 			"test_failure_message": w_o,
 			"conceptual_mutant": w_wrapped
 		}
-
 		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
-		
+		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);	
 		return await this.get_hint_from_autograder_output(ag_output, testFileName);
 	}
 
-	
-	// TODO: Does not play nice with parameterized predicates.
+	// TODO: ISSUE: Does not play nice with parameterized predicates.
 	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
-		
-		// Remove student comments as much as possible.
 		studentTests = removeForgeComments(studentTests);
-		const failedExample = findExampleByName(studentTests, testName);
-
 		const sigNames = getSigList(w);
 		const wheatPredNames = getPredList(w);
+		const failedExample = findExampleByName(studentTests, testName);
+
+		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
+		const negationRegex = /(not|!)\s+(\b\w+\b)/;
+		const isNegation = failedExample.examplePredicate.match(negationRegex);
+		
+		// Change the target predicate.
+		if (isNegation != null) {
+			failedExample.examplePredicate = isNegation[1];
+		}
 
 		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
 		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";
+		let w_with_student_preds = w + "\n" + student_preds + "\n";
 
+		var w_wrapped = "";
+		if (isNegation != null) {
+			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
+			/*
+				Modify the wheat to be 
 
-		// Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
-		// TODO:  This is a hack to re-use code. I should fix it.
-		const student_belief = `Theorem Assertion ${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate} failed.`; 
-		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, student_belief);
-		
+				i' {
+					i and (not s)	
+				}
+			*/
+			w_wrapped = constrainPredicateByExclusion(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
+		}
+
+		else {
+			// Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
+			// TODO:  This is a hack to re-use code. I should fix it.
+			const student_belief = `Theorem Assertion ${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate} failed.`; 
+			w_wrapped = w_wrapped = easePredicate(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
+		}
+
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
