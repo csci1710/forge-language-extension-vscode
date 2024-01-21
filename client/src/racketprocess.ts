@@ -7,7 +7,7 @@ export class RacketProcess {
 		
 	private childProcess: ChildProcess | null;
 	public racketKilledManually : boolean;
-	private userFacingOutput : vscode.OutputChannel;
+	public userFacingOutput : vscode.OutputChannel;
 	private evalDiagnostics : vscode.DiagnosticCollection;
 	
 
@@ -21,6 +21,7 @@ export class RacketProcess {
 
 
 	runFile(filePath : string) : ChildProcess | null {
+
 		// always auto-save before any run
 		if (!vscode.window.activeTextEditor.document.save())
 		{
@@ -29,12 +30,13 @@ export class RacketProcess {
 		}
 
 		this.kill(false);
+		this.racketKilledManually = false;
+
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
 
-
-		this.childProcess.on('exit', (code: string) => {
-			this.racketKilledManually = false;
-		});
+		// this.childProcess.on('exit', (code: string) => {
+		// 	//this.racketKilledManually = false;
+		// });
 		return this.childProcess
 	}
 
