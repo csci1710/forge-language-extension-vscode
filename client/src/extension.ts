@@ -187,8 +187,8 @@ export async function activate(context: ExtensionContext) {
 		racketProcess.on('exit', (code: string) => {
 			if (!racket.racketKilledManually) {
 				if (myStderr != '') {
-					racket.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
-					racket.userFacingOutput.appendLine(myStderr);
+					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
+					//racket.userFacingOutput.appendLine(myStderr);
 				} else {
 					racket.showFileWithOpts(filepath, null, null);
 					racket.userFacingOutput.appendLine('Finished running.');
@@ -198,6 +198,7 @@ export async function activate(context: ExtensionContext) {
 				racket.userFacingOutput.appendLine('Forge process terminated.');
 			}
 
+			// Output *may* have user file path in it. Do we want this?
 			var payload = {
 				"output-errors" : myStderr,
 				"runId" : runId 
