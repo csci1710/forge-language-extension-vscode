@@ -190,7 +190,6 @@ function constrainPredicate(w : string, i : string, s : string) : string {
 	return w_wrapped + added_pred;
 }
 
-
 export function constrainPredicateByExclusion(w : string, i : string, s : string) : string {
 	const i_inner = i + "_inner";
 	// User believes that ! s => i, even thought s => i.
@@ -206,10 +205,6 @@ export function constrainPredicateByExclusion(w : string, i : string, s : string
 	return w_wrapped + added_pred;
 }
 
-
-
-
-
 export function easePredicate(w : string, i : string, s : string) : string {
 	const i_inner = i + "_inner";
 	// User believes that s => i (ie if s then i)
@@ -224,15 +219,8 @@ export function easePredicate(w : string, i : string, s : string) : string {
 	return w_wrapped + added_pred;
 }
 
-
-
-
-
-
 export function getSigList(s : string) : string[] {
-	var pattern = /\bsig\s+(\w+)/g;
-
-    // Find all matches in the text
+	const pattern = /\bsig\s+(\w+)/g;
     var matches = [];
     var match;
     while ((match = pattern.exec(s)) !== null) {
@@ -255,21 +243,9 @@ export function getPredList(fileContent: string): string[] {
 	return predicates;
 }
 
-
-/*
-example diagonalPasses is {some brd: Board | winningDiag[brd, X] } for {
-  Board = `Board0
-  X = `X0 
-  O = `O0
-  A = `A0 
-  B = `B0 
-  C = `C0
-  inverse = A->C + B->B + C->A
-  places = Board -> (A -> A + B -> B + C -> C ) -> X
-}
-*/
 export function findAllExamples(fileContent : string) {
-    const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/;
+	// TODO: A language server would help us not have to write these long (possibly buggy) regexes.
+	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/;
     let match;
     let examples = [];
 
@@ -284,21 +260,17 @@ export function findAllExamples(fileContent : string) {
             exampleBody
         });
     }
-
     return examples;
 }
 
 
-// Write a function to find a specific example
-// Finds a specific example by name
 export function findExampleByName(fileContent : string, exampleName: string) {
 	
-	// NEED TO FIGURE OUT HOW TO PARSE MULTIPLE EXAMPLES! This is super hacky and slow.
-
+	// HACK: We first isolate examples and then parse the correct one because I was
+	// having trouble with the regex. A language server would help.
 	const all_examples = findForgeExamples(fileContent);
 	const r = new RegExp(`\\b${exampleName}\\b`);
 	var to_search = all_examples.filter(e => r.test(e))[0];
-
 
 	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*)}`);
 	const match = exampleRegex.exec(to_search);
@@ -309,7 +281,6 @@ export function findExampleByName(fileContent : string, exampleName: string) {
 
 	const examplePredicate = match[1].trim();
 	const exampleBody = match[2].trim();
-
 	return {
 		exampleName,
 		examplePredicate,
@@ -327,26 +298,20 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const examplePredicate = example.examplePredicate;
     const exampleBody = example.exampleBody;
 
-	
 	if (!wheatPredNames.includes(examplePredicate)) {
-		// Cannot really provide help for now :(
-		throw new Error("Some message about how we cannot help unless it is a positive example explicitly testing a predicate defined in the assignment.");
+		throw new Error("I provide feedbacl unless your example explicitly tests a predicate defined in the assignment.");
 	}
 
 
 	function extractAssignments() {
 
-		function assignmentContinued(x)  {
-			let t = x
-					.replace(/\(/g, "")
-					.replace(/\)/g, "")
-					.replace(/\{/g, "")
-					.replace(/\}/g, "")
-					.trim();
+		function assignmentContinued(x : string)  {
+			let t = x.replace(/\(/g, "").replace(/\)/g, "")
+					.replace(/\{/g, "").replace(/\}/g, "").trim();
 			return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
 		}
 
-		// Split the instance string into lines
+
 		const lines = exampleBody.split('\n');
 		let expressions = [];
 		let assignments = [];
@@ -360,10 +325,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			if (line === '') return; // Skip empty lines
 	
 			isAssignmentContinued = assignmentContinued(line);
-
-
 			if (isAssignmentContinued) {
-				// Continuation of the current assignment
 				currentAssignment.value += ' ' + line.trim();
 			} else
 			{
@@ -377,11 +339,9 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			}
 		});
 	
-		// Add the last assignment if there is one
 		if (isAssignmentContinued) {
 			assignments.push({...currentAssignment});
 		}
-	
 		return [assignments, expressions];
 	}
 
@@ -418,23 +378,19 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 	// All the expressions go on the outside.
 	const expressionString = expressions.join('\n');
 	const sigExpressions = assignments.map(sigToExpr);
-
 	const sigQuantifiers = sigExpressions.map(a => a.quantifier).filter(a => a != '');
 	const sigQuantifiersAsString = sigQuantifiers.join("\n");
 	const sigConstraints = sigExpressions.map(a => a.constraint).join("\n");
 	const sigAssignmentsPostfix = '}'.repeat(sigQuantifiers.length) + "\n";
-
 
 	// We need to put ALL the assignments on sigs on the outside, and then expressions and relations inside.
 		/*
 			some disj ${atom_rhs_comma_sep} : ${atom_name} | {
 				${atom_name} = ${atom_rhs}
 					.... etc
-
 				expressions
 				relations
 			}
-
 		*/
 	// TODO: ISSUE: What if the example has a some disj quantifier in its body? That would break this.
 	const exampleAsPred = `pred ${exampleName} {
@@ -446,4 +402,3 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 	return exampleAsPred;
 }
-

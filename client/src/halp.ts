@@ -36,8 +36,6 @@ export class HalpRunner {
 	}
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
-
-		
 		studentTests = studentTests.replace(/\r/g, "\n");
 
 		const w = await this.getWheat(testFileName);
@@ -52,19 +50,13 @@ export class HalpRunner {
 		if (w_o == "") {
 			return `Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
-			
-			// TODO: Can we add some sort of thoroughness metric?
-			/*This means that all of your tests are passing, 
-			 but you may want to add more tests to ensure your code explores more aspects of the problem.`;
-			 */
+			// TODO: Can we add some sort of thoroughness metric here?
 		}
-
 
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		const testName = this.getFailingTestName(w_o);
 
-		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. 
-		I am better at providing more detailed feedback when analyzing assertions than examples.`;
+		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. I am better at providing more detailed feedback when analyzing assertions than examples.`;
 
 		const defaultFeedback = `I found a runtime or syntax error in your tests:
 ${w_o}`;
@@ -72,7 +64,6 @@ ${w_o}`;
 			return defaultFeedback;
 		}
 
-		
 		if (example_regex.test(w_o)) {
 
 			// Fundamentally the issue is that the characteristic predicate from a 
@@ -85,9 +76,7 @@ ${w_o}`;
 					return `${testName} is not consistent with the problem specification. ` + hint;
 				}
 			}
-			catch (e) {
-			}
-
+			catch (e) {}
 			return w_o + assertionsBetter;
 		}
 		if (assertion_regex.test(w_o)) {
@@ -126,7 +115,7 @@ please fill out this form: ${formurl}`;
 		}
 		else if (test_regex.test(w_o)) {
 			return `Sorry! I cannot provide feedback around the test "${testName}".
-			If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
+If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
 		}
 		
 		return defaultFeedback;
@@ -138,16 +127,12 @@ please fill out this form: ${formurl}`;
 		const forgeOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
-
 		const toRun = this.combineTestsWithModel(model, tests);
 
 		// Write the contents of toRun to a temporary file
 		const tempFilePath = this.tempFile();
 		try {
 			fs.writeFileSync(tempFilePath, toRun);
-
-			console.log(__dirname);
-
 			// Need to examine and interpret results here.
 			let r = racket.runFile(tempFilePath);
 
@@ -156,24 +141,20 @@ please fill out this form: ${formurl}`;
 				return "Toadus Ponens run failed."
 			}
 
-
 			let stdoutput = "";
 			r.stdout.on('data', (data: string) => {
 				stdoutput += data;
 			});
 
 			let stderrput = "";
-
 			r.stderr.on('data', (err: string) => {
 				stderrput += err;
 			});
 
-			// wait till r exits
+
 			await new Promise((resolve) => {
 				r.on('exit', resolve);
 			});
-			
-
 			return stderrput;
 		} finally {
 			// Delete the temporary file in the finally block
@@ -299,32 +280,18 @@ please fill out this form: ${formurl}`;
 		
 		// Change the target predicate.
 		if (isNegation != null) {
-			failedExample.examplePredicate = isNegation[1];
+			failedExample.examplePredicate = isNegation[2];
 		}
 
 		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
 		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";
 		let w_with_student_preds = w + "\n" + student_preds + "\n";
-
-		var w_wrapped = "";
-		if (isNegation != null) {
+		const w_wrapped =  (isNegation != null) ?
 			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
-			/*
-				Modify the wheat to be 
-
-				i' {
-					i and (not s)	
-				}
-			*/
-			w_wrapped = constrainPredicateByExclusion(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
-		}
-
-		else {
-			// Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
-			// TODO:  This is a hack to re-use code. I should fix it.
-			const student_belief = `Theorem Assertion ${failedExample.exampleName} is sufficient for ${failedExample.examplePredicate} failed.`; 
-			w_wrapped = w_wrapped = easePredicate(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
-		}
+			// Modify the wheat to be i' {	i and (not s)	}
+			constrainPredicateByExclusion(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName)
+			// OR Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
+			: easePredicate(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
 
 		const payload = {
 			"testFileName": testFileName,
