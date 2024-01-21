@@ -186,20 +186,20 @@ export async function activate(context: ExtensionContext) {
 
 		racketProcess.on('exit', (code: string) => {
 			if (!racket.racketKilledManually) {
-				if (myStderr !== '') {
-					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
-					this.userFacingOutput.appendLine(myStderr);
+				if (myStderr != '') {
+					racket.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);
+					racket.userFacingOutput.appendLine(myStderr);
 				} else {
-					this.showFileWithOpts(filepath, null, null);
-					this.userFacingOutput.appendLine('Finished running.');
+					racket.showFileWithOpts(filepath, null, null);
+					racket.userFacingOutput.appendLine('Finished running.');
 				}
 			} else {
-				this.showFileWithOpts(filepath, null, null);
-				this.userFacingOutput.appendLine('Forge process terminated.');
+				racket.showFileWithOpts(filepath, null, null);
+				racket.userFacingOutput.appendLine('Forge process terminated.');
 			}
 
 			var payload = {
-				"output" : this.userFacingOutput.getText(),
+				"output-errors" : myStderr,
 				"runId" : runId 
 			}
 			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
