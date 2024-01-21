@@ -31,17 +31,15 @@ async function getUserId(context) {
 	
 	try
 	{
-		var uid = await  context.secrets.get(UID_KEY);
-		return uid.toString();
+		var uid = await context.secrets.get(UID_KEY).toString();
 	}
 	catch {
 		uid = uuidv4().toString();
 		await context.secrets.store(UID_KEY, uid);
 	}
-	forgeOutput.appendLine(`You anonymous ID is ${uid}`);
+	forgeOutput.appendLine(`Your anonymous ID is ${uid}.`);
 	return uid;
 }
-
 
 let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
@@ -58,8 +56,6 @@ function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnost
 }
 
 // TODO: Want to make this an extension method on TextDocument, but cannot wrangle it.
-
-
 function textDocumentToLog(d, focusedDoc) {
 	const content = d.getText();
 	const filePath = d.isUntitled ? "untitled" : d.fileName;
@@ -139,8 +135,6 @@ export async function activate(context: ExtensionContext) {
 		const editor = vscode.window.activeTextEditor;
 		const fileURI = editor.document.uri;
 		const filepath = fileURI.fsPath;
-
-
 		const runId = uuidv4();
 
 		forgeOutput.clear();
@@ -170,7 +164,6 @@ export async function activate(context: ExtensionContext) {
 			log['runId'] = runId;
 
 			logger.log_payload(log, LogLevel.ERROR, Event.FORGE_RUN);
-
 			console.error('Cannot spawn Forge process');
 		}
 
@@ -192,10 +185,6 @@ export async function activate(context: ExtensionContext) {
 		});
 
 		racketProcess.on('exit', (code: string) => {
-			
-
-
-			// This isn't showing anything.
 			if (!racket.racketKilledManually) {
 				if (myStderr !== '') {
 					this.sendEvalErrors(myStderr, fileURI, this.evalDiagnostics);

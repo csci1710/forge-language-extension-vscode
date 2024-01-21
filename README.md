@@ -44,10 +44,35 @@ HALp is a 24 hour TA for the course, that helps students understand why their te
 
 If a test fails and:
 
--  is an example, HALp lets users know that the example is invalid.
--  is a general `test expect``, HALp offers no help.
--  is an assertion, HALp leverages the structure of implications to generate a mutation of the `wheat` that reflects the misconception embodied in the failing assertion. 
-   -  This is then run against an auto-grader, whose results are used to generate feedback.
+### Is an example, 
+
+We are able to add hinting for examples that directly reference a wheat predicate (or its negation). We default to basic feedback (valid vs invalid) in all other cases.
+
+1. We first generate a characteristic predicate for the wheat failing example (`e`). We do this by first separating the example into bounds imposed on (ie explicit assignments on) sigs, bounds imposed on relations (ie explicit assignments on relations), and expressions.  We then construct a characteristic predicate `s` as follows:
+
+	- Each sig assignment of the form `X = X1 + X2` is converted to an existentially quantified expression : `some disj X1, X2 : X | `. 
+	- All relational and expression-based assignments are placed inside these existential quantifiers.
+
+2. We then modify the wheat `i` to a new predicate `i'` reflecting student belief as follows:
+   - If `e` is a positive example, `i'` represents an easing of `i`. That is: `i' = {i OR s}`.
+   - If `e` is a negative example, `i'` represents a constriction of `i`. That is: `i' = {i AND !s}`
+
+We replace `i` with `i'` in the wheat, which is then run against an auto-grader, whose results are used to generate feedback.
+
+### Is an assertion
+
+We leverage the structure of implications to generate a mutation of the `wheat` that reflects the misconception embodied in the failing assertion.
+Assertions are bound to 2 forms:
+
+1. Student believes their predicate (`s`) implies an instructor predicate (`i`). We create a mutation of `i`, `i' =  { i or s }`
+
+2. Student believes an instructor predicate (`i`) implies their predicate (`s`). We create a mutation of `i`, `i' =  { i and s }`
+
+We replace `i` with `i'` in the wheat, which is then run against an auto-grader, whose results are used to generate feedback.
+
+### Is a general `test expect`
+We offer no help
+
 
 In doing so, HALp does not focus on every potential mismatch between the `wheat` and the student's tests. Rather, it focuses on those deemed important by the instructor (as reflected in the autograder), and uses those to generate feedback.
 

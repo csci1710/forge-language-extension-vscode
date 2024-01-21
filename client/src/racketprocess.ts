@@ -31,7 +31,7 @@ export class RacketProcess {
 		this.kill(false);
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
 
-		// This is broken. Need to understand and fix.
+
 		this.childProcess.on('exit', (code: string) => {
 			this.racketKilledManually = false;
 		});
