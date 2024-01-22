@@ -14,15 +14,7 @@ import { SymmetricEncryptor } from './encryption-util';
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
 
 /*
-	HALP currently does not work with obfuscated wheats. Can we do some simple hiding here?
-	(wheats on server are encrypted, and then are decrypted *in memory* here?)
-
 	Potential issues : Name clash between student files and grader files.
-
-	Should we present this as a 'Smart TA' rather than a hinting mechanism? Examplar
-	hinting suggests students perhaps don't want to *ask* for hints? Pride?
-
-	Perhaps the name of the frog that backs the course? Could list it on the course page.
 */
 
 export class HalpRunner {

@@ -80,6 +80,20 @@ Feedback on failing tests currently has to be instructor-provided. We suggest ph
 
 Logo available under creative commons : https://www.rawpixel.com/image/6864843/vector-sticker-public-domain-green
 
+### Logging
+
+| Event              | LogLevel | What is Logged                                                                                         | Triggered by  | Research Need                                                                        | Possible threats                                                                                                       |
+| ------------------ | -------- | ------------------------------------------------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| FORGE_RUN          | ERROR    | Open .frg file contents and error message                                                              | forge.RunFile | Maintainance -- logging forge launch failures                                        | None, beyond students leaking any information within their frg file.                                                   |
+| FORGE_RUN_RESULT   | INFO     | RunId, and any errors on run                                                                           | forge.RunFile | Understanding student errors, can be correlated using RunId with Forge               | Error messages may include local paths on the student machine, students leaking any information within their frg file. |
+| FORGE_RUN          | INFO     | RunId, contents of all .frg files open in VSCode                                                       | forge.RunFile | Record of what students run helps us understand student behavior.                    | None, beyond students leaking any information within their frg file.                                                   |
+| ASSISTANCE_REQUEST | INFO     | {}                                                                                                     | forge.halp    | Understand frequency of when Toadus Ponens is invoked                                | None obvious                                                                                                           |
+| HALP_RESULT        | INFO     | Open .test.frg contents, Toadus Ponens output presented to student                                     | forge.halp    | Understand the results students get from Toadus ponens.                              | None, beyond students leaking any information within their frg file.                                                   |
+| AMBIGUOUS_TEST     | INFO     | Test file name, student tests, Forge output when test was run against the wheat                        | forge.halp    | Log test that may be in a space left ambiguous by the problem                        | Error messages may include local paths on the student machine, students leaking any information within their frg file. |
+| FILE_DOWNLOAD      | ERROR    | Url of file being requested                                                                            | forge.halp    | Maintainance, understanding if students tried to use Toadus for other assignments    | None obvious                                                                                                           |
+| CONCEPTUAL_MUTANT  | INFO     | <br>"testFileName","assignment", "student test file name", test_failure_message, conceptual_mutant<br> | forge.Halp    | Understand, store conceptual mutants produced by Toadus from assertions and examples | Error messages may include local paths on the student machine, students leaking any information within their frg file. |
+
+
 ### TODO
 
 - HALP ignores bounds on tests, which may be complicated.
