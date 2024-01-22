@@ -19,7 +19,7 @@ const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assi
 
 export class HalpRunner {
 
-	static WHEATSTORE = "https://sidprasad.github.io/dirtree";
+	static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles";
 	logger : Logger;
 	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
 
