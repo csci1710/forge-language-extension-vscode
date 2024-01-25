@@ -312,6 +312,6 @@ If you want feedback around other tests you have written, you will have to tempo
 		if (tName in hint_map) {
 			return hint_map[tName];
 		}
-		throw new Error("Something went wrong when generating further feedback around this test. Please contact course staff fif you need more feedback.");
+		throw new Error("Something went wrong when generating further feedback around this test. Please contact course staff if you need more feedback.");
 	}
 }
