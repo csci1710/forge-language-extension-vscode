@@ -188,7 +188,6 @@ export async function activate(context: ExtensionContext) {
 			if (!racket.racketKilledManually) {
 				if (myStderr != '') {
 					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
-					//racket.userFacingOutput.appendLine(myStderr);
 				} else {
 					racket.showFileWithOpts(filepath, null, null);
 					racket.userFacingOutput.appendLine('Finished running.');

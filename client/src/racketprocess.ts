@@ -72,9 +72,9 @@ export class RacketProcess {
 			}
 		}
 
+		this.userFacingOutput.appendLine(text);
 		if (matcher) {
-			this.userFacingOutput.appendLine(text);
-
+			
 			const line = parseInt(matcher[2]) - 1;
 			const col = parseInt(matcher[3]) - 1;
 
