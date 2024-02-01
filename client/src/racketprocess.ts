@@ -62,6 +62,9 @@ export class RacketProcess {
 	// This is broken		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 		let errLocation: Object | null;
+
+		this.userFacingOutput.appendLine(text);
+
 		const textLines = text.split(/[\n\r]/);
 		for (let i = 0; i < textLines.length; i++) {
 			errLocation = this.matchForgeError(textLines[i]);
@@ -72,7 +75,7 @@ export class RacketProcess {
 			}
 		}
 
-		this.userFacingOutput.appendLine(text);
+		
 		if (errLocation) {
 			
 			const diagnostics: Diagnostic[] = [];
