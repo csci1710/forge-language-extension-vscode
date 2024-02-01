@@ -61,11 +61,11 @@ export class RacketProcess {
 
 	// This is broken		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
-		let matcher: RegExpMatchArray | null;
+		let errLocation: Object | null;
 		const textLines = text.split(/[\n\r]/);
 		for (let i = 0; i < textLines.length; i++) {
-			matcher = this.matchForgeError(textLines[i]);
-			if (matcher) {
+			errLocation = this.matchForgeError(textLines[i]);
+			if (errLocation) {
 				// for now stops at the first error
 				// this could be risky if there are frg files in the source code
 				break;
@@ -73,34 +73,60 @@ export class RacketProcess {
 		}
 
 		this.userFacingOutput.appendLine(text);
-		if (matcher) {
+		if (errLocation) {
 			
-			const line = parseInt(matcher[2]) - 1;
-			const col = parseInt(matcher[3]) - 1;
-
 			const diagnostics: Diagnostic[] = [];
-
-			const start = new vscode.Position(line, col);
-			const end = new vscode.Position(line, col + 1); // todo: add length?
-			const range = new vscode.Range(start, end);
 
 			const diagnostic: Diagnostic = {
 				severity: DiagnosticSeverity.Error,
-				range: range,
-				message: `Forge Evaluation Error: ${line}`,
+				range: errLocation['range'],
+				message: `Forge Evaluation Error: ${errLocation['line']}`,
 				source: 'Racket'
 			};
 			diagnostics.push(diagnostic);
 			diagnosticCollectionForgeEval.set(fileURI, diagnostics);
-			this.showFileWithOpts(fileURI.fsPath, line, col);
+			this.showFileWithOpts(fileURI.fsPath, errLocation['linenum'], errLocation['colnum']);
 		} else {
 			this.showFileWithOpts(fileURI.fsPath, null, null);
 		}
 	}
 
-	matchForgeError(line: string): RegExpMatchArray | null {
-		const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
-		return (line as string).match(forgeFileReg);
+	matchForgeError(line: string): Object | null {
+		
+		/* There are multiple types of errors that can be thrown by Forge.*/		
+		const raiseSyntaxErrorPattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
+		const raiseForgeErrorPattern = /.*\[line=(\d+), column=(\d+), offset=(\d+)\]/;
+		const generalLocPattern = /at loc: line (\d+), col (\d+), span: (\d+)/;
+
+		const raiseSyntaxErrorMatch = line.match(raiseSyntaxErrorPattern);
+		const raiseForgeErrorMatch = line.match(raiseForgeErrorPattern);
+		const generalLocMatch = line.match(generalLocPattern);
+
+		let linenum, colnum, span;
+
+		if (raiseSyntaxErrorMatch) {
+
+			linenum = parseInt(raiseSyntaxErrorMatch[2]) - 1;
+			colnum = parseInt(raiseSyntaxErrorMatch[3]) - 1;
+
+		} else if (raiseForgeErrorMatch) {
+			linenum = parseInt(raiseForgeErrorMatch[1]) - 1;
+			colnum = parseInt(raiseForgeErrorMatch[2]) - 1;
+
+		} else if (generalLocMatch) {
+			linenum = parseInt(generalLocMatch[1]) - 1;
+			colnum = parseInt(generalLocMatch[2]) - 1;
+			span = parseInt(generalLocMatch[3]) - 1; //unsure what to do with span
+		}
+		else{
+			return null;
+		}
+
+		const start = new vscode.Position(linenum, colnum);
+		const end = new vscode.Position(linenum, colnum + 1); // todo: add length?
+		const range = new vscode.Range(start, end);
+
+		return { linenum, colnum, start, end, range, line};
 	}
 	
 	showFileWithOpts(filePath: string, line: number | null, column: number | null) {
