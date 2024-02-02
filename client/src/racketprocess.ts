@@ -61,46 +61,104 @@ export class RacketProcess {
 
 	// This is broken		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
-		let matcher: RegExpMatchArray | null;
+		let errLocation: Object | null;
+
+		this.userFacingOutput.appendLine(text);
+
 		const textLines = text.split(/[\n\r]/);
 		for (let i = 0; i < textLines.length; i++) {
-			matcher = this.matchForgeError(textLines[i]);
-			if (matcher) {
+			errLocation = this.matchForgeError(textLines[i]);
+			if (errLocation) {
 				// for now stops at the first error
 				// this could be risky if there are frg files in the source code
 				break;
 			}
 		}
 
-		this.userFacingOutput.appendLine(text);
-		if (matcher) {
+		
+		if (errLocation) {
 			
-			const line = parseInt(matcher[2]) - 1;
-			const col = parseInt(matcher[3]) - 1;
-
 			const diagnostics: Diagnostic[] = [];
-
-			const start = new vscode.Position(line, col);
-			const end = new vscode.Position(line, col + 1); // todo: add length?
-			const range = new vscode.Range(start, end);
 
 			const diagnostic: Diagnostic = {
 				severity: DiagnosticSeverity.Error,
-				range: range,
-				message: `Forge Evaluation Error: ${line}`,
+				range: errLocation['range'],
+				message: `Forge Evaluation Error: ${errLocation['line']}`,
 				source: 'Racket'
 			};
 			diagnostics.push(diagnostic);
 			diagnosticCollectionForgeEval.set(fileURI, diagnostics);
-			this.showFileWithOpts(fileURI.fsPath, line, col);
+			this.showFileWithOpts(fileURI.fsPath, errLocation['linenum'], errLocation['colnum']);
 		} else {
 			this.showFileWithOpts(fileURI.fsPath, null, null);
 		}
 	}
 
-	matchForgeError(line: string): RegExpMatchArray | null {
-		const forgeFileReg = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
-		return (line as string).match(forgeFileReg);
+	matchForgeError(line: string): Object | null {
+		
+		/* There are multiple types of errors that can be thrown by Forge.*/		
+		const raiseSyntaxErrorPattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
+		const raiseForgeErrorWithFileNamePattern = /#<path:(.*?)> \[line=(\d+), column=(\d+), offset=(\d+)\]/;
+		const raiseForgeErrorPattern = /.*\[line=(\d+), column=(\d+), offset=(\d+)\]/;
+		const generalLocPattern = /at loc: line (\d+), col (\d+), span: (\d+)/;
+		const generalsrcLocPattern = /.*\(srcloc #<path:(.*?)> (\d+) (\d+) (\d+) (\d+)\)/;
+
+		const raiseSyntaxErrorMatch = line.match(raiseSyntaxErrorPattern);
+		const raiseForgeErrorWithFileNameMatch = line.match(raiseForgeErrorWithFileNamePattern);
+		const raiseForgeErrorMatch = line.match(raiseForgeErrorPattern);
+		const generalLocMatch = line.match(generalLocPattern);
+		const generalsrcLocMatch = line.match(generalsrcLocPattern);
+
+		let linenum, colnum, index;
+		let span = -1;
+		let filename = vscode.window.activeTextEditor?.document.fileName || ''; // Default to current file
+
+		if (raiseSyntaxErrorMatch) {
+			filename = raiseSyntaxErrorMatch[1];
+			linenum = parseInt(raiseSyntaxErrorMatch[2]) - 1;
+			colnum = parseInt(raiseSyntaxErrorMatch[3]) - 1;
+			index = raiseSyntaxErrorMatch.index;
+		} 
+		else if (raiseForgeErrorWithFileNameMatch) {
+			filename = raiseForgeErrorWithFileNameMatch[1];
+			linenum = parseInt(raiseForgeErrorWithFileNameMatch[2]) - 1;
+			colnum = parseInt(raiseForgeErrorWithFileNameMatch[3]) - 1;
+			index = raiseForgeErrorWithFileNameMatch.index;
+		}
+		else if (raiseForgeErrorMatch) {
+			
+			linenum = parseInt(raiseForgeErrorMatch[1]) - 1;
+			colnum = parseInt(raiseForgeErrorMatch[2]) - 1;
+			index = raiseForgeErrorMatch.index;
+
+		} 
+		else if (generalsrcLocMatch) {
+			filename = generalsrcLocMatch[1];
+			linenum = parseInt(generalsrcLocMatch[2]) - 1;
+			colnum = parseInt(generalsrcLocMatch[3]) - 1;
+			span = parseInt(generalsrcLocMatch[5]) - 1; 
+			index = generalsrcLocMatch.index;
+		}
+		
+		else if (generalLocMatch) {
+			linenum = parseInt(generalLocMatch[1]) - 1;
+			colnum = parseInt(generalLocMatch[2]) - 1;
+			span = parseInt(generalLocMatch[3]) - 1; 
+			index = generalLocMatch.index;
+		}
+		else{
+			return null;
+		}
+
+		linenum = Math.max(0, linenum);
+		colnum = Math.max(0, colnum);
+		span = Math.max(1, span);
+
+		const start = new vscode.Position(linenum, colnum);
+		const end = new vscode.Position(linenum, colnum + span); 
+		const range = new vscode.Range(start, end);
+
+		return { linenum, colnum, start, end, range, line, index, filename};
 	}
 	
 	showFileWithOpts(filePath: string, line: number | null, column: number | null) {

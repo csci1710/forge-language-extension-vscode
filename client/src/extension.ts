@@ -84,7 +84,7 @@ export async function activate(context: ExtensionContext) {
 			if (!matcher) {
 				return [];
 			} else {
-				const filename = matcher[1];
+				const filename = matcher['fileName'];
 				// verify that filename matches?
 				const filePath = vscode.window.activeTextEditor.document.uri.fsPath;
 				const filePathFilename = filePath.split(/[/\\]/).pop();
@@ -94,14 +94,14 @@ export async function activate(context: ExtensionContext) {
 					return [];
 				}
 
-				const line = parseInt(matcher[2]) - 1;
-				const col = parseInt(matcher[3]) - 1;
+				const line = matcher['linenum'];
+				const col = matcher['colnum'];
 
 				const tooltip = filePath + `:${line}:${col}`;
 				return [
 					{
-						startIndex: matcher.index,
-						length: matcher[0].length,
+						startIndex: matcher['index'],
+						length: matcher['line'].length,
 						tooltip: tooltip,
 						filePath: filePath,
 						line: line,
