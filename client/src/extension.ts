@@ -172,7 +172,7 @@ export async function activate(context: ExtensionContext) {
 			for (let i = 0; i < lst.length; i++) {
 				// this is a bit ugly but trying to avoid confusing students
 				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
-					forgeOutput.appendLine('Sterling running. Hit Stop to stop service.');
+					forgeOutput.appendLine('Sterling running. Hit "Continue" to stop service and continue execution.');
 				} else {
 					forgeOutput.appendLine(lst[i]);
 				}
@@ -226,6 +226,12 @@ export async function activate(context: ExtensionContext) {
 		racket.kill(true);
 	});
 
+	const continueRun = vscode.commands.registerCommand('forge.continueRun', () => {
+		if (!racket.continueEval()){
+			vscode.window.showErrorMessage('No active Forge process to continue.');
+		}
+	});
+
 
 	const enableLogging = vscode.commands.registerCommand('forge.enableLogging', () => {
 		context.globalState.update('forge.isLoggingEnabled', true);
@@ -276,7 +282,7 @@ export async function activate(context: ExtensionContext) {
 		}
 	});
 
-	context.subscriptions.push(runFile, stopRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
+	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
 								 forgeOutput, halpOutput);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
