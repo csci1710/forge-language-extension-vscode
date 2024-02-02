@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.1.1",
+	"version": "2.2.0",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -79,6 +79,11 @@
 				}
 			},
 			{
+				"command": "forge.continueRun",
+				"title": "Continue Forge Run",
+				"icon": "$(debug-continue)"
+			},
+			{
 				"command": "forge.stopRun",
 				"title": "Stop",
 				"icon": {
@@ -107,12 +112,17 @@
 				{
 					"when": "editorLangId == forge",
 					"command": "forge.runFile",
-					"group": "navigation"
+					"group": "navigation@0"
 				},
 				{
 					"when": "editorLangId == forge",
 					"command": "forge.stopRun",
-					"group": "navigation"
+					"group": "navigation@1"
+				},
+				{
+					"when": "editorLangId == forge",
+					"command": "forge.continueRun",
+					"group": "navigation@2"
 				},
 				{
 					"command": "forge.enableLogging",
@@ -127,7 +137,7 @@
 				{
 					"command": "forge.halp",
 					"when": "editorLangId == forge",
-					"group": "navigation"
+					"group": "navigation@3"
 				}
 			]
 		}

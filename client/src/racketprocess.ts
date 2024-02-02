@@ -33,13 +33,16 @@ export class RacketProcess {
 		this.racketKilledManually = false;
 
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
-
-		// this.childProcess.on('exit', (code: string) => {
-		// 	//this.racketKilledManually = false;
-		// });
 		return this.childProcess
 	}
 
+
+	continueEval() {
+		if (this.childProcess) {
+			return this.childProcess.stdin?.write('\n');
+		}
+		return false;
+	}
 
 	destroy() {
 		if (this.childProcess) {
