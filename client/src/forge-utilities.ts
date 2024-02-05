@@ -120,8 +120,8 @@ export function findForgeExamples(inputText) {
 }
 
 
-export const quantified_assertion_regex = /\[.*:(\d+):(\d+) \(span (\d+)\)\] Theorem .* Assertion (\w+) is (\w+) for (\w+) failed\../;
-export const assertion_regex = /Theorem Assertion (\w+) is (\w+) for (\w+) failed\./;
+export const quantified_assertion_regex = /\[.*:(\d+):(\d+) \(span (\d+)\)\]Theorem.*[ _]Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+)[ _]failed\./;
+export const assertion_regex = /Theorem Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+)[ _]failed\./;
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
 export const test_regex = /Failed test (\w+)\./;
 
