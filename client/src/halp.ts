@@ -5,7 +5,7 @@ import * as path from 'path';
 import { 
 	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
 	exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments, constrainPredicateByExclusion, easePredicate
+	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
 } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
@@ -71,6 +71,44 @@ ${w_o}`;
 			catch (e) {}
 			return w_o + assertionsBetter;
 		}
+
+		if (quantified_assertion_regex.test(w_o)) {
+
+			// Deal with quantified assertions here. Of the form:
+			const student_preds = getPredicatesOnly(studentTests); 
+			try {
+				var hint = await this.tryGetHintFromQuantifiedAssertion(studentTests, w, student_preds, w_o);
+			}
+			catch (e)
+			{
+				if (e instanceof BothPredsStudentError) {
+					return `Sorry! I cannot provide feedback around ${testName}. ` + e.message;
+				} 
+				hint = e.message;
+			}
+			if (hint != "") {
+				return `${testName} is not consistent with the problem specification. ` + hint;
+			}
+
+			const payload = {
+
+				"studentTests": studentTests,
+				"wheat_output" : w_o,
+				"testFile" : testFileName
+			}
+			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+
+			// Else, return this feedback around no hint found.
+			return `"${testName}" examines behaviors that are either ambiguous or not clearly defined in the problem specification.
+This test is not necessarily incorrect, but I cannot provide feedback around it. 
+If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
+
+If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+please fill out this form: ${formurl}`;
+
+		}
+
+
 		if (assertion_regex.test(w_o)) {
 			const student_preds = getPredicatesOnly(studentTests); 
 
@@ -224,7 +262,14 @@ If you want feedback around other tests you have written, you will have to tempo
 	}
 
 	private getFailingTestName(o: string): string {
-		if (assertion_regex.test(o)) {
+		if (quantified_assertion_regex.test(o)) {
+			const match = o.match(assertion_regex);
+			const lhs_pred = match[4];	
+			const op = match[5];
+			const rhs_pred = match[6];
+			return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
+
+		} else if (assertion_regex.test(o)) {
 			const match = o.match(assertion_regex);
 			const lhs_pred = match[1];	
 			const op = match[2];
@@ -258,6 +303,35 @@ If you want feedback around other tests you have written, you will have to tempo
 		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);	
 		return await this.get_hint_from_autograder_output(ag_output, testFileName);
 	}
+
+
+		// w : wheat
+	// w_o : wheat output
+	private async tryGetHintFromQuantifiedAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
+
+		let w_wrapped = adjustWheatToQuantifiedStudentMisunderstanding(testFileName, w, student_preds, w_o);
+		const payload = {
+			"testFileName": testFileName,
+			"assignment": testFileName.replace('.test.frg', ''),
+			"student_preds": student_preds,
+			"test_failure_message": w_o,
+			"conceptual_mutant": w_wrapped
+		}
+		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
+
+		const autograderTests = await this.getAutograderTests(testFileName);
+		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);	
+		return await this.get_hint_from_autograder_output(ag_output, testFileName);
+	}
+
+
+
+
+
+
+
+
+
 
 	// TODO: ISSUE: Does not play nice with parameterized predicates.
 	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
