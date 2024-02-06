@@ -99,12 +99,19 @@ export class RacketProcess {
 
 	matchForgeError(line: string): Object | null {
 		
-		/* There are multiple types of errors that can be thrown by Forge.*/		
+		/* There are multiple types of errors that can be thrown by Forge.*/	
+		const testFailurePattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+) \(span (\d+)\)\]/;	
 		const raiseSyntaxErrorPattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
 		const raiseForgeErrorWithFileNamePattern = /#<path:(.*?)> \[line=(\d+), column=(\d+), offset=(\d+)\]/;
 		const raiseForgeErrorPattern = /.*\[line=(\d+), column=(\d+), offset=(\d+)\]/;
 		const generalLocPattern = /at loc: line (\d+), col (\d+), span: (\d+)/;
 		const generalsrcLocPattern = /.*\(srcloc #<path:(.*?)> (\d+) (\d+) (\d+) (\d+)\)/;
+
+	
+
+
+
+
 
 		const raiseSyntaxErrorMatch = line.match(raiseSyntaxErrorPattern);
 		const raiseForgeErrorWithFileNameMatch = line.match(raiseForgeErrorWithFileNamePattern);
@@ -112,11 +119,21 @@ export class RacketProcess {
 		const generalLocMatch = line.match(generalLocPattern);
 		const generalsrcLocMatch = line.match(generalsrcLocPattern);
 
+		const generalTestFailureMatch = line.match(testFailurePattern);
+
+
+
 		let linenum, colnum, index;
 		let span = -1;
 		let filename = vscode.window.activeTextEditor?.document.fileName || ''; // Default to current file
-
-		if (raiseSyntaxErrorMatch) {
+		if (generalTestFailureMatch) {
+			filename = generalTestFailureMatch[1];
+			linenum = parseInt(generalTestFailureMatch[2]) - 1;
+			colnum = parseInt(generalTestFailureMatch[3]) - 1;
+			span = parseInt(generalTestFailureMatch[4]); 
+			index = generalTestFailureMatch.index;
+		}
+		else if (raiseSyntaxErrorMatch) {
 			filename = raiseSyntaxErrorMatch[1];
 			linenum = parseInt(raiseSyntaxErrorMatch[2]) - 1;
 			colnum = parseInt(raiseSyntaxErrorMatch[3]) - 1;
