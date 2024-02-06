@@ -283,7 +283,8 @@ If you want feedback around other tests you have written, you will have to tempo
 			return match[1];
 		} else if (test_regex.test(o)) {
 			const match = o.match(test_regex);
-			return match[1];
+			if (match[1]) return match[1];
+			return match[2]
 		} 
 		return "";
 	}

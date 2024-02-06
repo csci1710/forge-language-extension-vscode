@@ -130,7 +130,8 @@ export function findForgeExamples(inputText) {
 export const quantified_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Theorem .*_Assertion_All_(\w+)_is_(\w+)_for_(\w+)/;
 export const assertion_regex = /Theorem Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+) failed\./;
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
-export const test_regex = /Failed test (\w+)\./;
+export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
+
 
 
 // s: student pred
@@ -233,6 +234,7 @@ export function adjustWheatToQuantifiedStudentMisunderstanding(source_text : str
 
 	var failing_test = extractSubstring( source_text  , row, col, span).trim();
 
+	// Ensure this extraction works?
 	const quantifier_match = /\bassert\b(.*?)\|/;
 	const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
 	const lhs_match = /\|\s*(.*?)\s+is\b/;
