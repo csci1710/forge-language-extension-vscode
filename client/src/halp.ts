@@ -76,8 +76,11 @@ ${w_o}`;
 
 			// Deal with quantified assertions here. Of the form:
 			const student_preds = getPredicatesOnly(studentTests); 
+
+			const source_text = this.combineTestsWithModel(w, studentTests);
+
 			try {
-				var hint = await this.tryGetHintFromQuantifiedAssertion(studentTests, w, student_preds, w_o);
+				var hint = await this.tryGetHintFromQuantifiedAssertion(testFileName, source_text, w, student_preds, w_o);
 			}
 			catch (e)
 			{
@@ -263,7 +266,7 @@ If you want feedback around other tests you have written, you will have to tempo
 
 	private getFailingTestName(o: string): string {
 		if (quantified_assertion_regex.test(o)) {
-			const match = o.match(assertion_regex);
+			const match = o.match(quantified_assertion_regex);
 			const lhs_pred = match[4];	
 			const op = match[5];
 			const rhs_pred = match[6];
@@ -307,9 +310,9 @@ If you want feedback around other tests you have written, you will have to tempo
 
 		// w : wheat
 	// w_o : wheat output
-	private async tryGetHintFromQuantifiedAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
+	private async tryGetHintFromQuantifiedAssertion(testFileName: string, source_text : string, w : string, student_preds : string, w_o : string) : Promise<string> {
 
-		let w_wrapped = adjustWheatToQuantifiedStudentMisunderstanding(testFileName, w, student_preds, w_o);
+		let w_wrapped = adjustWheatToQuantifiedStudentMisunderstanding(source_text, w, student_preds, w_o);
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),

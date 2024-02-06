@@ -4,19 +4,26 @@
 */
 /* Extracts a substring from a forge file */
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
+	
+	// 1 index to 0 index
+	startRow -= 1;
+
+	//TODO: Forge output has span incorrect
+	span += 1;
+
 	// Split the text into rows
 	const rows = text.split("\n");
 	
 	// Validate if startRow and startColumn are within bounds
 	if (startRow < 1 || startRow > rows.length) {
-	  throw new Error("startRow is out of bounds.");
+	  throw new Error("Something went wrong while I was reading Forge output.");
 	}
-	if (startColumn < 1 || startColumn > rows[startRow - 1].length + 1) {
-	  throw new Error("startColumn is out of bounds.");
+	if (startColumn > rows[startRow - 1].length + 1) {
+	  throw new Error("Something went wrong while I was reading Forge output.");
 	}
 	
 	// Calculate the starting index
-	let startIndex = rows.slice(0, startRow - 1).reduce((acc, currRow) => acc + currRow.length + 1, 0) + (startColumn - 1);
+	let startIndex = rows.slice(0, startRow - 1).reduce((acc, currRow) => acc + currRow.length + 1, 0) + startColumn;
 	
 	// Extract and return the substring
 	return text.substring(startIndex, startIndex + span);
@@ -120,7 +127,7 @@ export function findForgeExamples(inputText) {
 }
 
 
-export const quantified_assertion_regex = /\[.*:(\d+):(\d+) \(span (\d+)\)\]Theorem.*[ _]Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+) failed\./;
+export const quantified_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Theorem .*_Assertion_All_(\w+)_is_(\w+)_for_(\w+)/;
 export const assertion_regex = /Theorem Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+) failed\./;
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
 export const test_regex = /Failed test (\w+)\./;
@@ -195,7 +202,7 @@ export function adjustWheatToStudentMisunderstanding(testFileName: string, w : s
 }
 
 
-export function adjustWheatToQuantifiedStudentMisunderstanding(studentTests : string, w : string, student_preds : string, w_o : string) : string {
+export function adjustWheatToQuantifiedStudentMisunderstanding(source_text : string, w : string, student_preds : string, w_o : string) : string {
 	const match = w_o.match(quantified_assertion_regex);
 	
 	const row = parseInt(match[1]);
@@ -224,11 +231,11 @@ export function adjustWheatToQuantifiedStudentMisunderstanding(studentTests : st
 	w = w + "\n" + student_preds + "\n";
 
 
-	var failing_test = extractSubstring( studentTests  , row, col, span).trim();
+	var failing_test = extractSubstring( source_text  , row, col, span).trim();
 
 	const quantifier_match = /\bassert\b(.*?)\|/;
 	const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
-	const lhs_match = /\|\b(.*?)\bis\b/;
+	const lhs_match = /\|\s*(.*?)\s+is\b/;
 	const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
 	const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
 	const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
