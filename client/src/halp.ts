@@ -9,6 +9,7 @@ import {
 } from './forge-utilities'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
+import * as os from 'os';
 
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
@@ -168,7 +169,6 @@ If you want feedback around other tests you have written, you will have to tempo
 
 	private async runTestsAgainstModel (tests: string, model: string): Promise<string> {
 
-		var x = process.cwd();
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
 		const toRun = this.combineTestsWithModel(model, tests);
@@ -203,7 +203,7 @@ If you want feedback around other tests you have written, you will have to tempo
 			return stderrput;
 		}  catch (e) {
 
-			vscode.window.showErrorMessage(`Toadus Ponens run failed. This could be because VS Code did not have permission to write a temporary file to ${x}. Full error message : ${e}`);
+			vscode.window.showErrorMessage(`Toadus Ponens run failed, perhaps be because VS Code did not have permission to write a file to your OS temp folder (${os.tmpdir()}). Consult the Toadus Ponens guide for how to modify this. Full error message : ${e}`);
 		}
 		
 		finally {
@@ -214,6 +214,7 @@ If you want feedback around other tests you have written, you will have to tempo
 
 
 	private tempFile(): string {
+		const tempDir = os.tmpdir();
 		const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		const length = 10;
 		let result = '';
@@ -223,7 +224,7 @@ If you want feedback around other tests you have written, you will have to tempo
 			result += characters.charAt(randomIndex);
 		}
 
-		return result + '.rkt';
+		return path.join(tempDir, result + '.rkt');
 	}
 
 
