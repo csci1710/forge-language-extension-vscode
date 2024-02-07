@@ -168,7 +168,7 @@ If you want feedback around other tests you have written, you will have to tempo
 
 	private async runTestsAgainstModel (tests: string, model: string): Promise<string> {
 
-
+		var x = process.cwd();
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
 		const toRun = this.combineTestsWithModel(model, tests);
@@ -181,6 +181,7 @@ If you want feedback around other tests you have written, you will have to tempo
 			let r = racket.runFile(tempFilePath);
 
 			if (!r) {
+				vscode.window.showErrorMessage("Could not run Forge process.");
 				console.error('Cannot spawn Forge process');
 				return "Toadus Ponens run failed."
 			}
@@ -200,7 +201,12 @@ If you want feedback around other tests you have written, you will have to tempo
 				r.on('exit', resolve);
 			});
 			return stderrput;
-		} finally {
+		}  catch (e) {
+
+			vscode.window.showErrorMessage(`Toadus Ponens run failed. This could be because VS Code did not have permission to write a temporary file to ${x}. Full error message : ${e}`);
+		}
+		
+		finally {
 			// Delete the temporary file in the finally block
 			fs.unlinkSync(tempFilePath);
 		}
