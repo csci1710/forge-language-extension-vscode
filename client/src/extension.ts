@@ -268,7 +268,7 @@ export async function activate(context: ExtensionContext) {
 		const fileName = document.fileName;
 		
 		if (fileName.endsWith('.test.frg')) {
-			var h = new HalpRunner(logger);
+			var h = new HalpRunner(logger, halpOutput);
 			h.runHalp(content, fileName)
 				.then((result) => {
 					// TODO: Move this log to inside the HalpRunner

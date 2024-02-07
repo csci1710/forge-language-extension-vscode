@@ -22,10 +22,21 @@ export class HalpRunner {
 	static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles";
 	logger : Logger;
 	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
+	forgeOutput: vscode.OutputChannel;
 
-	constructor(logger: Logger) {
+	constructor(logger: Logger, output: vscode.OutputChannel) {
 		this.logger = logger;
+		this.forgeOutput = output;
 	}
+
+
+
+	isConsistent(w_o: string): boolean {
+		const lines = w_o.split("\n");
+		const filteredLines = lines.filter((line) => !line.startsWith("Warning:"));
+		return filteredLines.join('').trim().length == 0;
+	}
+
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
 		studentTests = studentTests.replace(/\r/g, "\n");
@@ -39,7 +50,7 @@ export class HalpRunner {
 		}
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
-		if (w_o == "") {
+		if (this.isConsistent(w_o)) {
 			return `Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
 			// TODO: Can we add some sort of thoroughness metric here?
@@ -157,9 +168,9 @@ If you want feedback around other tests you have written, you will have to tempo
 
 	private async runTestsAgainstModel (tests: string, model: string): Promise<string> {
 
-		const forgeOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
+
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
-		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
+		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
 		const toRun = this.combineTestsWithModel(model, tests);
 
 		// Write the contents of toRun to a temporary file
@@ -210,15 +221,23 @@ If you want feedback around other tests you have written, you will have to tempo
 	}
 
 
-	private combineTestsWithModel(wheatText: string, studentTests: string) : string {
+	private combineTestsWithModel(wheatText: string, tests: string) : string {
 		// todo: What if separator doesn't exist (in that case, look for #lang forge)
 		const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+		const hashlang_decl = "#lang";
 
-		if (studentTests.includes(TEST_SEPARATOR)) {
-			const startIndex = studentTests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-			studentTests = studentTests.substring(startIndex).trim();
+		if (tests.includes(TEST_SEPARATOR)) {
+			const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+			tests = tests.substring(startIndex).trim();
 		}
-		return wheatText + "\n" + studentTests;
+		// else if (studentAuthored) {
+		// 	const errStr = `Format error in your test file. Did you edit anything above the comment '${TEST_SEPARATOR}' or remove this comment?`;
+		// 	vscode.window.showErrorMessage(errStr);
+		// 	throw new Error(errStr);
+		// }
+		// Remove any potentially accidentally left in #lang defs
+		tests = tests.replace(hashlang_decl, "// #lang");
+		return wheatText + "\n" + tests;
 	}
 
 	private async downloadFile(url: string): Promise<string>  {
