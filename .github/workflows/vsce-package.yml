@@ -1,0 +1,29 @@
+name: Package VS Code Extension
+
+on:
+  push:
+    branches:
+      - main  # Set this to your default branch
+
+jobs:
+  package-extension:
+    runs-on: ubuntu-latest  # You can choose other runners as needed
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'  # Specify the Node.js version
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Install VSCE
+      run: npm install -g vsce
+
+    - name: Package Extension
+      run: vsce package
