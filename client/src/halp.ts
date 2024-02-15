@@ -257,6 +257,7 @@ If you want feedback around other tests you have written, you will have to tempo
 		
 		this.logger.log_payload({"url": url}, LogLevel.ERROR, Event.FILE_DOWNLOAD)
 		if (response.status === 404) {
+			vscode.window.showErrorMessage(NOT_ENABLED_MESSAGE)
 			return NOT_ENABLED_MESSAGE;
 		}
 		else {
