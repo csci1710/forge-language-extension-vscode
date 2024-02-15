@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.2.3",
+	"version": "2.2.3-dev",
 	"repository": {
 		"type": "git",
 		"url": ""

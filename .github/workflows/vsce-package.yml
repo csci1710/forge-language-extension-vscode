@@ -6,7 +6,6 @@ on:
       - main  # replace with your default branch if not 'main'
 
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
