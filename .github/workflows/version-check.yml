@@ -12,6 +12,9 @@ jobs:
         with:
           fetch-depth: 0 # Ensures history is available for comparison
 
+      - name: Fetch main
+        run: git fetch origin main:main
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
