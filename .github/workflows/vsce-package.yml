@@ -5,28 +5,19 @@ on:
     branches:
       - main  # replace with your default branch if not 'main'
 
+
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '19'
-
-    - name: Install Dependencies
-      run: npm ci
-
-    - name: Build and Package
-      run: npx vsce package
-
-    - name: Publish
-      uses: HaaLeo/publish-vscode-extension@v0
-      env:
-        VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      with:
-        vscodePackage: '*.vsix'
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 19
+      - run: npm ci
+      - name: Publish to Visual Studio Marketplace
+        uses: HaaLeo/publish-vscode-extension@v0
+        with:
+          pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+          registryUrl: https://marketplace.visualstudio.com
