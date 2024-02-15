@@ -5,6 +5,8 @@ on:
     branches:
       - main  # replace with your default branch if not 'main'
 
+  workflow_dispatch:
+    
 
 jobs:
   deploy:
