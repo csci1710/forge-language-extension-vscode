@@ -25,7 +25,7 @@ let halpOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 
-// TODO: This is broken
+
 async function getUserId(context) {
 	const UID_KEY = "FORGE_UID";
 	

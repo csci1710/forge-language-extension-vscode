@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.2.3-dev",
+	"version": "2.2.4",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -108,7 +108,8 @@
 			},
 			{
 				"command": "forge.openDocumentation",
-				"title": "Forge Documentation"
+				"title": "Forge Docs",
+				"icon": "$(book)"
 			}
 		],
 		"menus": {
