@@ -24,6 +24,7 @@ export async function activate(docUri: vscode.Uri) {
 		await sleep(2000); // Wait for server activation
 	} catch (e) {
 		console.error(e);
+		vscode.window.showErrorMessage(`Forge extension activation failed! ${e}`);
 	}
 }
 

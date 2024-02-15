@@ -129,6 +129,17 @@ export async function activate(context: ExtensionContext) {
 	var logger = new Logger(userid);
 
 
+	let forgeDocs = vscode.commands.registerCommand('forge.openDocumentation', async() => {
+        
+		const DOCS_URL = 'https://csci1710.github.io/forge-documentation/home.html';
+		vscode.env.openExternal(vscode.Uri.parse(DOCS_URL))
+		.then((success) => {
+			if (!success) {
+				vscode.window.showErrorMessage(`Could not open Forge documentation from VS Code. It is available at ${DOCS_URL}`);
+			}
+		});
+    });
+
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
 
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
@@ -144,6 +155,7 @@ export async function activate(context: ExtensionContext) {
 		if (!editor.document.save())
 		{
 			console.error(`Could not save ${filepath}`);
+			vscode.window.showErrorMessage(`Could not save ${filepath}`);
 			return null;
 		}
 
@@ -160,11 +172,12 @@ export async function activate(context: ExtensionContext) {
 		if (!racketProcess) {
 
 			const log = textDocumentToLog(editor.document, true);
-			log['error'] = 'Cannot spawn Forge process';
+			log['error'] = 'Could not run Forge process.';
 			log['runId'] = runId;
 
 			logger.log_payload(log, LogLevel.ERROR, Event.FORGE_RUN);
-			console.error('Cannot spawn Forge process');
+			vscode.window.showErrorMessage("Could not run Forge process.");
+			console.error("Could not run Forge process.");
 		}
 
 		racketProcess.stdout.on('data', (data: string) => {
@@ -283,7 +296,7 @@ export async function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
-								 forgeOutput, halpOutput);
+								 forgeOutput, halpOutput,forgeDocs);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 

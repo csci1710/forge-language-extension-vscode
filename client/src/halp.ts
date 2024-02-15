@@ -182,7 +182,7 @@ If you want feedback around other tests you have written, you will have to tempo
 
 			if (!r) {
 				vscode.window.showErrorMessage("Could not run Forge process.");
-				console.error('Cannot spawn Forge process');
+				console.error("Could not run Forge process.");
 				return "Toadus Ponens run failed."
 			}
 

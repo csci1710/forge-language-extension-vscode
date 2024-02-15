@@ -26,6 +26,7 @@ export class RacketProcess {
 		if (!vscode.window.activeTextEditor.document.save())
 		{
 			console.error(`Could not save ${filePath}`);
+			vscode.window.showErrorMessage(`Forge run failed. Could not save ${filePath}`);
 			return null;
 		}
 

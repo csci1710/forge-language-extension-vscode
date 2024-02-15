@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.2.2",
+	"version": "2.2.3",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -105,6 +105,10 @@
 				"command": "forge.halp",
 				"title": "Ask Toadus Ponens!",
 				"icon":  "./client/images/toadus.png"
+			},
+			{
+				"command": "forge.openDocumentation",
+				"title": "Forge Documentation"
 			}
 		],
 		"menus": {
@@ -138,6 +142,11 @@
 					"command": "forge.halp",
 					"when": "editorLangId == forge",
 					"group": "navigation@3"
+				},
+				{
+					"command": "forge.openDocumentation",
+					"when": "editorLangId == forge",
+					"group": "navigation"
 				}
 			]
 		}
