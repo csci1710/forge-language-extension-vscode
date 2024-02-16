@@ -1,4 +1,16 @@
- #Dev Guide
+
+# Contributing
+
+- Pushes to `main` result in direct deployment to the VS Marketplace. Pull requests to `main`, therefore must change the package version number.
+- All pull requests adding features should be made to `dev`. 
+- **DO NOT** make pull requests directly to `main` unless you are deploying a hotfix.
+- Merge dev to master as follows:
+  - `git checkout -b staging-branch origin/main`
+  - `git merge -ff dev`
+  - Now create a pull request from `staging branch` to `main`
+
+# Finding your way around
+
 
 ## What's in the folder
 
@@ -55,5 +67,4 @@ vsce package
 The associated VSIX file represents the extension. **DO NOT** publish this extension to the VSCode marketplace.
 
 You can install the extension following rules here: https://code.visualstudio.com/docs/editor/extension-marketplace#_install-from-a-vsix
-
 
