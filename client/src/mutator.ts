@@ -8,19 +8,8 @@ import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getP
 	TODO: 
 	    - List the names of tests around which you are giving feedback (locations?), and say they are *not* consistent with the problem specification.
 		- List the names of tests around which you cannot give feedback (locations?)
-		- When we run the test against the test suite, we need to do something interesting
-
-
 */
 
-
-// Raise when an assertion is student predicates on both sides.
-export class BothPredsStudentError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'BothPredsStudentError';
-	}
-}
 
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
 

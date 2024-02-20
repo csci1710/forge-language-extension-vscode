@@ -11,13 +11,12 @@ import {
 
 
 import { 
-	 Mutator, BothPredsStudentError
+	 Mutator
 } from './mutator'; 
 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
-import { get } from 'http';
 
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
