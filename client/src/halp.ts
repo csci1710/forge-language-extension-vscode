@@ -3,16 +3,15 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { 
-	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
+	assertion_regex, example_regex, test_regex, getPredicatesOnly,
 	exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
+	removeForgeComments, quantified_assertion_regex,
+	getFailingTestNames, getFailingTestName
 } from './forge-utilities'; 
 
 
 import { 
-	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
-	exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
+	 adjustWheatToQuantifiedStudentMisunderstanding, adjustWheatToStudentMisunderstanding, BothPredsStudentError
 } from './mutator'; 
 
 import { LogLevel, Logger, Event } from './logger';
@@ -72,7 +71,7 @@ export class HalpRunner {
 		}
 
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
-		const testNames = this.getFailingTestNames(w_o);
+		const testNames = getFailingTestNames(w_o);
 
 		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. I am better at providing more detailed feedback when analyzing assertions than examples.`;
 
@@ -313,37 +312,6 @@ If you want feedback around other tests you have written, you will have to tempo
 	}
 
 
-	private getFailingTestNames(o: string): string[] {
-
-		let lines = o.split("\n");
-		return lines.map(this.getFailingTestName).filter((x) => x != "");
-	}
-
-
-	private getFailingTestName(o: string): string {
-		if (quantified_assertion_regex.test(o)) {
-			const match = o.match(quantified_assertion_regex);
-			const lhs_pred = match[4];	
-			const op = match[5];
-			const rhs_pred = match[6];
-			return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
-
-		} else if (assertion_regex.test(o)) {
-			const match = o.match(assertion_regex);
-			const lhs_pred = match[1];	
-			const op = match[2];
-			const rhs_pred = match[3];
-			return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
-		} else if (example_regex.test(o)) {
-			const match = o.match(example_regex);
-			return match[1];
-		} else if (test_regex.test(o)) {
-			const match = o.match(test_regex);
-			if (match[1]) return match[1];
-			return match[2]
-		} 
-		return "";
-	}
 
 	// w : wheat
 	// w_o : wheat output
@@ -440,7 +408,7 @@ If you want feedback around other tests you have written, you will have to tempo
 		if (ag_output == "") {
 			return "";
 		}
-		const tName = this.getFailingTestName(ag_output);
+		const tName = getFailingTestName(ag_output);
 		const hint_map = await this.getHintMap(testFileName);
 
 		if (tName in hint_map) {

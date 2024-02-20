@@ -284,3 +284,37 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 	return exampleAsPred;
 }
+
+
+
+export function getFailingTestNames(o: string): string[] {
+
+	let lines = o.split("\n");
+	return lines.map(getFailingTestName).filter((x) => x != "");
+}
+
+
+export function getFailingTestName(o: string): string {
+	if (quantified_assertion_regex.test(o)) {
+		const match = o.match(quantified_assertion_regex);
+		const lhs_pred = match[4];	
+		const op = match[5];
+		const rhs_pred = match[6];
+		return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
+
+	} else if (assertion_regex.test(o)) {
+		const match = o.match(assertion_regex);
+		const lhs_pred = match[1];	
+		const op = match[2];
+		const rhs_pred = match[3];
+		return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
+	} else if (example_regex.test(o)) {
+		const match = o.match(example_regex);
+		return match[1];
+	} else if (test_regex.test(o)) {
+		const match = o.match(test_regex);
+		if (match[1]) return match[1];
+		return match[2]
+	} 
+	return "";
+}
