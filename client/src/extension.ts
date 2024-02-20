@@ -4,6 +4,7 @@ import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, Diagnostic
 import { HalpRunner } from './halp';
 
 
+
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -80,6 +81,10 @@ export async function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
+
+			// TODO: THis needs to be updated to handle multiple errors
+
+
 			const matcher = racket.matchForgeError(context.line);
 			if (!matcher) {
 				return [];
@@ -180,6 +185,8 @@ export async function activate(context: ExtensionContext) {
 			console.error("Could not run Forge process.");
 		}
 
+		// :'Some tests failed. Reporting failures in order.'
+
 		racketProcess.stdout.on('data', (data: string) => {
 			const lst = data.toString().split(/[\n]/);
 			for (let i = 0; i < lst.length; i++) {
@@ -198,6 +205,7 @@ export async function activate(context: ExtensionContext) {
 		});
 
 		racketProcess.on('exit', (code: string) => {
+
 			if (!racket.racketKilledManually) {
 				if (myStderr != '') {
 					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
@@ -209,6 +217,7 @@ export async function activate(context: ExtensionContext) {
 				racket.showFileWithOpts(filepath, null, null);
 				racket.userFacingOutput.appendLine('Forge process terminated.');
 			}
+
 
 			// Output *may* have user file path in it. Do we want this?
 			var payload = {

@@ -65,37 +65,31 @@ export class RacketProcess {
 
 	// This is broken		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
-		let errLocation: Object | null;
 
-		this.userFacingOutput.appendLine(text);
 
-		const textLines = text.split(/[\n\r]/);
-		for (let i = 0; i < textLines.length; i++) {
-			errLocation = this.matchForgeError(textLines[i]);
-			if (errLocation) {
-				// for now stops at the first error
-				// this could be risky if there are frg files in the source code
-				break;
-			}
-		}
-
-		
-		if (errLocation) {
+		function errLocationToDiagnostic(errLocation: any): Diagnostic {
 			
-			const diagnostics: Diagnostic[] = [];
-
-			const diagnostic: Diagnostic = {
+			return {
 				severity: DiagnosticSeverity.Error,
 				range: errLocation['range'],
 				message: `Forge Evaluation Error: ${errLocation['line']}`,
 				source: 'Racket'
-			};
-			diagnostics.push(diagnostic);
-			diagnosticCollectionForgeEval.set(fileURI, diagnostics);
-			this.showFileWithOpts(fileURI.fsPath, errLocation['linenum'], errLocation['colnum']);
-		} else {
-			this.showFileWithOpts(fileURI.fsPath, null, null);
+			}
 		}
+
+		this.userFacingOutput.appendLine(text);
+
+		const textLines = text.split(/[\n\r]/);
+
+		let errorList = textLines.map((line) => this.matchForgeError(line) ).filter((x) => x != null);
+		let diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
+
+		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
+		
+
+		let linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
+		let colnum = errorList.length > 0 ?  errorList[0]['colnum'] : null;
+		this.showFileWithOpts(fileURI.fsPath,linenum, colnum);
 	}
 
 	matchForgeError(line: string): Object | null {
@@ -182,6 +176,9 @@ export class RacketProcess {
 		return { linenum, colnum, start, end, range, line, index, filename};
 	}
 	
+
+
+	// This does not support multiple lines
 	showFileWithOpts(filePath: string, line: number | null, column: number | null) {
 		if (line === null || column === null) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
