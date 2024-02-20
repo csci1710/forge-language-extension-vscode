@@ -3,6 +3,17 @@ import { example_regex, assertion_regex, quantified_assertion_regex } from './fo
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName , test_regex, getFailingTestName} from './forge-utilities';
 
 
+/*
+
+	TODO: 
+	    - List the names of tests around which you are giving feedback (locations?), and say they are *not* consistent with the problem specification.
+		- List the names of tests around which you cannot give feedback (locations?)
+		- When we run the test against the test suite, we need to do something interesting
+
+
+*/
+
+
 // Raise when an assertion is student predicates on both sides.
 export class BothPredsStudentError extends Error {
 	constructor(message: string) {
@@ -47,6 +58,11 @@ export class Mutator {
 	mutant: string;
 	source_text : string;
 
+	error_messages : string[];
+
+	inconsistent_tests : string[];
+
+
 	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
 		this.wheat = wheat;
 
@@ -58,6 +74,7 @@ export class Mutator {
 
 		this.mutant = this.wheat + "\n" + this.student_preds + "\n";
 		this.source_text = source_text;
+		this.error_messages = [];
 	}
 
 
@@ -112,21 +129,26 @@ export class Mutator {
 	}
 
 
-	mutateToAssertion(lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") {
+	mutateToAssertion(test_name : string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") {
 
 		const isLhsInstructorAuthored = this.isInstructorAuthored(lhs_pred);
 		const isRhsInstructorAuthored = this.isInstructorAuthored(rhs_pred);
 
 
+		if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
+			this.error_messages.push(`Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
+			return "";
+		}
+		this.inconsistent_tests.push(test_name);
+
+
 		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-			throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
-		}
-		else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-
-			throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
+			// TODO: Work on message. We can give *some* validity feedback here right?
+			this.error_messages.push(`I cannot provide you with further feedback around ${test_name}, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
+			return "";
 		}
 
-
+		
 		// If the student believes that i => s,
 		// then they believe that if i then s. So constrain i to be { i AND s }
 		if (isLhsInstructorAuthored) {
@@ -198,28 +220,31 @@ export class Mutator {
 	}
 
 
+	mutateToStudentMisunderstanding()  {
 
-
-
-	mutateToStudentMisunderstanding(forge_output: string) : string {
-
-
-		let w_os = forge_output.split("\n");
+		let w_os = this.forge_output.split("\n");
 
 		for (var w_o in w_os) {
 
 
 			//TODO: What should we do if an error is raised (eg. we cannot give feedback around this test!)
+			const testName = getFailingTestName(w_o);
 
 			if (example_regex.test(w_o)) {
 
+
+				
 				// Fundamentally the issue is that the characteristic predicate from a 
 				// positive example gives us such a *specific* modification to a predicate,
 				// that it is rare for us to offer meaningful feedback.
+				
 
-				const testName = getFailingTestName(w_o);
 				const failedExample = findExampleByName(this.student_tests, testName);
 				this.mutateToExample(failedExample);
+
+	
+				this.inconsistent_tests.push(testName);
+
 
 			}
 
@@ -244,12 +269,14 @@ export class Mutator {
 				const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
 				const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
 				
-				this.mutateToAssertion(lhs_instantiation, rhs_instantiation, op, quantifier);
+				this.mutateToAssertion(testName, lhs_instantiation, rhs_instantiation, op, quantifier);
+
+
+	
 			}
 
 
 			if (assertion_regex.test(w_o)) {
-
 
 				// mutate to assertion
 				const match = w_o.match(assertion_regex);
@@ -257,162 +284,23 @@ export class Mutator {
 				const op = match[2];
 				const rhs_pred = match[3];
 
-				this.mutateToAssertion(lhs_pred, rhs_pred, op);
+				this.mutateToAssertion(testName, lhs_pred, rhs_pred, op);
+				this.inconsistent_tests.push(testName);
 
 			}
 			else if (test_regex.test(w_o)) {
 
 				// Do nothing
+				const test_expect_failure_msg = `Sorry! I cannot provide feedback around the test "${testName}". Excluding it from my analysis.`;
+				this.error_messages.push(test_expect_failure_msg)
 				
 			}
 		}
 
-		return this.mutant;
+		//return this.mutant;
 	}
 }
 
 
 
-
-
-
-export function adjustWheatToStudentMisunderstanding(testFileName: string, w: string, student_preds: string, w_o: string): string {
-	const match = w_o.match(assertion_regex);
-	const lhs_pred = match[1];
-	const op = match[2];
-	const rhs_pred = match[3];
-
-	const isLhsInstructorAuthored = new RegExp(`\\b${lhs_pred}\\b`).test(w);
-	const isRhsInstructorAuthored = new RegExp(`\\b${rhs_pred}\\b`).test(w);
-
-
-	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
-	}
-	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-
-		throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
-	}
-
-	w = w + "\n" + student_preds + "\n";
-
-	// If the student believes that s => i 
-	// then they believe that if s then i. So ease i to be { i or s }
-
-	// If the student believes that i => s,
-	// then they believe that if i then s. So constrain i to be { i AND s }
-	if (isLhsInstructorAuthored) {
-
-		// i is lhs
-		// s is rhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// (ie i => s)
-			return constrainPredicate(w, lhs_pred, rhs_pred)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie s => i
-			return easePredicate(w, lhs_pred, rhs_pred)
-		}
-	}
-	else {
-		// i is rhs
-		// s is lhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// ie s => i
-			return easePredicate(w, rhs_pred, lhs_pred)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie i => s
-			return constrainPredicate(w, rhs_pred, lhs_pred)
-		}
-	}
-	throw new Error("Something went wrong!");
-}
-
-
-export function adjustWheatToQuantifiedStudentMisunderstanding(source_text: string, w: string, student_preds: string, w_o: string): string {
-	const match = w_o.match(quantified_assertion_regex);
-
-	const row = parseInt(match[1]);
-	const col = parseInt(match[2]);
-	const span = parseInt(match[3]);
-	const lhs_pred = match[4];
-	const op = match[5];
-	const rhs_pred = match[6];
-
-
-
-
-	// I think this is still correct, since the regex doesn't check any opening '['s.
-	const isLhsInstructorAuthored = new RegExp(`\\b${lhs_pred}\\b`).test(w);
-	const isRhsInstructorAuthored = new RegExp(`\\b${rhs_pred}\\b`).test(w);
-
-
-	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
-	}
-	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-
-		throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
-	}
-
-	w = w + "\n" + student_preds + "\n";
-
-
-	var failing_test = extractSubstring(source_text, row, col, span).trim();
-
-	// Ensure this extraction works?
-	const quantifier_match = /\bassert\b(.*?)\|/;
-	const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
-	const lhs_match = /\|\s*(.*?)\s+is\b/;
-	const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
-	const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
-	const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
-
-
-
-	// If the student believes that s => i 
-	// then they believe that if s then i. So ease i to be { i or s }
-
-	// If the student believes that i => s,
-	// then they believe that if i then s. So constrain i to be { i AND s }
-	if (isLhsInstructorAuthored) {
-
-		// i is lhs
-		// s is rhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// (ie i => s)
-			return constrainPredicate(w, lhs_instantiation, rhs_instantiation, quantifier)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie s => i
-			return easePredicate(w, lhs_instantiation, rhs_instantiation, quantifier)
-		}
-	}
-	else {
-		// i is rhs
-		// s is lhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// ie s => i
-			return easePredicate(w, rhs_instantiation, lhs_instantiation, quantifier)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie i => s
-			return constrainPredicate(w, rhs_instantiation, lhs_instantiation, quantifier)
-		}
-	}
-	throw new Error("Something went wrong!");
-}
 

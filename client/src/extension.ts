@@ -295,9 +295,14 @@ export async function activate(context: ExtensionContext) {
 				.then((result) => {
 					// TODO: Move this log to inside the HalpRunner
 					var documentData = textDocumentToLog(document, true);
-					documentData['halp_output'] = result;
+					documentData['halp_output'] = result.join("\n");
 					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
-					halpOutput.appendLine("💡🐸💡 " + result);
+
+					if (result.length > 0) {
+						// TODO: What should I do when we have multiple hints? Should I choose one at random?
+						var hint = result[Math.floor(Math.random() * result.length)];
+						halpOutput.appendLine("💡🐸💡 " + hint);
+					}
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');
