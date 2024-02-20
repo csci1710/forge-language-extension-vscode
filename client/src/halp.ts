@@ -243,7 +243,7 @@ please fill out this form: ${formurl}`];
 	}
 
 
-	private async tryGetHintsFromAutograderOutput(ag_output : string, testFileName : string) : Primise<string[]> {
+	private async tryGetHintsFromAutograderOutput(ag_output : string, testFileName : string) : Promise<string[]> {
 		
 		if (ag_output == "") {
 			return [];
