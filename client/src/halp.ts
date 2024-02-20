@@ -2,18 +2,8 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { 
-	assertion_regex, example_regex, test_regex, getPredicatesOnly,
-	exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments, quantified_assertion_regex,
-	getFailingTestNames, getFailingTestName
-} from './forge-utilities'; 
-
-
-import { 
-	 Mutator
-} from './mutator'; 
-
+import { removeForgeComments, getFailingTestNames } from './forge-utilities'; 
+import { Mutator } from './mutator'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
@@ -258,8 +248,7 @@ please fill out this form: ${formurl}`];
 
 
 		var hint_candidates = tNames.filter((tName) => tName in hint_map)
-							 .map((tName) => hint_map[tName]);
-							
+							 .map((tName) => hint_map[tName]);						
 		return hint_candidates;
 	}
 
