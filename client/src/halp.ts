@@ -68,7 +68,6 @@ export class HalpRunner {
 			// TODO: Can we add some sort of thoroughness metric here?
 		}
 
-		
 		const testNames = getFailingTestNames(w_o);
 		const noTestFound = `I found a runtime or syntax error in your tests:
 ${w_o}`;
@@ -81,14 +80,13 @@ ${w_o}`;
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, w_o);
 		mutator.mutateToStudentMisunderstanding();
 
-		let skipped_tests = mutator.error_messages.join("\n");
-		this.forgeOutput.appendLine(skipped_tests);
-
 		let assessed_tests = mutator.inconsistent_tests.join(",");
 		this.forgeOutput.appendLine(`Providing feedback around the following tests: ${assessed_tests}`);
 
-		try {
+		let skipped_tests = mutator.error_messages.join("\n");
+		this.forgeOutput.appendLine(skipped_tests);
 
+		try {
 			//testFileName: string, mutant : string, student_preds : string, w_o : string
 			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
 		}
@@ -110,7 +108,7 @@ ${w_o}`;
 
 
 			// HOWEVER: A LOSS HERE IS THAT WE DO NOT KNOW WHICH TESTS ARE AMBIGUOUS.
-			return [`The remaining tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+			return [`Analyzed tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
 They are not necessarily incorrect, but I cannot provide feedback around it. 
 
 If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
