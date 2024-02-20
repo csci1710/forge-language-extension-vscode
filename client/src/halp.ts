@@ -7,9 +7,18 @@ import {
 	exampleToPred, getSigList, getPredList, findExampleByName,
 	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
 } from './forge-utilities'; 
+
+
+import { 
+	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
+	exampleToPred, getSigList, getPredList, findExampleByName,
+	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
+} from './mutator'; 
+
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
+import { get } from 'http';
 
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
@@ -40,6 +49,11 @@ export class HalpRunner {
 
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
+
+
+		// TODO: Need to support multiple test failures here!
+
+
 		studentTests = studentTests.replace(/\r/g, "\n");
 
 		const w = await this.getWheat(testFileName);
@@ -58,15 +72,22 @@ export class HalpRunner {
 		}
 
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
-		const testName = this.getFailingTestName(w_o);
+		const testNames = this.getFailingTestNames(w_o);
 
 		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. I am better at providing more detailed feedback when analyzing assertions than examples.`;
 
 		const defaultFeedback = `I found a runtime or syntax error in your tests:
 ${w_o}`;
-		if (testName == "") {
+
+		if (testNames.length == 0) {
+
+			// TODO: What if there is a runtime or syntax error? I guess we still report something but still...
+
 			return defaultFeedback;
 		}
+
+
+		// NOW, we want to refactor this to mutate for EACH failing test.
 
 		if (example_regex.test(w_o)) {
 
@@ -290,6 +311,14 @@ If you want feedback around other tests you have written, you will have to tempo
 			return {};
 		}
 	}
+
+
+	private getFailingTestNames(o: string): string[] {
+
+		let lines = o.split("\n");
+		return lines.map(this.getFailingTestName).filter((x) => x != "");
+	}
+
 
 	private getFailingTestName(o: string): string {
 		if (quantified_assertion_regex.test(o)) {
