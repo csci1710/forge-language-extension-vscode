@@ -132,7 +132,6 @@ export class Mutator {
 
 
 		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-			// TODO: Work on message. We can give *some* validity feedback here right?
 			this.error_messages.push(`I cannot provide you with further feedback around ${test_name}, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
 			return "";
 		}
@@ -215,14 +214,9 @@ export class Mutator {
 
 		for (var w_o in w_os) {
 
-
-			//TODO: What should we do if an error is raised (eg. we cannot give feedback around this test!)
 			const testName = getFailingTestName(w_o);
 
-			if (example_regex.test(w_o)) {
-
-
-				
+			if (example_regex.test(w_o)) {				
 				// Fundamentally the issue is that the characteristic predicate from a 
 				// positive example gives us such a *specific* modification to a predicate,
 				// that it is rare for us to offer meaningful feedback.
@@ -233,8 +227,6 @@ export class Mutator {
 
 	
 				this.inconsistent_tests.push(testName);
-
-
 			}
 
 			if (quantified_assertion_regex.test(w_o)) {
