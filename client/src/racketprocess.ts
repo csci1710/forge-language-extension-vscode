@@ -4,14 +4,14 @@ import { Diagnostic, DiagnosticCollection, DiagnosticSeverity } from 'vscode';
 
 
 export class RacketProcess {
-		
-	private childProcess: ChildProcess | null;
-	public racketKilledManually : boolean;
-	public userFacingOutput : vscode.OutputChannel;
-	private evalDiagnostics : vscode.DiagnosticCollection;
-	
 
-	constructor(evalDiagnostics : vscode.DiagnosticCollection, userFacingOutput: vscode.OutputChannel) {
+	private childProcess: ChildProcess | null;
+	public racketKilledManually: boolean;
+	public userFacingOutput: vscode.OutputChannel;
+	private evalDiagnostics: vscode.DiagnosticCollection;
+
+
+	constructor(evalDiagnostics: vscode.DiagnosticCollection, userFacingOutput: vscode.OutputChannel) {
 		this.evalDiagnostics = evalDiagnostics;
 		this.userFacingOutput = userFacingOutput;
 		this.childProcess = null;
@@ -19,11 +19,10 @@ export class RacketProcess {
 	}
 
 
-	runFile(filePath : string) : ChildProcess | null {
+	runFile(filePath: string): ChildProcess | null {
 
 		// always auto-save before any run
-		if (!vscode.window.activeTextEditor.document.save())
-		{
+		if (!vscode.window.activeTextEditor.document.save()) {
 			console.error(`Could not save ${filePath}`);
 			vscode.window.showErrorMessage(`Forge run failed. Could not save ${filePath}`);
 			return null;
@@ -51,7 +50,7 @@ export class RacketProcess {
 		}
 	}
 
-	
+
 	kill(manual: boolean) {
 		if (this.childProcess) {
 			this.childProcess.kill();
@@ -67,7 +66,7 @@ export class RacketProcess {
 
 
 		function errLocationToDiagnostic(errLocation: any): Diagnostic {
-			
+
 			return {
 				severity: DiagnosticSeverity.Error,
 				range: errLocation['range'],
@@ -80,28 +79,28 @@ export class RacketProcess {
 
 		const textLines = text.split(/[\n\r]/);
 
-		let errorList = textLines.map((line) => this.matchForgeError(line) ).filter((x) => x != null);
+		let errorList = textLines.map((line) => this.matchForgeError(line)).filter((x) => x != null);
 		let diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
 
 		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
-		
+
 
 		let linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
-		let colnum = errorList.length > 0 ?  errorList[0]['colnum'] : null;
-		this.showFileWithOpts(fileURI.fsPath,linenum, colnum);
+		let colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
+		this.showFileWithOpts(fileURI.fsPath, linenum, colnum);
 	}
 
 	matchForgeError(line: string): Object | null {
-		
-		/* There are multiple types of errors that can be thrown by Forge.*/	
-		const testFailurePattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+) \(span (\d+)\)\]/;	
+
+		/* There are multiple types of errors that can be thrown by Forge.*/
+		const testFailurePattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+) \(span (\d+)\)\]/;
 		const raiseSyntaxErrorPattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+):?/;  // assumes no space in filename
 		const raiseForgeErrorWithFileNamePattern = /#<path:(.*?)> \[line=(\d+), column=(\d+), offset=(\d+)\]/;
 		const raiseForgeErrorPattern = /.*\[line=(\d+), column=(\d+), offset=(\d+)\]/;
 		const generalLocPattern = /at loc: line (\d+), col (\d+), span: (\d+)/;
 		const generalsrcLocPattern = /.*\(srcloc #<path:(.*?)> (\d+) (\d+) (\d+) (\d+)\)/;
 
-	
+
 
 
 
@@ -124,7 +123,7 @@ export class RacketProcess {
 			filename = generalTestFailureMatch[1];
 			linenum = parseInt(generalTestFailureMatch[2]) - 1;
 			colnum = parseInt(generalTestFailureMatch[3]) - 1;
-			span = parseInt(generalTestFailureMatch[4]); 
+			span = parseInt(generalTestFailureMatch[4]);
 			index = generalTestFailureMatch.index;
 		}
 		else if (raiseSyntaxErrorMatch) {
@@ -132,7 +131,7 @@ export class RacketProcess {
 			linenum = parseInt(raiseSyntaxErrorMatch[2]) - 1;
 			colnum = parseInt(raiseSyntaxErrorMatch[3]) - 1;
 			index = raiseSyntaxErrorMatch.index;
-		} 
+		}
 		else if (raiseForgeErrorWithFileNameMatch) {
 			filename = raiseForgeErrorWithFileNameMatch[1];
 			linenum = parseInt(raiseForgeErrorWithFileNameMatch[2]) - 1;
@@ -140,27 +139,27 @@ export class RacketProcess {
 			index = raiseForgeErrorWithFileNameMatch.index;
 		}
 		else if (raiseForgeErrorMatch) {
-			
+
 			linenum = parseInt(raiseForgeErrorMatch[1]) - 1;
 			colnum = parseInt(raiseForgeErrorMatch[2]) - 1;
 			index = raiseForgeErrorMatch.index;
 
-		} 
+		}
 		else if (generalsrcLocMatch) {
 			filename = generalsrcLocMatch[1];
 			linenum = parseInt(generalsrcLocMatch[2]) - 1;
 			colnum = parseInt(generalsrcLocMatch[3]) - 1;
-			span = parseInt(generalsrcLocMatch[5]) - 1; 
+			span = parseInt(generalsrcLocMatch[5]) - 1;
 			index = generalsrcLocMatch.index;
 		}
-		
+
 		else if (generalLocMatch) {
 			linenum = parseInt(generalLocMatch[1]) - 1;
 			colnum = parseInt(generalLocMatch[2]) - 1;
-			span = parseInt(generalLocMatch[3]) - 1; 
+			span = parseInt(generalLocMatch[3]) - 1;
 			index = generalLocMatch.index;
 		}
-		else{
+		else {
 			return null;
 		}
 
@@ -169,12 +168,12 @@ export class RacketProcess {
 		span = Math.max(1, span);
 
 		const start = new vscode.Position(linenum, colnum);
-		const end = new vscode.Position(linenum, colnum + span); 
+		const end = new vscode.Position(linenum, colnum + span);
 		const range = new vscode.Range(start, end);
 
-		return { linenum, colnum, start, end, range, line, index, filename};
+		return { linenum, colnum, start, end, range, line, index, filename };
 	}
-	
+
 
 
 	// This does not support multiple lines
@@ -185,11 +184,11 @@ export class RacketProcess {
 			const start = new vscode.Position(line, column);
 			const end = new vscode.Position(line, column);
 			const range = new vscode.Range(start, end);
-	
+
 			const opts: vscode.TextDocumentShowOptions = {
 				selection: range
 			};
-	
+
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath), opts);
 		}
 	}
