@@ -12,7 +12,10 @@ export function getPredicatesOnly(inputText : string) : string {
 
 
 export function removeForgeComments(inputText: string): string {
-	return removeInlineComments(removeCStyleComments(inputText));
+	let x = removeInlineComments(removeCStyleComments(inputText));
+	// Normalize windows line endings
+	x = x.replace(/\r/g, '');
+	return x;
 }
 
 function removeCStyleComments(inputText: string): string {

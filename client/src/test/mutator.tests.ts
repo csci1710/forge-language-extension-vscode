@@ -1,12 +1,12 @@
 import { Mutator } from '../mutator';
-//import { combineTestsWithModel } from '../halp';
+import { removeForgeComments } from '../forge-utilities';
 
 
 import { strict as assert, strictEqual } from 'assert';
 
 
 
-function combineTestsWithModel(wheatText: string, tests: string): string {
+export function combineTestsWithModel(wheatText: string, tests: string) : string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 	const hashlang_decl = "#lang";
@@ -15,8 +15,14 @@ function combineTestsWithModel(wheatText: string, tests: string): string {
 		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
 		tests = tests.substring(startIndex).trim();
 	}
+
 	tests = tests.replace(hashlang_decl, "// #lang");
-	return wheatText + "\n" + tests;
+
+	var combined = wheatText + "\n" + tests;
+	combined = removeForgeComments(combined);
+
+	return combined;
+
 }
 
 function removeWhitespace(str: string): string {
@@ -185,6 +191,62 @@ describe('Mutator', () => {
 		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
 	});
 
+	it('can mutate on quantified assertion failures.', () => {
+
+		const tests = `
+		#lang forge
+
+//// Do not edit anything above this line ////
+
+pred loops {
+     (some (^edges & iden))
+}
+
+assert loops is necessary for isDirectedTree
+assert all x : Node | loops is sufficient for isDirectedTree
+		  `;
+		const truncated_forge_output = `[aaa.test.frg:17:0 (span 44)] Theorem Assertion_loops_is_necessary_for_isDirectedTree failed. Found instance:
+		#(struct:Sat (#hash((Node . ()) (edges . ()))) ((size-variables 388) (size-clauses 555) (size-primary 20) (time-translation 98) (time-solving 8) (time-building 1708545113557)) ()) Sterling disabled, so reporting raw instance data:
+		#(struct:Sat (#hash((Node . ()) (edges . ()))) ((size-variables 388) (size-clauses 555) (size-primary 20) (time-translation 98) (time-solving 8) (time-building 1708545113557)) ())
+		
+		[aaa.test.frg:18:0 (span 60)] Theorem temporary-name_directedtree.test_1__Assertion_All_loops_is_sufficient_for_isDirectedTree failed. Found instance:
+		#(struct:Sat (#hash(($x_all7045 . ((Node3))) (Node . ((Node1) (Node2) (Node3))) (edges . ((Node1 Node1) (Node1 Node3) (Node2 Node2) (Node2 Node3) (Node3 Node1) (Node3 Node2))))) ((size-variables 418) (size-clauses 388) (size-primary 24) (time-translation 34) (time-solving 7) (time-building 1708545113696)) ()) Sterling disabled, so reporting raw instance data:
+		#(struct:Sat (#hash(($x_all7045 . ((Node3))) (Node . ((Node1) (Node2) (Node3))) (edges . ((Node1 Node1) (Node1 Node3) (Node2 Node2) (Node2 Node3) (Node3 Node1) (Node3 Node2))))) ((size-variables 418) (size-clauses 388) (size-primary 24) (time-translation 34) (time-solving 7) (time-building 1708545113696)) ())	`;
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, truncated_forge_output, DIRTREE_INFO.filename, source_text);
+		let num_mutations = mutator.mutateToStudentMisunderstanding();
+
+		
+
+		const expectedMutant = `#lang forge
+
+		option run_sterling off
+		
+		sig Node {edges: set Node}
+		
+		pred isDirectedTree_inner1 {
+		 edges.~edges in iden 
+		 lone edges.Node - Node.edges 
+		 no (^edges & iden) 
+		 lone Node or Node in edges.Node + Node.edges 
+		}
+		
+		pred loops {
+			 (some (^edges & iden))
+		}
+		
+		   pred isDirectedTree_inner2 { 
+			  isDirectedTree_inner1 and loops
+		   }
+		   
+		   pred isDirectedTree { 
+			all x : Node |  isDirectedTree_inner2 or loops
+		   }`;
+
+		assert.strictEqual(num_mutations, 2);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
+	});
 
 
 });

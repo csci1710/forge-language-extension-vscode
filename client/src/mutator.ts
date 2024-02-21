@@ -10,7 +10,7 @@ import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getP
 		- List the names of tests around which you cannot give feedback (locations?)
 */
 
-
+// This is buggy in cases where tests are the same
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
 
 	// 1 index to 0 index
@@ -30,8 +30,11 @@ function extractSubstring(text: string, startRow: number, startColumn: number, s
 		throw new Error("Something went wrong while I was reading Forge output.");
 	}
 
+	let row_to_check = rows[startRow];
+
+
 	// Calculate the starting index
-	let startIndex = rows.slice(0, startRow - 1).reduce((acc, currRow) => acc + currRow.length + 1, 0) + startColumn;
+	let startIndex = rows.slice(0, startRow).reduce((acc, currRow) => acc + currRow.length + 1, 0) + startColumn;
 
 	// Extract and return the substring
 	return text.substring(startIndex, startIndex + span);
@@ -215,7 +218,7 @@ export class Mutator {
 			: this.easePredicate(mutant_with_example, failed_example.examplePredicate, failed_example.exampleName);
 	}
 
-
+// This does not error  loudly!
 	mutateToStudentMisunderstanding()  {
 
 		let w_os = this.forge_output.split("\n");
@@ -225,7 +228,6 @@ export class Mutator {
 			const testName = getFailingTestName(w_o);
 
 
-			
 
 			if (example_regex.test(w_o)) {				
 				// Fundamentally the issue is that the characteristic predicate from a 
@@ -238,9 +240,7 @@ export class Mutator {
 
 	
 				
-			}
-
-			if (quantified_assertion_regex.test(w_o)) {
+			} else if (quantified_assertion_regex.test(w_o)) {
 
 
 				const match = w_o.match(quantified_assertion_regex);
@@ -265,10 +265,7 @@ export class Mutator {
 
 
 	
-			}
-
-
-			if (assertion_regex.test(w_o)) {
+			}else if (assertion_regex.test(w_o)) {
 
 
 				// mutate to assertion

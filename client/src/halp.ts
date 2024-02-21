@@ -19,14 +19,14 @@ export function combineTestsWithModel(wheatText: string, tests: string) : string
 		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
 		tests = tests.substring(startIndex).trim();
 	}
-	// else if (studentAuthored) {
-	// 	const errStr = `Format error in your test file. Did you edit anything above the comment '${TEST_SEPARATOR}' or remove this comment?`;
-	// 	vscode.window.showErrorMessage(errStr);
-	// 	throw new Error(errStr);
-	// }
-	// Remove any potentially accidentally left in #lang defs
+
 	tests = tests.replace(hashlang_decl, "// #lang");
-	return wheatText + "\n" + tests;
+
+	var combined = wheatText + "\n" + tests;
+	combined = removeForgeComments(combined);
+
+	return combined;
+
 }
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
