@@ -9,6 +9,26 @@ import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
 
 
+
+export function combineTestsWithModel(wheatText: string, tests: string) : string {
+	// todo: What if separator doesn't exist (in that case, look for #lang forge)
+	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+	const hashlang_decl = "#lang";
+
+	if (tests.includes(TEST_SEPARATOR)) {
+		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+		tests = tests.substring(startIndex).trim();
+	}
+	// else if (studentAuthored) {
+	// 	const errStr = `Format error in your test file. Did you edit anything above the comment '${TEST_SEPARATOR}' or remove this comment?`;
+	// 	vscode.window.showErrorMessage(errStr);
+	// 	throw new Error(errStr);
+	// }
+	// Remove any potentially accidentally left in #lang defs
+	tests = tests.replace(hashlang_decl, "// #lang");
+	return wheatText + "\n" + tests;
+}
+
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
 
 /*
@@ -66,8 +86,12 @@ ${w_o}`;
 			return [noTestFound];
 		}
 
+
+		const source_text = combineTestsWithModel(w, studentTests);
+
+
 		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
-		const mutator = new Mutator(w, studentTests, w_o, testFileName, w_o);
+		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 		mutator.mutateToStudentMisunderstanding();
 
 		let assessed_tests = mutator.inconsistent_tests.join(",");
@@ -113,7 +137,7 @@ please fill out this form: ${formurl}`];
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
-		const toRun = this.combineTestsWithModel(model, tests);
+		const toRun = combineTestsWithModel(model, tests);
 
 		// Write the contents of toRun to a temporary file
 		const tempFilePath = this.tempFile();
@@ -169,24 +193,7 @@ please fill out this form: ${formurl}`];
 	}
 
 
-	private combineTestsWithModel(wheatText: string, tests: string) : string {
-		// todo: What if separator doesn't exist (in that case, look for #lang forge)
-		const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
-		const hashlang_decl = "#lang";
 
-		if (tests.includes(TEST_SEPARATOR)) {
-			const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-			tests = tests.substring(startIndex).trim();
-		}
-		// else if (studentAuthored) {
-		// 	const errStr = `Format error in your test file. Did you edit anything above the comment '${TEST_SEPARATOR}' or remove this comment?`;
-		// 	vscode.window.showErrorMessage(errStr);
-		// 	throw new Error(errStr);
-		// }
-		// Remove any potentially accidentally left in #lang defs
-		tests = tests.replace(hashlang_decl, "// #lang");
-		return wheatText + "\n" + tests;
-	}
 
 	private async downloadFile(url: string): Promise<string>  {
 

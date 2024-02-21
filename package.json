@@ -105,7 +105,7 @@
 			{
 				"command": "forge.halp",
 				"title": "Ask Toadus Ponens!",
-				"icon":  "./client/images/toadus.png"
+				"icon": "./client/images/toadus.png"
 			},
 			{
 				"command": "forge.openDocumentation",
@@ -133,7 +133,7 @@
 				{
 					"command": "forge.enableLogging",
 					"when": "!forge.isLoggingEnabled && (editorLangId == forge)",
-					"group": "navigation"					
+					"group": "navigation"
 				},
 				{
 					"when": "forge.isLoggingEnabled && (editorLangId == forge)",
@@ -166,16 +166,17 @@
 		"@types/node": "^12.12.0",
 		"@typescript-eslint/eslint-plugin": "^4.23.0",
 		"@typescript-eslint/parser": "^4.23.0",
+		"@vscode/vsce": "^2.23.0",
 		"eslint": "^7.26.0",
 		"mocha": "^8.4.0",
-		"typescript": "^4.4.3",
-		"@vscode/vsce": "^2.23.0"
+		"typescript": "^4.4.3"
 	},
 	"dependencies": {
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
 		"glob": "^8.1.0",
+		"ts-node": "^10.9.2",
 		"vscode-languageserver": "^9.0.1",
 		"vscode-languageserver-textdocument": "^1.0.11"
 	}
