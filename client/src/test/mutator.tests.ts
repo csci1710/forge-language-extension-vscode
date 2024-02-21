@@ -379,14 +379,50 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			edges = \`Node1->\`Node2  + \`Node2->\`Node1
 		  }
 		  `;
-			const forge_output = "FILL ME";
+			const forge_output = `[directedtree.test.frg:21:19 (span 50)] Theorem Assertion_mustBeEmpty_is_necessary_for_isDirectedTree failed. Found instance:
+			#(struct:Sat (#hash((Node . ((Node2) (Node3))) (edges . ((Node3 Node2))))) ((size-variables 390) (size-clauses 558) (size-primary 20) (time-translation 77) (time-solving 9) (time-building 1708555673207)) ()) Sterling disabled, so reporting raw instance data:
+			#(struct:Sat (#hash((Node . ((Node2) (Node3))) (edges . ((Node3 Node2))))) ((size-variables 390) (size-clauses 558) (size-primary 20) (time-translation 77) (time-solving 9) (time-building 1708555673207)) ())
+			
+			[directedtree.test.frg:23:18 (span 114)] Invalid example 'loop'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
+			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 5) (time-solving 0) (time-building 1708555673326) (time-core 0)) unsat)			
+			`;
 			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 			console.log(source_text);
 	
 			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 			mutator.mutateToStudentMisunderstanding();
 	
-		  	const expected_mutant = ``;
+		  	const expected_mutant = `#lang forge
+
+			  option run_sterling off
+			  
+			  sig Node {edges: set Node}
+			  
+			  pred isDirectedTree_inner1 {
+				edges.~edges in iden 
+				lone edges.Node - Node.edges 
+				no (^edges & iden) 
+				lone Node or Node in edges.Node + Node.edges 
+			  }
+			  
+			  pred mustBeEmpty {
+					  no edges
+			  }
+			  
+			  pred isDirectedTree_inner2 { 
+				  isDirectedTree_inner1 and mustBeEmpty
+			  }
+					
+			  pred loop {
+				  some disj Node1, Node2 : Node | {
+					  Node = Node1 + Node2
+					  edges = Node1->Node2  + Node2->Node1
+				  }
+			  }
+			  
+			  pred isDirectedTree { 
+				  isDirectedTree_inner2 or loop
+			  }`;
 	
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
