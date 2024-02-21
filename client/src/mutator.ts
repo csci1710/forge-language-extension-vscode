@@ -122,13 +122,15 @@ export class Mutator {
 
 
 	isInstructorAuthored(pred: string): boolean {
-		return new RegExp(`\\b${pred}\\b`).test(this.wheat);
+		var exp = `pred\\s+${pred}\\b`
+		var x = new RegExp(exp).test(this.wheat);
+		return x;
 	}
 
 
 	mutateToAssertion(test_name : string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") : void {
 
-		
+
 		const isLhsInstructorAuthored = this.isInstructorAuthored(lhs_pred);
 		const isRhsInstructorAuthored = this.isInstructorAuthored(rhs_pred);
 
@@ -217,11 +219,6 @@ export class Mutator {
 	mutateToStudentMisunderstanding()  {
 
 		let w_os = this.forge_output.split("\n");
-
-
-
-
-
 		for (let w_o of w_os) {
 
 			
