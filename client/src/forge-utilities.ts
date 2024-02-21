@@ -204,10 +204,11 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		let currentAssignment = { variable: '', value: '' };
 		let isAssignmentContinued = false;
 	
-		lines.forEach(l => {
-
+		for (var l of lines) {
 			var line = l.trim();
-			if (line === '') return; // Skip empty lines
+			if (line == '') {
+				continue
+			} 
 	
 			isAssignmentContinued = assignmentContinued(line);
 			if (isAssignmentContinued) {
@@ -217,13 +218,17 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 				assignments.push({...currentAssignment});
 				if (/^\s*\w+\s*=/.test(line)) {
 					let parts = line.split('=');
-					currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
+					const lhs = parts[0].trim();
+					const rhs = parts[1].trim();
+					currentAssignment = { variable: lhs, value: rhs };
+					isAssignmentContinued = true;
 				} else {
 					expressions.push(line);
 				}
 			}
-		});
+		};
 	
+
 		if (isAssignmentContinued) {
 			assignments.push({...currentAssignment});
 		}
