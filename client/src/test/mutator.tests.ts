@@ -4,8 +4,7 @@ import { removeForgeComments } from '../forge-utilities';
 
 import { strict as assert, strictEqual } from 'assert';
 
-
-
+// TODO: This is duplicated, find a better place to put it.
 export function combineTestsWithModel(wheatText: string, tests: string) : string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
@@ -359,5 +358,37 @@ assert all x : Node | loops is sufficient for isDirectedTree
 
 
 
-	// TODO: Test "Example" mutation. I think this is off.
+		// TODO: Test "Example" mutations alongside Assertions. I think this is tricky!
+		it('carries out mutations on examples and assertions when combined.', () => {
+	
+			const tests = `
+		  
+			  #lang forge
+	
+			open "${DIRTREE_INFO.filename}"
+			//// Do not edit anything above this line ////
+		 
+			pred mustBeEmpty {
+				no edges
+		    }
+		   
+		   assert mustBeEmpty is necessary for isDirectedTree
+		  
+		  example loop is {isDirectedTree} for {
+			Node = \`Node1 + \`Node2
+			edges = \`Node1->\`Node2  + \`Node2->\`Node1
+		  }
+		  `;
+			const forge_output = "FILL ME";
+			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+			console.log(source_text);
+	
+			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+			mutator.mutateToStudentMisunderstanding();
+	
+		  	const expected_mutant = ``;
+	
+			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+		});
+
 });
