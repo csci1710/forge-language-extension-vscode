@@ -89,7 +89,9 @@ ${w_o}`;
 
 		const source_text = combineTestsWithModel(w, studentTests);
 
-
+		//this.forgeOutput.appendLine(w_o)
+		
+		
 		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 		mutator.mutateToStudentMisunderstanding();
@@ -209,6 +211,7 @@ please fill out this form: ${formurl}`];
 			return NOT_ENABLED_MESSAGE;
 		}
 		else {
+			vscode.window.showErrorMessage(`Toadus : Network error ${response.status} ${response.statusText}`);
 			return ""; 			// ERROR
 		}
 	}

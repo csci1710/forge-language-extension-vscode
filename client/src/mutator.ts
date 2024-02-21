@@ -52,6 +52,8 @@ export class Mutator {
 	inconsistent_tests : string[];
 
 
+	num_mutations : number = 0;
+
 	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
 		this.wheat = wheat;
 
@@ -64,13 +66,19 @@ export class Mutator {
 		this.mutant = this.wheat + "\n" + this.student_preds + "\n";
 		this.source_text = source_text;
 		this.error_messages = [];
+		this.inconsistent_tests = [];
 	}
 
+
+	getInnerPostfix() {
+		this.num_mutations++;
+		return `_inner${this.num_mutations}`;
+	}
 
 
 	// w : Current wheat, i : predicate to be constrained, s : predicate by which to constrain
 	constrainPredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + "_inner";
+		const i_inner = i + this.getInnerPostfix();
 		// User believes that i => s (ie if i then s).
 		// So constrict i to be { i AND s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -84,7 +92,7 @@ export class Mutator {
 	}
 
 	constrainPredicateByExclusion(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + "_inner";
+		const i_inner = i + this.getInnerPostfix();
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -98,7 +106,7 @@ export class Mutator {
 	}
 
 	easePredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + "_inner";
+		const i_inner = i + this.getInnerPostfix();
 		// User believes that s => i (ie if s then i)
 		// So ease i to be { i or s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -118,22 +126,23 @@ export class Mutator {
 	}
 
 
-	mutateToAssertion(test_name : string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") {
+	mutateToAssertion(test_name : string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") : void {
 
+		
 		const isLhsInstructorAuthored = this.isInstructorAuthored(lhs_pred);
 		const isRhsInstructorAuthored = this.isInstructorAuthored(rhs_pred);
 
 
 		if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
 			this.error_messages.push(`Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
-			return "";
+			return;
 		}
 		this.inconsistent_tests.push(test_name);
 
 
 		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
 			this.error_messages.push(`I cannot provide you with further feedback around ${test_name}, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
-			return "";
+			return;
 		}
 
 		
@@ -165,7 +174,7 @@ export class Mutator {
 				this.mutant = this.constrainPredicate(this.mutant, rhs_pred, lhs_pred, quantified_prefix)
 			}
 		}
-		throw new Error("Something went wrong!");
+
 	}
 
 
@@ -177,7 +186,7 @@ export class Mutator {
 		const sigNames = getSigList(this.wheat);
 		const wheatPredNames = getPredList(this.wheat);
 
-
+		this.inconsistent_tests.push(failed_example.exampleName);
 		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
 		const negationRegex = /(not|!)\s+(\b\w+\b)/;
 		const isNegation = failed_example.examplePredicate.match(negationRegex);
@@ -186,9 +195,6 @@ export class Mutator {
 		if (isNegation != null) {
 			failed_example.examplePredicate = isNegation[2];
 		}
-
-
-
 
 
 		// TODO: ISSUE: 
@@ -212,9 +218,17 @@ export class Mutator {
 
 		let w_os = this.forge_output.split("\n");
 
-		for (var w_o in w_os) {
 
+
+
+
+		for (let w_o of w_os) {
+
+			
 			const testName = getFailingTestName(w_o);
+
+
+			
 
 			if (example_regex.test(w_o)) {				
 				// Fundamentally the issue is that the characteristic predicate from a 
@@ -226,7 +240,7 @@ export class Mutator {
 				this.mutateToExample(failedExample);
 
 	
-				this.inconsistent_tests.push(testName);
+				
 			}
 
 			if (quantified_assertion_regex.test(w_o)) {
@@ -259,6 +273,7 @@ export class Mutator {
 
 			if (assertion_regex.test(w_o)) {
 
+
 				// mutate to assertion
 				const match = w_o.match(assertion_regex);
 				const lhs_pred = match[1];
@@ -266,8 +281,6 @@ export class Mutator {
 				const rhs_pred = match[3];
 
 				this.mutateToAssertion(testName, lhs_pred, rhs_pred, op);
-				this.inconsistent_tests.push(testName);
-
 			}
 			else if (test_regex.test(w_o)) {
 
@@ -276,9 +289,12 @@ export class Mutator {
 				this.error_messages.push(test_expect_failure_msg)
 				
 			}
+			else if (testName != "") {
+				throw new Error("Something went very wrong!");
+			}
 		}
 
-		//return this.mutant;
+		return this.num_mutations;
 	}
 }
 

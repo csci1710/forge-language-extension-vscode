@@ -272,11 +272,11 @@ export async function activate(context: ExtensionContext) {
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 
 
-		// TODO: Re-comment
-		// if (!isLoggingEnabled) {
-		// 	halpOutput.appendLine('❗🐸❗ I can only be used if logging is enabled.');
-		// 	return;
-		// }
+
+		if (!isLoggingEnabled) {
+			halpOutput.appendLine('❗🐸❗ I can only be used if logging is enabled.');
+			return;
+		}
 
 		halpOutput.appendLine('🐸: Analyzing your tests...');
 		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
