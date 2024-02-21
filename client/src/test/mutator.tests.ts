@@ -303,5 +303,61 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
 
+
+		it('carries out mutations on negative examples.', () => {
+	
+			const tests = `
+		  
+			  #lang forge
+	
+			open "${DIRTREE_INFO.filename}"
+			//// Do not edit anything above this line ////
+		 
+		  
+		  example line is {not isDirectedTree} for {
+			Node = \`Node1 + \`Node2
+			edges = \`Node1->\`Node2 
+		  }
+		  `;
+			const forge_output = `[directedtree.test.frg:13:0 (span 168)] Invalid example 'line'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
+			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 36) (time-solving 0) (time-building 1708545562033) (time-core 0)) unsat)
+			`;
+			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+			//console.log(source_text);
+	
+			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+			mutator.mutateToStudentMisunderstanding();
+	
+		  	const expected_mutant = `
+			#lang forge
+			option run_sterling off
+
+			  sig Node {edges: set Node}
+			  
+			  pred isDirectedTree_inner1 {
+					  edges.~edges in iden
+					  lone edges.Node - Node.edges 
+					  no (^edges & iden)
+					  lone Node or Node in edges.Node + Node.edges 
+			  }
+			  
+			  
+			  pred line {
+				  some disj Node1, Node2 : Node | {
+							  Node = Node1 + Node2
+							  edges = Node1->Node2
+						  }
+			  }
+			  
+			  pred isDirectedTree { 
+			   isDirectedTree_inner1 and not line
+			  }`;
+	
+			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+		});
+
+
+
+
 	// TODO: Test "Example" mutation. I think this is off.
 });
