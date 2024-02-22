@@ -1,0 +1,26 @@
+name: Version Increment Check
+on:
+  pull_request:
+    branches: [ dev ] # or master, depending on your default branch
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Ensures history is available for comparison
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18' # Use the Node.js version that matches your project requirements
+
+      - run: npm ci
+
+      - name: Run Mutator Tests
+        run: npx mocha -r ts-node/register ./client/src/test/mutator.tests.ts
+
+
+        
