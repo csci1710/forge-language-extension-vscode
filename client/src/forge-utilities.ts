@@ -394,6 +394,9 @@ export async function ensureForgeVersion(minVersion: string) {
 			if (compareVersions(version, minVersion) < 0) {
 				vscode.window.showErrorMessage(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
 			}
+			else {
+				vscode.window.showInformationMessage(`You are running Forge version ${version}.`);
+			}
 			
 		} else {
 			vscode.window.showErrorMessage(ERR_FORGE);
