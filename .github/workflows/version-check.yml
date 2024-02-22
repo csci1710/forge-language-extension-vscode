@@ -22,3 +22,4 @@ jobs:
 
       - name: Check Version Increment
         run: node .github/scripts/version-check.js
+        
