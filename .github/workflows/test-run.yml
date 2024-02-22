@@ -1,7 +1,7 @@
-name: Version Increment Check
+name: Test Check
 on:
   pull_request:
-    branches: [ main ] # or master, depending on your default branch
+    branches: [ dev ] # or master, depending on your default branch
 
 jobs:
   version-check:
@@ -11,9 +11,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0 # Ensures history is available for comparison
-
-      - name: Fetch main
-        run: git fetch origin main:main
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
@@ -25,6 +22,5 @@ jobs:
       - name: Run Mutator Tests
         run: npx mocha -r ts-node/register ./client/src/test/mutator.tests.ts
 
-      - name: Check Version Increment
-        run: node .github/scripts/version-check.js
+
         

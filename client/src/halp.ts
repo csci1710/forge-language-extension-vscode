@@ -2,15 +2,32 @@ import {RacketProcess} from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { 
-	assertion_regex, example_regex, test_regex, adjustWheatToStudentMisunderstanding, getPredicatesOnly, BothPredsStudentError ,
-	exampleToPred, getSigList, getPredList, findExampleByName,
-	removeForgeComments, constrainPredicateByExclusion, easePredicate, quantified_assertion_regex,adjustWheatToQuantifiedStudentMisunderstanding
-} from './forge-utilities'; 
+import { removeForgeComments, getFailingTestNames } from './forge-utilities'; 
+import { Mutator } from './mutator'; 
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
 
+
+
+export function combineTestsWithModel(wheatText: string, tests: string) : string {
+	// todo: What if separator doesn't exist (in that case, look for #lang forge)
+	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+	const hashlang_decl = "#lang";
+
+	if (tests.includes(TEST_SEPARATOR)) {
+		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+		tests = tests.substring(startIndex).trim();
+	}
+
+	tests = tests.replace(hashlang_decl, "// #lang");
+
+	var combined = wheatText + "\n" + tests;
+	combined = removeForgeComments(combined);
+
+	return combined;
+
+}
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
 
@@ -20,6 +37,7 @@ const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assi
 
 export class HalpRunner {
 
+	private SOMETHING_WENT_WRONG = "Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff.";
 	static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles";
 	logger : Logger;
 	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
@@ -39,131 +57,88 @@ export class HalpRunner {
 	}
 
 
-	async runHalp(studentTests: string, testFileName: string): Promise<string> {
+	async runHalp(studentTests: string, testFileName: string): Promise<string[]> {
+		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		studentTests = studentTests.replace(/\r/g, "\n");
-
 		const w = await this.getWheat(testFileName);
+
 		if (w === "") {
-			return "Network error. Terminating run.";
+			vscode.window.showErrorMessage("Toadus : Network error. Terminating run.");
+			return [];
 		}
 		else if (w === NOT_ENABLED_MESSAGE) {
-			return NOT_ENABLED_MESSAGE;
+			vscode.window.showErrorMessage(NOT_ENABLED_MESSAGE);
+			return []
 		}
+
+
+		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
 		if (this.isConsistent(w_o)) {
-			return `Your tests are all consistent with the assignment specification.
-			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`;
+			return [`Your tests are all consistent with the assignment specification.
+			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`];
 			// TODO: Can we add some sort of thoroughness metric here?
 		}
 
-		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
-		const testName = this.getFailingTestName(w_o);
 
-		const assertionsBetter = `\n\u{2139} I am sorry I could not provide more feedback here. I am better at providing more detailed feedback when analyzing assertions than examples.`;
-
-		const defaultFeedback = `I found a runtime or syntax error in your tests:
+		const testNames = getFailingTestNames(w_o);
+		const noTestFound = `I found a runtime or syntax error in your tests:
 ${w_o}`;
-		if (testName == "") {
-			return defaultFeedback;
-		}
 
-		if (example_regex.test(w_o)) {
-
-			// Fundamentally the issue is that the characteristic predicate from a 
-			// positive example gives us such a *specific* modification to a predicate,
-			// that it is rare for us to offer meaningful feedback.
-			try {
-				var hint = await this.tryGetHintFromExample(testName, testFileName, w, studentTests, w_o);
-				if (hint != "")
-				{
-					return `${testName} is not consistent with the problem specification. ` + hint;
-				}
-			}
-			catch (e) {}
-			return w_o + assertionsBetter;
-		}
-
-		if (quantified_assertion_regex.test(w_o)) {
-
-			// Deal with quantified assertions here. Of the form:
-			const student_preds = getPredicatesOnly(studentTests); 
-
-			const source_text = this.combineTestsWithModel(w, studentTests);
-
-			try {
-				var hint = await this.tryGetHintFromQuantifiedAssertion(testFileName, source_text, w, student_preds, w_o);
-			}
-			catch (e)
-			{
-				if (e instanceof BothPredsStudentError) {
-					return `Sorry! I cannot provide feedback around ${testName}. ` + e.message;
-				} 
-				hint = e.message;
-			}
-			if (hint != "") {
-				return `${testName} is not consistent with the problem specification. ` + hint;
-			}
-
-			const payload = {
-
-				"studentTests": studentTests,
-				"wheat_output" : w_o,
-				"testFile" : testFileName
-			}
-			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
-
-			// Else, return this feedback around no hint found.
-			return `"${testName}" examines behaviors that are either ambiguous or not clearly defined in the problem specification.
-This test is not necessarily incorrect, but I cannot provide feedback around it. 
-If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
-
-If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-please fill out this form: ${formurl}`;
-
+		if (testNames.length == 0) {
+			return [noTestFound];
 		}
 
 
-		if (assertion_regex.test(w_o)) {
-			const student_preds = getPredicatesOnly(studentTests); 
-
-			try {
-				var hint = await this.tryGetHintFromAssertion(testFileName, w, student_preds, w_o);
-			}
-			catch (e)
-			{
-				if (e instanceof BothPredsStudentError) {
-					return `Sorry! I cannot provide feedback around ${testName}. ` + e.message;
-				} 
-				hint = e.message;
-			}
-			if (hint != "") {
-				return `${testName} is not consistent with the problem specification. ` + hint;
-			}
-
-			const payload = {
-
-				"studentTests": studentTests,
-				"wheat_output" : w_o,
-				"testFile" : testFileName
-			}
-			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
-
-			// Else, return this feedback around no hint found.
-			return `"${testName}" examines behaviors that are either ambiguous or not clearly defined in the problem specification.
-This test is not necessarily incorrect, but I cannot provide feedback around it. 
-If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.
-
-If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-please fill out this form: ${formurl}`;
-
-		}
-		else if (test_regex.test(w_o)) {
-			return `Sorry! I cannot provide feedback around the test "${testName}".
-If you want feedback around other tests you have written, you will have to temporarily comment out this test and run me again.`;
-		}
+		const source_text = combineTestsWithModel(w, studentTests);
 		
-		return defaultFeedback;
+		
+		
+		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
+		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
+		mutator.mutateToStudentMisunderstanding();
+
+
+		let assessed_tests = mutator.inconsistent_tests.join("\n");
+		
+
+		let skipped_tests = mutator.error_messages.join("\n");
+		this.forgeOutput.appendLine(skipped_tests);
+
+		this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
+		this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
+
+		try {
+			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
+		}
+		catch (e)
+		{
+			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+			this.forgeOutput.appendLine(e.message);
+			return [this.SOMETHING_WENT_WRONG];
+		}
+
+		if (hints.length == 0) {
+			
+			const payload = {
+
+				"studentTests": studentTests,
+				"wheat_output" : w_o,
+				"testFile" : testFileName
+			}
+			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+
+
+			// HOWEVER: A LOSS HERE IS THAT WE DO NOT KNOW WHICH TESTS ARE AMBIGUOUS.
+			return [`Analyzed tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+They are not necessarily incorrect, but I cannot provide feedback around it. 
+
+If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+please fill out this form: ${formurl}`];
+
+		}		
+		return hints;
 	}
 
 
@@ -171,13 +146,12 @@ If you want feedback around other tests you have written, you will have to tempo
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
-		const toRun = this.combineTestsWithModel(model, tests);
+		const toRun = combineTestsWithModel(model, tests);
 
 		// Write the contents of toRun to a temporary file
 		const tempFilePath = this.tempFile();
 		try {
 			fs.writeFileSync(tempFilePath, toRun);
-			// Need to examine and interpret results here.
 			let r = racket.runFile(tempFilePath);
 
 			if (!r) {
@@ -228,24 +202,7 @@ If you want feedback around other tests you have written, you will have to tempo
 	}
 
 
-	private combineTestsWithModel(wheatText: string, tests: string) : string {
-		// todo: What if separator doesn't exist (in that case, look for #lang forge)
-		const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
-		const hashlang_decl = "#lang";
 
-		if (tests.includes(TEST_SEPARATOR)) {
-			const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-			tests = tests.substring(startIndex).trim();
-		}
-		// else if (studentAuthored) {
-		// 	const errStr = `Format error in your test file. Did you edit anything above the comment '${TEST_SEPARATOR}' or remove this comment?`;
-		// 	vscode.window.showErrorMessage(errStr);
-		// 	throw new Error(errStr);
-		// }
-		// Remove any potentially accidentally left in #lang defs
-		tests = tests.replace(hashlang_decl, "// #lang");
-		return wheatText + "\n" + tests;
-	}
 
 	private async downloadFile(url: string): Promise<string>  {
 
@@ -261,6 +218,7 @@ If you want feedback around other tests you have written, you will have to tempo
 			return NOT_ENABLED_MESSAGE;
 		}
 		else {
+			vscode.window.showErrorMessage(`Toadus : Network error ${response.status} ${response.statusText}`);
 			return ""; 			// ERROR
 		}
 	}
@@ -291,132 +249,41 @@ If you want feedback around other tests you have written, you will have to tempo
 		}
 	}
 
-	private getFailingTestName(o: string): string {
-		if (quantified_assertion_regex.test(o)) {
-			const match = o.match(quantified_assertion_regex);
-			const lhs_pred = match[4];	
-			const op = match[5];
-			const rhs_pred = match[6];
-			return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
 
-		} else if (assertion_regex.test(o)) {
-			const match = o.match(assertion_regex);
-			const lhs_pred = match[1];	
-			const op = match[2];
-			const rhs_pred = match[3];
-			return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
-		} else if (example_regex.test(o)) {
-			const match = o.match(example_regex);
-			return match[1];
-		} else if (test_regex.test(o)) {
-			const match = o.match(test_regex);
-			if (match[1]) return match[1];
-			return match[2]
-		} 
-		return "";
-	}
-
-	// w : wheat
-	// w_o : wheat output
-	private async tryGetHintFromAssertion(testFileName: string, w : string, student_preds : string, w_o : string) : Promise<string> {
-
-		let w_wrapped = adjustWheatToStudentMisunderstanding(testFileName, w, student_preds, w_o);
-		const payload = {
-			"testFileName": testFileName,
-			"assignment": testFileName.replace('.test.frg', ''),
-			"student_preds": student_preds,
-			"test_failure_message": w_o,
-			"conceptual_mutant": w_wrapped
-		}
-		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
-
-		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);	
-		return await this.get_hint_from_autograder_output(ag_output, testFileName);
-	}
-
-
-		// w : wheat
-	// w_o : wheat output
-	private async tryGetHintFromQuantifiedAssertion(testFileName: string, source_text : string, w : string, student_preds : string, w_o : string) : Promise<string> {
-
-		let w_wrapped = adjustWheatToQuantifiedStudentMisunderstanding(source_text, w, student_preds, w_o);
-		const payload = {
-			"testFileName": testFileName,
-			"assignment": testFileName.replace('.test.frg', ''),
-			"student_preds": student_preds,
-			"test_failure_message": w_o,
-			"conceptual_mutant": w_wrapped
-		}
-		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
-
-		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);	
-		return await this.get_hint_from_autograder_output(ag_output, testFileName);
-	}
-
-
-
-
-
-
-
-
-
-
-	// TODO: ISSUE: Does not play nice with parameterized predicates.
-	private async tryGetHintFromExample(testName : string, testFileName: string, w : string, studentTests : string, w_o : string) : Promise<string> {
-		studentTests = removeForgeComments(studentTests);
-		const sigNames = getSigList(w);
-		const wheatPredNames = getPredList(w);
-		const failedExample = findExampleByName(studentTests, testName);
-
-		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
-		const negationRegex = /(not|!)\s+(\b\w+\b)/;
-		const isNegation = failedExample.examplePredicate.match(negationRegex);
-		
-		// Change the target predicate.
-		if (isNegation != null) {
-			failedExample.examplePredicate = isNegation[2];
-		}
-
-		const exampleAsPred = exampleToPred(failedExample, sigNames, wheatPredNames);
-		const student_preds = getPredicatesOnly(studentTests) + "\n" + exampleAsPred + "\n";
-		let w_with_student_preds = w + "\n" + student_preds + "\n";
-		const w_wrapped =  (isNegation != null) ?
-			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
-			// Modify the wheat to be i' {	i and (not s)	}
-			constrainPredicateByExclusion(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName)
-			// OR Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
-			: easePredicate(w_with_student_preds, failedExample.examplePredicate, failedExample.exampleName);
-
-		const payload = {
-			"testFileName": testFileName,
-			"assignment": testFileName.replace('.test.frg', ''),
-			"student_preds": student_preds,
-			"test_failure_message": w_o,
-			"conceptual_mutant": w_wrapped
-		}
-
-		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
-
-		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, w_wrapped);
-		return await this.get_hint_from_autograder_output(ag_output, testFileName);
-	}
-
-
-	async get_hint_from_autograder_output(ag_output : string, testFileName : string) {
+	private async tryGetHintsFromAutograderOutput(ag_output : string, testFileName : string) : Promise<string[]> {
 		
 		if (ag_output == "") {
-			return "";
+			return [];
 		}
-		const tName = this.getFailingTestName(ag_output);
+		const tNames = getFailingTestNames(ag_output);
 		const hint_map = await this.getHintMap(testFileName);
 
-		if (tName in hint_map) {
-			return hint_map[tName];
+		var issues = tNames.filter((tName) => !(tName in hint_map));
+		if (issues.length > 0) {
+			vscode.window.showErrorMessage("Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff.");
 		}
-		throw new Error("Something went wrong when generating further feedback around this test. Please contact course staff if you need more feedback.");
+
+
+		var hint_candidates = tNames.filter((tName) => tName in hint_map)
+							 .map((tName) => hint_map[tName]);						
+		return hint_candidates;
 	}
+
+
+	async tryGetHintsFromMutant(testFileName: string, mutant : string, student_preds : string, w_o : string) : Promise<string[]> {
+
+		const payload = {
+			"testFileName": testFileName,
+			"assignment": testFileName.replace('.test.frg', ''),
+			"student_preds": student_preds,
+			"test_failure_message": w_o,
+			"conceptual_mutant": mutant
+		}
+		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
+
+		const autograderTests = await this.getAutograderTests(testFileName);
+		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
+		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
+	}
+
 }

@@ -4,6 +4,7 @@ import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, Diagnostic
 import { HalpRunner } from './halp';
 
 
+
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -80,6 +81,10 @@ export async function activate(context: ExtensionContext) {
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
+
+			// TODO: THis needs to be updated to handle multiple errors
+
+
 			const matcher = racket.matchForgeError(context.line);
 			if (!matcher) {
 				return [];
@@ -180,6 +185,8 @@ export async function activate(context: ExtensionContext) {
 			console.error("Could not run Forge process.");
 		}
 
+		// :'Some tests failed. Reporting failures in order.'
+
 		racketProcess.stdout.on('data', (data: string) => {
 			const lst = data.toString().split(/[\n]/);
 			for (let i = 0; i < lst.length; i++) {
@@ -198,6 +205,7 @@ export async function activate(context: ExtensionContext) {
 		});
 
 		racketProcess.on('exit', (code: string) => {
+
 			if (!racket.racketKilledManually) {
 				if (myStderr != '') {
 					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
@@ -209,6 +217,7 @@ export async function activate(context: ExtensionContext) {
 				racket.showFileWithOpts(filepath, null, null);
 				racket.userFacingOutput.appendLine('Forge process terminated.');
 			}
+
 
 			// Output *may* have user file path in it. Do we want this?
 			var payload = {
@@ -262,12 +271,14 @@ export async function activate(context: ExtensionContext) {
 		halpOutput.show();
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 
+
+
 		if (!isLoggingEnabled) {
 			halpOutput.appendLine('❗🐸❗ I can only be used if logging is enabled.');
 			return;
 		}
 
-		halpOutput.appendLine('🐸: Analyzing your tests...');
+		
 		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
 
 		const editor = vscode.window.activeTextEditor;
@@ -284,11 +295,22 @@ export async function activate(context: ExtensionContext) {
 			var h = new HalpRunner(logger, halpOutput);
 			h.runHalp(content, fileName)
 				.then((result) => {
-					// TODO: Move this log to inside the HalpRunner
-					var documentData = textDocumentToLog(document, true);
-					documentData['halp_output'] = result;
-					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
-					halpOutput.appendLine("💡🐸💡 " + result);
+					
+					try {
+						var documentData = textDocumentToLog(document, true);
+						documentData['halp_output'] = result.join("\n");
+						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
+
+						if (result.length > 0) {
+							// TODO: What should I do when we have multiple hints? Should I choose one at random?
+							var hint = result[Math.floor(Math.random() * result.length)];
+							halpOutput.appendLine("💡🐸💡 " + hint);
+						}
+					}
+					finally {
+						halpOutput.appendLine('🐸 Toadus Ponens run ended 🐸');
+					}
+					
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');

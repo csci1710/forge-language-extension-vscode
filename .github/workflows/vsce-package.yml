@@ -3,7 +3,7 @@ name: Build and Deploy Extension
 on:
   push:
     branches:
-      - main  # replace with your default branch if not 'main'
+      - main  
 
 jobs:
   deploy:
@@ -13,7 +13,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 19
-      - run: npm ci
+
+
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v0
         with:
