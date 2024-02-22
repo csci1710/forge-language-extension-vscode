@@ -1,6 +1,7 @@
 {
 	"name": "forge-language-server",
 	"description": "Forge Language Server",
+
 	"author": "",
 	"license": "",
 	"version": "2.3.0",
@@ -67,6 +68,12 @@
 					],
 					"default": "messages",
 					"description": "Traces the communication between VS Code and the language server."
+				},
+				"forge.minVersion" : {
+					"scope": "resource",
+					"type": "string",
+					"default": "3.2.1",
+					"description": "Minimum version of Forge required to run this extension."
 				}
 			}
 		},

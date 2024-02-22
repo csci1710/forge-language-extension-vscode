@@ -1,3 +1,7 @@
+import { tempFile } from './utilities';
+import {spawn } from 'child_process';
+import * as fs from 'fs';
+import * as vscode from 'vscode';
 /*
 	Utilites related to Forge syntax.
 	Could change with Forge updates and/or a language server.
@@ -325,4 +329,74 @@ export function getFailingTestName(o: string): string {
 		return match[2]
 	} 
 	return "";
+}
+
+function compareVersions(version1: string, version2: string): number {
+	const parseVersion = (version: string) => version.split('.').map(Number);
+	
+	const v1 = parseVersion(version1);
+	const v2 = parseVersion(version2);
+	
+	for (let i = 0; i < Math.max(v1.length, v2.length); i++) {
+	  // Treat missing parts as 0 (e.g., "1.0" is equal to "1.0.0")
+	  const num1 = i < v1.length ? v1[i] : 0;
+	  const num2 = i < v2.length ? v2[i] : 0;
+	  
+	  if (num1 > num2) return 1;
+	  if (num2 > num1) return -1;
+	}
+	
+	return 0; // Versions are equal
+  }
+  
+
+export async function ensureForgeVersion(minVersion: string) {
+
+	const filePath = tempFile();
+	const emptyForgeFile = `
+	#lang forge
+	test expect {
+
+		{} is sat
+	}
+	`;
+
+	fs.writeFileSync(filePath, emptyForgeFile);
+	let p = spawn('racket', [`"${filePath}"`], { shell: true });
+
+	var stdout = '';
+	var stderr = '';
+
+	const ERR_FORGE = "Could not determine Forge version. Please ensure that Forge is installed.";
+	p.stderr.on('data', (err: string) => {
+		stderr += err;
+	});
+
+	p.stdout.on('data', (err: string) => {
+		stdout += err;
+	});
+
+	await new Promise<void>((resolve, _) => {
+		p.on('exit', (code: string) => {		
+			resolve();
+		});
+	});
+
+	if (stderr != '') {
+		vscode.window.showErrorMessage(stderr);
+	} else if (stdout == '') {
+		vscode.window.showErrorMessage(ERR_FORGE);
+	} else {
+		const forgeVersionRegex = /Forge version: (\d+\.\d+\.\d+)/;
+		const match = stdout.match(forgeVersionRegex);
+		if (match) {
+			let version = match[1];
+			if (compareVersions(version, minVersion) < 0) {
+				vscode.window.showErrorMessage(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
+			}
+			
+		} else {
+			vscode.window.showErrorMessage(ERR_FORGE);
+		}
+	}
 }
