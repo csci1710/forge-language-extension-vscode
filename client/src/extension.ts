@@ -278,7 +278,7 @@ export async function activate(context: ExtensionContext) {
 			return;
 		}
 
-		halpOutput.appendLine('🐸: Analyzing your tests...');
+		
 		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
 
 		const editor = vscode.window.activeTextEditor;
@@ -305,6 +305,8 @@ export async function activate(context: ExtensionContext) {
 						var hint = result[Math.floor(Math.random() * result.length)];
 						halpOutput.appendLine("💡🐸💡 " + hint);
 					}
+
+					halpOutput.appendLine('🐸 Toadus Ponens analysis complete 🐸');
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');

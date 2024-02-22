@@ -71,12 +71,16 @@ export class HalpRunner {
 			return []
 		}
 
+
+		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
+
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
 		if (this.isConsistent(w_o)) {
 			return [`Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`];
 			// TODO: Can we add some sort of thoroughness metric here?
 		}
+
 
 		const testNames = getFailingTestNames(w_o);
 		const noTestFound = `I found a runtime or syntax error in your tests:
@@ -88,22 +92,21 @@ ${w_o}`;
 
 
 		const source_text = combineTestsWithModel(w, studentTests);
-
-		//this.forgeOutput.appendLine(w_o)
+		
 		
 		
 		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 		mutator.mutateToStudentMisunderstanding();
 
-		let assessed_tests = mutator.inconsistent_tests.join(",");
-		this.forgeOutput.appendLine(`Providing feedback around the following tests: ${assessed_tests}`);
+
+		let assessed_tests = mutator.inconsistent_tests.join("\n");
+		this.forgeOutput.appendLine(`🐸 Step 2: I'm going to try and provide feedback around the following ${mutator.inconsistent_tests.length} tests:\n ${assessed_tests}`);
 
 		let skipped_tests = mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
 
 		try {
-			//testFileName: string, mutant : string, student_preds : string, w_o : string
 			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
 		}
 		catch (e)

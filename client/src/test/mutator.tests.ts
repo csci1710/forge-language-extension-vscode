@@ -114,7 +114,46 @@ describe('Mutator', () => {
 	});
 
 
+	it('ignores examples that do not directly reference a predicate.', () => {
 
+		const tests = `
+	  
+	  	#lang forge
+
+		open "${DIRTREE_INFO.filename}"
+		//// Do not edit anything above this line ////
+	 
+
+	  
+	  example someexamplename1 is {all t : Node | isDirectedTree } for {
+		Node = \`Node1 + \`Node2
+		no edges
+	  }
+
+	  pred anotherPred {
+		  some edges
+	  }
+
+	  example someexamplename2 is anotherPred for {
+		Node = \`Node1 
+		no edges
+	  }
+
+	  `;
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentMisunderstanding();
+	  	assert.strictEqual(mutator.num_mutations, 0);
+
+	   let outputs = mutator.error_messages;
+
+	   for (let output of outputs) {
+			assert.strict(output.includes('someexamplename1') || output.includes('someexamplename'));
+	   }
+
+	});
 
 	it('can mutate on multiple assertion failures.', () => {
 
@@ -387,7 +426,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 5) (time-solving 0) (time-building 1708555673326) (time-core 0)) unsat)			
 			`;
 			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
-			console.log(source_text);
+		
 	
 			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 			mutator.mutateToStudentMisunderstanding();
@@ -426,5 +465,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 	
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
+
+		// TODO: Mutation only when the example tests a predicate or negative predicate from the spec.
 
 });

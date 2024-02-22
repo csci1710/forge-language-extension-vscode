@@ -122,8 +122,6 @@ export class Mutator {
 		return w_wrapped + added_pred;
 	}
 
-
-
 	isInstructorAuthored(pred: string): boolean {
 		var exp = `pred\\s+${pred}\\b`
 		var x = new RegExp(exp).test(this.wheat);
@@ -202,10 +200,10 @@ export class Mutator {
 		}
 
 
-		// TODO: ISSUE: 
-		// Double check the logic here, and do some debugging.
-
-
+		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
+			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
+			return;
+		}
 
 		const exampleAsPred = exampleToPred(failed_example, sigNames, wheatPredNames);
 		let mutant_with_example = this.mutant + "\n" + exampleAsPred + "\n";
@@ -218,7 +216,8 @@ export class Mutator {
 			: this.easePredicate(mutant_with_example, failed_example.examplePredicate, failed_example.exampleName);
 	}
 
-// This does not error  loudly!
+// TODO: This does not error  loudly!
+// TODO: Examples are not added to output!
 	mutateToStudentMisunderstanding()  {
 
 		let w_os = this.forge_output.split("\n");
@@ -234,6 +233,9 @@ export class Mutator {
 				// positive example gives us such a *specific* modification to a predicate,
 				// that it is rare for us to offer meaningful feedback.
 				
+
+				// TODO: Need to ensure the example is tests a predicate or negative predicate.
+
 
 				const failedExample = findExampleByName(this.student_tests, testName);
 				this.mutateToExample(failedExample);
