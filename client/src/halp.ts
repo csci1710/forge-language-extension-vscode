@@ -101,10 +101,13 @@ ${w_o}`;
 
 
 		let assessed_tests = mutator.inconsistent_tests.join("\n");
-		this.forgeOutput.appendLine(`🐸 Step 2: I'm going to try and provide feedback around the following ${mutator.inconsistent_tests.length} tests:\n ${assessed_tests}`);
+		
 
 		let skipped_tests = mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
+
+		this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
+		this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
 		try {
 			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
@@ -113,6 +116,7 @@ ${w_o}`;
 		{
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
 			this.forgeOutput.appendLine(e.message);
+			return [this.SOMETHING_WENT_WRONG];
 		}
 
 		if (hints.length == 0) {

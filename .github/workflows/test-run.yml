@@ -1,4 +1,4 @@
-name: Version Increment Check
+name: Test Check
 on:
   pull_request:
     branches: [ dev ] # or master, depending on your default branch

@@ -295,18 +295,22 @@ export async function activate(context: ExtensionContext) {
 			var h = new HalpRunner(logger, halpOutput);
 			h.runHalp(content, fileName)
 				.then((result) => {
-					// TODO: Move this log to inside the HalpRunner
-					var documentData = textDocumentToLog(document, true);
-					documentData['halp_output'] = result.join("\n");
-					logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
+					
+					try {
+						var documentData = textDocumentToLog(document, true);
+						documentData['halp_output'] = result.join("\n");
+						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 
-					if (result.length > 0) {
-						// TODO: What should I do when we have multiple hints? Should I choose one at random?
-						var hint = result[Math.floor(Math.random() * result.length)];
-						halpOutput.appendLine("💡🐸💡 " + hint);
+						if (result.length > 0) {
+							// TODO: What should I do when we have multiple hints? Should I choose one at random?
+							var hint = result[Math.floor(Math.random() * result.length)];
+							halpOutput.appendLine("💡🐸💡 " + hint);
+						}
 					}
-
-					halpOutput.appendLine('🐸 Toadus Ponens analysis complete 🐸');
+					finally {
+						halpOutput.appendLine('🐸 Toadus Ponens run ended 🐸');
+					}
+					
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');

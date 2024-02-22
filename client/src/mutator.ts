@@ -217,30 +217,19 @@ export class Mutator {
 	}
 
 // TODO: This does not error  loudly!
-// TODO: Examples are not added to output!
 	mutateToStudentMisunderstanding()  {
 
 		let w_os = this.forge_output.split("\n");
-		for (let w_o of w_os) {
-
-			
+		for (let w_o of w_os) {	
 			const testName = getFailingTestName(w_o);
-
-
 
 			if (example_regex.test(w_o)) {				
 				// Fundamentally the issue is that the characteristic predicate from a 
 				// positive example gives us such a *specific* modification to a predicate,
 				// that it is rare for us to offer meaningful feedback.
 				
-
-				// TODO: Need to ensure the example is tests a predicate or negative predicate.
-
-
 				const failedExample = findExampleByName(this.student_tests, testName);
 				this.mutateToExample(failedExample);
-
-	
 				
 			} else if (quantified_assertion_regex.test(w_o)) {
 
@@ -280,10 +269,8 @@ export class Mutator {
 			}
 			else if (test_regex.test(w_o)) {
 
-				// Do nothing
-				const test_expect_failure_msg = `Sorry! I cannot provide feedback around the test "${testName}". Excluding it from my analysis.`;
-				this.error_messages.push(test_expect_failure_msg)
-				
+				const test_expect_failure_msg = `Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
+				this.error_messages.push(test_expect_failure_msg)	
 			}
 			else if (testName != "") {
 				throw new Error("Something went very wrong!");

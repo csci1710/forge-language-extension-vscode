@@ -465,7 +465,4 @@ assert all x : Node | loops is sufficient for isDirectedTree
 	
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
-
-		// TODO: Mutation only when the example tests a predicate or negative predicate from the spec.
-
 });
