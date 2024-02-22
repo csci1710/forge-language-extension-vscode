@@ -13,10 +13,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 19
-      - run: npm ci
 
-      - name: Mutator Tests
-        run: npx mocha -r ts-node/register ./client/src/test/mutator.tests.ts
 
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v0

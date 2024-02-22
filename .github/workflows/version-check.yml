@@ -20,6 +20,11 @@ jobs:
         with:
           node-version: '18' # Use the Node.js version that matches your project requirements
 
+      - run: npm ci
+
+      - name: Run Mutator Tests
+        run: npx mocha -r ts-node/register ./client/src/test/mutator.tests.ts
+
       - name: Check Version Increment
         run: node .github/scripts/version-check.js
         
