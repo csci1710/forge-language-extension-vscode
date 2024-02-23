@@ -82,9 +82,10 @@ export class HalpRunner {
 
 		if (this.isConsistent(w_o)) {
 		
-			this.forgeOutput.appendLine(`🐸 Step 2: Your tests are all consistent with the assignment specification.
+			this.forgeOutput.appendLine(`Your tests are all consistent with the assignment specification.
 			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`);
-
+			this.forgeOutput.appendLine(`🐸 Step 2: Trying to generate feedback around the thoroughness of the tests in your 'test-suite's.
+			My feedback is limited to assertions and examples that directly reference the problem specification.`);
 
 			mutator.mutateToStudentUnderstanding();
 			return this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
