@@ -7,6 +7,7 @@ import { Mutator } from './mutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
+import {tempFile} from './gen-utilities';
 
 
 
@@ -152,7 +153,7 @@ please fill out this form: ${formurl}`];
 		const toRun = combineTestsWithModel(model, tests);
 
 		// Write the contents of toRun to a temporary file
-		const tempFilePath = this.tempFile();
+		const tempFilePath = tempFile();
 		try {
 			fs.writeFileSync(tempFilePath, toRun);
 			let r = racket.runFile(tempFilePath);
@@ -188,23 +189,6 @@ please fill out this form: ${formurl}`];
 			fs.unlinkSync(tempFilePath);
 		}
 	}
-
-
-	private tempFile(): string {
-		const tempDir = os.tmpdir();
-		const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-		const length = 10;
-		let result = '';
-
-		for (let i = 0; i < length; i++) {
-			const randomIndex = Math.floor(Math.random() * characters.length);
-			result += characters.charAt(randomIndex);
-		}
-
-		return path.join(tempDir, result + '.rkt');
-	}
-
-
 
 
 	private async downloadFile(url: string): Promise<string>  {
