@@ -88,7 +88,10 @@ export class HalpRunner {
 			My feedback is limited to assertions and examples that directly reference the problem specification.`);
 
 			mutator.mutateToStudentUnderstanding();
-			return this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
+			let x = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
+			if (x.length == 0) {
+				return ["I could not generate further feedback. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+			}
 		}
 
 
