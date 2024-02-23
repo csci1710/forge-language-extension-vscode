@@ -1,7 +1,6 @@
 
 import {spawn } from 'child_process';
 import * as fs from 'fs';
-import * as vscode from 'vscode';
 import { tempFile } from './gen-utilities';
 
 
@@ -353,7 +352,7 @@ function compareVersions(version1: string, version2: string): number {
   }
   
 
-export async function ensureForgeVersion(minVersion: string) {
+export async function ensureForgeVersion(minVersion: string, error_reporter : (s : string) => void){
 
 	const filePath = tempFile();
 	const emptyForgeFile = `
@@ -386,23 +385,19 @@ export async function ensureForgeVersion(minVersion: string) {
 	});
 
 	if (stderr != '') {
-		vscode.window.showErrorMessage(stderr);
+		error_reporter(stderr);
 	} else if (stdout == '') {
-		vscode.window.showErrorMessage(ERR_FORGE);
+		error_reporter(ERR_FORGE);
 	} else {
 		const forgeVersionRegex = /Forge version: (\d+\.\d+\.\d+)/;
 		const match = stdout.match(forgeVersionRegex);
 		if (match) {
 			let version = match[1];
 			if (compareVersions(version, minVersion) < 0) {
-				vscode.window.showErrorMessage(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
-			}
-			else {
-				vscode.window.showInformationMessage(`You are running Forge version ${version}.`);
-			}
-			
+				error_reporter(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
+			}			
 		} else {
-			vscode.window.showErrorMessage(ERR_FORGE);
+			error_reporter(ERR_FORGE);
 		}
 	}
 }

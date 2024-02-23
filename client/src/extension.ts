@@ -83,7 +83,7 @@ export async function activate(context: ExtensionContext) {
 
 	let currentSettings = vscode.workspace.getConfiguration('forge');
 	let minSupportedVersion = currentSettings.get('minVersion').toString();
-	await ensureForgeVersion(minSupportedVersion);
+	await ensureForgeVersion(minSupportedVersion, (s : string) => vscode.window.showErrorMessage(s));
 
 
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
