@@ -16,6 +16,7 @@ export enum LogLevel {
 export enum Event {
     ASSISTANCE_REQUEST = "assistance_request",
     CONCEPTUAL_MUTANT = "conceptual_mutant",
+    THOROUGHNESS_MUTANT = "thoroughness_mutant",
     HALP_RESULT = "halp_result",
     FORGE_RUN_RESULT = "forge_run_result",
     FORGE_RUN = "forge_run",
@@ -63,7 +64,8 @@ export class Logger {
         let p = this.payload(payload, loglevel, event);
         let log = doc(this.log_target);
         try {
-           await setDoc(log, p);
+            // TODO: Uncomment
+           // await setDoc(log, p);
         } catch (error) {
             console.error("Log failure ", error);
         }
