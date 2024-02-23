@@ -431,12 +431,16 @@ export function findAllStructuredTests(suite: string) {
 	return {examples, assertions, quantifiedAssertions};
 }
   
+
+// TODO: THis is not quite correct! It's not finding the test suites.
 export function extractTestSuite(input: string): ExtractedTestSuite[] {
+	
+	
 	const pattern = /test suite for\s+(.*?)\s*\{(.*?)\}/gs;
-	let match;
+	let matches = input.matchAll(pattern);
 	const results: ExtractedTestSuite[] = [];
   
-	while ((match = pattern.exec(input)) !== null) {
+	for (const match of matches) {
 	  const [fullMatch, predicateName, content] = match;
 	  if (isBalancedBraces(content)) {
 
