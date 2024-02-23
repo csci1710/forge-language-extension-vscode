@@ -7,7 +7,7 @@ import { Mutator } from './mutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
-import {tempFile} from './utilities';
+import {tempFile} from './gen-utilities';
 
 
 

@@ -1,7 +1,10 @@
-import { tempFile } from './utilities';
+
 import {spawn } from 'child_process';
 import * as fs from 'fs';
 import * as vscode from 'vscode';
+import { tempFile } from './gen-utilities';
+
+
 /*
 	Utilites related to Forge syntax.
 	Could change with Forge updates and/or a language server.
