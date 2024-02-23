@@ -176,8 +176,8 @@
 		"@vscode/vsce": "^2.23.0",
 		"eslint": "^7.26.0",
 		"mocha": "^8.4.0",
-		"typescript": "^4.4.3",
-		"@types/vscode" : "latest"
+		"typescript": "^4.4.3"
+		
 	},
 	"dependencies": {
 		"@firebase/auth": "^0.21.0",
@@ -186,6 +186,8 @@
 		"glob": "^8.1.0",
 		"ts-node": "^10.9.2",
 		"vscode-languageserver": "^9.0.1",
-		"vscode-languageserver-textdocument": "^1.0.11"
+		"vscode-languageserver-textdocument": "^1.0.11",
+		"@types/vscode" : "latest",
+		"vscode-test" : "latest"
 	}
 }
