@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
 import { HalpRunner } from './halp';
+import { ensureForgeVersion } from './forge-utilities';
 
 
 
@@ -78,6 +79,13 @@ function textDocumentToLog(d, focusedDoc) {
 
 
 export async function activate(context: ExtensionContext) {
+
+
+	let currentSettings = vscode.workspace.getConfiguration('forge');
+	let minSupportedVersion = currentSettings.get('minVersion').toString();
+	await ensureForgeVersion(minSupportedVersion, (s : string) => vscode.window.showErrorMessage(s));
+
+
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {

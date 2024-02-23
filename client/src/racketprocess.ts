@@ -100,12 +100,6 @@ export class RacketProcess {
 		const generalLocPattern = /at loc: line (\d+), col (\d+), span: (\d+)/;
 		const generalsrcLocPattern = /.*\(srcloc #<path:(.*?)> (\d+) (\d+) (\d+) (\d+)\)/;
 
-
-
-
-
-
-
 		const raiseSyntaxErrorMatch = line.match(raiseSyntaxErrorPattern);
 		const raiseForgeErrorWithFileNameMatch = line.match(raiseForgeErrorWithFileNamePattern);
 		const raiseForgeErrorMatch = line.match(raiseForgeErrorPattern);
@@ -173,8 +167,6 @@ export class RacketProcess {
 
 		return { linenum, colnum, start, end, range, line, index, filename };
 	}
-
-
 
 	// This does not support multiple lines
 	showFileWithOpts(filePath: string, line: number | null, column: number | null) {

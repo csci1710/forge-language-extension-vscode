@@ -394,10 +394,6 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
 
-
-
-
-		// TODO: Test "Example" mutations alongside Assertions. I think this is tricky!
 		it('carries out mutations on examples and assertions when combined.', () => {
 	
 			const tests = `
