@@ -135,6 +135,14 @@
                         {
                             "match": "\\b(is)\\b",
                             "name": "keyword.other.is.forge"
+                        },
+                        {
+                            "match": "\\b(necessary)\\b",
+                            "name": "keyword.language.necessary.forge"
+                        },
+                        {
+                            "match": "\\b(sufficient)\\b",
+                            "name": "keyword.language.sufficient.forge"
                         }
                     ]
                 },
@@ -145,7 +153,7 @@
                             "name": "keyword.modifier.abstract.forge"
                         },
                         {
-                            "match": "\\b(all|lone|no|one|set|some|sum|univ|none)\\b",
+                            "match": "\\b(all|lone|no|one|set|some|sum|univ|none|disj)\\b",
                             "name": "keyword.modifier.set.forge"
                         },
                         {
