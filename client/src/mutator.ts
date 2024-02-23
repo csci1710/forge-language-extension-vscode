@@ -1,14 +1,15 @@
 import { get } from 'http';
-import { example_regex, assertion_regex, quantified_assertion_regex } from './forge-utilities';
+import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite , assertionToExpr} from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName , test_regex, getFailingTestName} from './forge-utilities';
 
-
 /*
+	ISSUES:
+	- Quantifier Predicates and their mutation needs to be thought through a bit!
 
-	TODO: 
-	    - List the names of tests around which you are giving feedback (locations?), and say they are *not* consistent with the problem specification.
-		- List the names of tests around which you cannot give feedback (locations?)
+
+
 */
+
 
 // This is buggy in cases where tests are the same
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
@@ -98,6 +99,9 @@ export class Mutator {
 		const i_inner = i + this.getInnerPostfix();
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
+
+
+		// TODO: FIX: IS THIS CORRECT?
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
 		let added_pred =
 			`
@@ -126,6 +130,18 @@ export class Mutator {
 		var exp = `pred\\s+${pred}\\b`
 		var x = new RegExp(exp).test(this.wheat);
 		return x;
+	}
+
+
+	isPredOrNegationInstructorAuthored(pred: string): boolean {
+		const negationRegex = /(not|!)\s+(\b\w+\b)/;
+		const isNegation = pred.match(negationRegex);
+
+		// Change the target predicate.
+		if (isNegation != null) {
+			pred = isNegation[2];
+		}
+		return this.isInstructorAuthored(pred);
 	}
 
 
@@ -279,6 +295,95 @@ export class Mutator {
 
 		return this.num_mutations;
 	}
+
+
+
+
+
+	mutateToStudentUnderstanding() {
+
+		
+/*
+    - For each test-suite, identify the predicate being tested.
+	- For each test in the suite.
+		- Produce a predicate that characterizes the test.
+		- Exclude these predicates from the predicate under test.
+*/
+
+		// Mutant already has all student predicates in it.
+
+
+		let predicates_to_add_to_mutation = [];
+		let expressions_in_mutation = [];
+
+
+		extractTestSuite(this.student_tests).forEach((test_suite) => {
+
+
+			const xor = (a: boolean, b: boolean): boolean => {
+				return (a && !b) || (!a && b);
+			};
+			
+			const predicate_under_test = test_suite.predicateName;	
+			const examples = test_suite.tests.examples;
+			const assertions = test_suite.tests.assertions;
+			const quantified_assertions = test_suite.tests.quantifiedAssertions;
+
+			// For each of these, filter out examples around which we cannot give feedback.
+			
+			// Now for each example, modify predicates.
+			examples.forEach((example) => {
+				if(this.isPredOrNegationInstructorAuthored(example['examplePredicate'])) {
+					// Ensure the types match up
+					// I *think* this is right?
+					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.student_tests));
+	
+					// We want to mutate to the negation of the characteristic predicate of the example.
+
+					predicates_to_add_to_mutation.push(p);
+					expressions_in_mutation.push({ "name" : example['exampleName'], "expression" : example['exampleName'], predicate_under_test	});
+				}
+			});
+
+			/*
+				{ assertionName, quantifiedVars, lhs, op, rhs }
+			*/
+
+			// For each assertion, modify predicates.
+			assertions.forEach((assertion) => {
+				if(xor(this.isInstructorAuthored(assertion['lhs']),
+				 	   this.isInstructorAuthored(assertion['rhs']))) {
+					
+						// Create the appropriate predicate.
+						// ie create the characteristic predicate of the example.				
+						let e = assertionToExpr(assertion['lhs'], assertion['rhs'], assertion['op']);
+						expressions_in_mutation.push({ "name" : assertion['assertionName'], "expression" : e, predicate_under_test	});
+						
+				}
+			});
+``
+			// For each quantified assertion, modify predicates.
+			quantified_assertions.forEach((qassertion) => {
+				if(xor(this.isInstructorAuthored(qassertion['lhsPredicate']),
+				 	   this.isInstructorAuthored(qassertion['rhsPredicate']))) {
+					
+						// Create the appropriate predicate (ie create the characteristic predicate of the example.)
+						let e = assertionToExpr(qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars']);
+						expressions_in_mutation.push({ "name" : qassertion['assertionName'], "expression" : e, predicate_under_test	});
+				}
+			});
+		});
+
+		// Now add all the predicates to the current mutation.
+		var added_preds = predicates_to_add_to_mutation.join("\n");
+		this.mutant += added_preds;
+		
+		// I think this is it
+		for (let e of expressions_in_mutation) {
+			this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
+		}
+	}
+
 }
 
 

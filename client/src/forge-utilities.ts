@@ -148,6 +148,61 @@ export function findAllExamples(fileContent : string) {
     return examples;
 }
 
+export function findAllAssertions(fileContent : string) {
+	// TODO: Test this regex
+	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)for\s+(\w+)/;
+
+    let match;
+    let assertions = [];
+
+    while ((match = assertRegex.exec(fileContent)) != null) {
+        const assertionName = `Assert ${match[1]} is ${match[2]} for ${match[3]}`;
+        const lhs = match[1].trim();
+		const op = match[2].trim();
+        const rhs = match[3].trim();
+
+        assertions.push({
+            assertionName,
+            lhs,
+			op,
+            rhs
+        });
+    }
+    return assertions;
+}
+
+
+export function findAllQuantifiedAssertions(fileContent : string) {
+	// TODO: Fix!! This regex is not working.
+	const quantifiedAssertRegex = /assert\s+all([\s\S]+?)\|\s*(\w+)\s+is\s+(necessary|sufficient)for\s+(\w+)/;
+
+    let match;
+    let assertions = [];
+
+    while ((match = quantifiedAssertRegex.exec(fileContent)) != null) {
+        
+		const quantifiedVars = match[1].trim();
+        const lhs = match[2].trim();
+		const op = match[3].trim();
+        const rhs = match[4].trim();
+
+
+		const assertionName = `Assert All ${lhs} is ${op} for ${rhs}`;
+
+        assertions.push({
+            assertionName,
+			quantifiedVars,
+            lhs,
+			op,
+            rhs
+        });
+    }
+    return assertions;
+}
+
+
+
+
 
 export function findExampleByName(fileContent : string, exampleName: string) {
 	
@@ -171,6 +226,21 @@ export function findExampleByName(fileContent : string, exampleName: string) {
 		examplePredicate,
 		exampleBody
 	};
+}
+
+
+export function assertionToExpr(lhs, rhs, op, quantifier_prefix = "") : string {
+
+
+	if (op == "sufficient") {
+		return `(${quantifier_prefix} ${lhs} => ${rhs})`;
+	}
+	else if (op == "necessary") {
+		return `(${quantifier_prefix} ${rhs} => ${lhs})`;
+	}
+	else {
+		throw new Error("Invalid op");
+	}
 }
 
 
@@ -326,3 +396,67 @@ export function getFailingTestName(o: string): string {
 	} 
 	return "";
 }
+
+/*******For test suite  */
+
+export type ExtractedTests = {
+
+	examples: Object[];
+	assertions: Object[];
+	quantifiedAssertions: Object[];
+  
+} ;
+
+export type ExtractedTestSuite = {
+	predicateName: string;
+	tests: ExtractedTests;
+  } | null;
+
+
+
+
+export function findAllStructuredTests(suite: string) {
+
+
+	var examples = findAllExamples(suite);
+	var assertions = findAllAssertions(suite);
+	var quantifiedAssertions = findAllQuantifiedAssertions(suite);
+
+	return {examples, assertions, quantifiedAssertions};
+}
+  
+export function extractTestSuite(input: string): ExtractedTestSuite[] {
+	const pattern = /test suite for\s+(.*?)\s*\{(.*?)\}/gs;
+	let match;
+	const results: ExtractedTestSuite[] = [];
+  
+	while ((match = pattern.exec(input)) !== null) {
+	  const [fullMatch, predicateName, content] = match;
+	  if (isBalancedBraces(content)) {
+
+		let ts: ExtractedTestSuite = {
+			predicateName: predicateName,
+			tests: findAllStructuredTests(content)
+		  };
+
+		results.push(ts);
+	  }
+	}
+  
+	return results;
+  }
+  
+  function isBalancedBraces(content: string): boolean {
+	const stack: string[] = [];
+	for (const char of content) {
+	  if (char === '{') {
+		stack.push(char);
+	  } else if (char === '}') {
+		if (stack.length === 0) return false;
+		stack.pop();
+	  }
+	}
+	return stack.length === 0;
+  }
+
+
