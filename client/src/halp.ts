@@ -75,6 +75,7 @@ export class HalpRunner {
 		
 
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
+		
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
 		const source_text = combineTestsWithModel(w, studentTests);
@@ -87,9 +88,15 @@ export class HalpRunner {
 			this.forgeOutput.appendLine(`🐸 Step 2: JTrying to generate a hint around the thoroughness of your test-suite .
 			This feedback ignores any tests that are not assertions or examples that directly reference the problem specification.`);
 
+			// Flush the output
+			this.forgeOutput.show(); 
+
 			mutator.mutateToStudentUnderstanding();
+			let skipped_tests = mutator.error_messages.join("\n");
+			this.forgeOutput.appendLine(skipped_tests);
 
 			let x = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
+
 			if (x.length == 0) {
 				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
 			}

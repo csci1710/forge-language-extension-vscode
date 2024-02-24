@@ -353,7 +353,7 @@ export class Mutator {
 
 
 
-					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.student_tests));
+					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
 	
 					predicates_to_add_to_mutation.push(p);
 					expressions_in_mutation.push({ "name" : example['exampleName'], "expression" : example['exampleName'], predicate_under_test: example['examplePredicate'], isNegativeTest : pred_info.isNegation	});
