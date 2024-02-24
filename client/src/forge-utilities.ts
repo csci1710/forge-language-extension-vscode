@@ -136,11 +136,13 @@ export function getPredList(fileContent: string): string[] {
 
 export function findAllExamples(fileContent : string) {
 	// TODO: A language server would help us not have to write these long (possibly buggy) regexes.
-	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/;
-    let match;
-    let examples = [];
+	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/g;
+ 
 
-    while ((match = exampleRegex.exec(fileContent)) != null) {
+	let examples = [];
+	let matches = fileContent.matchAll(exampleRegex);
+
+	for (const match of matches){
         const exampleName = match[1];
         const examplePredicate = match[2].trim();
         const exampleBody = match[3].trim();
@@ -155,13 +157,13 @@ export function findAllExamples(fileContent : string) {
 }
 
 export function findAllAssertions(fileContent : string) {
-	// TODO: Test this regex
-	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)for\s+(\w+)/;
+	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/g;
 
-    let match;
+
     let assertions = [];
+	let matches = fileContent.matchAll(assertRegex);
 
-    while ((match = assertRegex.exec(fileContent)) != null) {
+    for (const match of matches){
         const assertionName = `Assert ${match[1]} is ${match[2]} for ${match[3]}`;
         const lhs = match[1].trim();
 		const op = match[2].trim();
@@ -180,12 +182,17 @@ export function findAllAssertions(fileContent : string) {
 
 export function findAllQuantifiedAssertions(fileContent : string) {
 	// TODO: Fix!! This regex is not working.
-	const quantifiedAssertRegex = /assert\s+all([\s\S]+?)\|\s*(\w+)\s+is\s+(necessary|sufficient)for\s+(\w+)/;
+	const quantifiedAssertRegex = /assert\s+all([\s\S]+?)\|\s*(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/gs;
 
-    let match;
+	if (fileContent == null || fileContent == "") {
+		return [];
+	}
+
+
     let assertions = [];
+	let matches  = fileContent.matchAll(quantifiedAssertRegex);
 
-    while ((match = quantifiedAssertRegex.exec(fileContent)) != null) {
+    for (const match of matches){
         
 		const quantifiedVars = match[1].trim();
         const lhs = match[2].trim();
@@ -260,7 +267,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const exampleBody = example.exampleBody;
 
 	if (!wheatPredNames.includes(examplePredicate)) {
-		throw new Error("I provide feedbacl unless your example explicitly tests a predicate defined in the assignment.");
+		throw new Error("I provide feedback unless your example explicitly tests a predicate defined in the assignment.");
 	}
 
 
@@ -435,26 +442,80 @@ export function findAllStructuredTests(suite: string) {
 // TODO: THis is not quite correct! It's not finding the test suites.
 export function extractTestSuite(input: string): ExtractedTestSuite[] {
 	
-	
-	const pattern = /test suite for\s+(.*?)\s*\{(.*?)\}/gs;
-	let matches = input.matchAll(pattern);
 	const results: ExtractedTestSuite[] = [];
+
+
+
+	// Need to keep getting the input string in
+	function findTestSuiteIndices(input: string) : Object[] {
+
+
+		const indices : Object[] = [];
+		if (input.length == 0 || input == null) {
+			return indices;
+		}
+
+		const pattern = /test\s+suite\s+for\s+(\w+)\s*\{/g;
+		const matches = Array.from(input.matchAll(pattern));
+
+
+
+
+		let suiteEnd = 0;
+		// This only catches the first one.
+		// Now there is a second one.
+
+		for (const match of matches) {
+			const startIndex = match.index;
+			const endIndex = startIndex + match[0].length;
+			const pred = match[1];
+			
+			if (startIndex !== undefined && endIndex !== undefined) {
+				
+				var to_search = input.substring(endIndex);
+				// Search till you find a matched closing brace.
+
+				var i = endIndex + 1;
+				var s = "{";
+
+				while (!isBalancedBraces(s) && i < input.length) {
+					s += input[i]
+					i++;
+				}
+
+				suiteEnd = i;
+				
+				if (isBalancedBraces(s)) {
+				// These include braces though!!
+					s = s.trim();
+					s = s.substring(1, s.length - 1); // Remove first and last characters '{' and '}'
+					indices.push({pred, s});
+				}
+			}
+		}
+		const remaining = input.substring(suiteEnd);
+		const next = findTestSuiteIndices(remaining)
+		return indices.concat(next);
+	}
+	  
+	//const pattern = /test suite for\s+(\w+)\s*\{(.*)\}/gs;
+	let identifiedSuites = findTestSuiteIndices(input);
+
   
-	for (const match of matches) {
-	  const [fullMatch, predicateName, content] = match;
-	  if (isBalancedBraces(content)) {
+	for (const suite of identifiedSuites) {
+	  const predicateName = suite['pred'];
+	  const content = suite['s'];
 
 		let ts: ExtractedTestSuite = {
 			predicateName: predicateName,
 			tests: findAllStructuredTests(content)
-		  };
+			};
 
-		results.push(ts);
-	  }
+	    results.push(ts);
 	}
   
 	return results;
-  }
+}
   
   function isBalancedBraces(content: string): boolean {
 	const stack: string[] = [];

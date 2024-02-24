@@ -82,16 +82,18 @@ export class HalpRunner {
 
 		if (this.isConsistent(w_o)) {
 		
-			this.forgeOutput.appendLine(`Your tests are all consistent with the assignment specification.
-			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`);
-			this.forgeOutput.appendLine(`🐸 Step 2: Trying to generate feedback around the thoroughness of the tests in your 'test-suite's.
-			My feedback is limited to assertions and examples that directly reference the problem specification.`);
+			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
+			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
+			this.forgeOutput.appendLine(`🐸 Step 2: JTrying to generate a hint around the thoroughness of your test-suite .
+			This feedback ignores any tests that are not assertions or examples that directly reference the problem specification.`);
 
 			mutator.mutateToStudentUnderstanding();
+
 			let x = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
 			if (x.length == 0) {
-				return ["I could not generate further feedback. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
 			}
+			return x;
 		}
 
 
@@ -304,7 +306,7 @@ please fill out this form: ${formurl}`];
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
-		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
 	}
 
 }

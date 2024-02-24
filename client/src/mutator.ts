@@ -100,13 +100,16 @@ export class Mutator {
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
 
+		const target_regexp = new RegExp("\\b" + i + "\\b", 'g');
+
 
 		// TODO: FIX: IS THIS CORRECT?
-		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
+		let w_wrapped = w.replace(target_regexp, i_inner);
+		let exp_to_constrain = s.replace(target_regexp, i_inner);
 		let added_pred =
 			`
 			pred ${i} { 
-				${quantifer_prefix} ${i_inner} and not ${s}
+				${quantifer_prefix} ${i_inner} and not ${exp_to_constrain}
 			}
 			`
 		return w_wrapped + added_pred;
@@ -133,15 +136,19 @@ export class Mutator {
 	}
 
 
-	isPredOrNegationInstructorAuthored(pred: string): boolean {
-		const negationRegex = /(not|!)\s+(\b\w+\b)/;
+	checkTargetPredicate(pred: string) {
+		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		const isNegation = pred.match(negationRegex);
 
 		// Change the target predicate.
 		if (isNegation != null) {
 			pred = isNegation[2];
 		}
-		return this.isInstructorAuthored(pred);
+		return {
+			predIsInstructorAuthored : this.isInstructorAuthored(pred),
+			isNegation : isNegation != null,
+			pred: pred
+		} 
 	}
 
 
@@ -297,7 +304,9 @@ export class Mutator {
 	}
 
 
-
+	xor (a: boolean, b: boolean): boolean  {
+		return (a && !b) || (!a && b);
+	};
 
 
 	mutateToStudentUnderstanding() {
@@ -320,10 +329,6 @@ export class Mutator {
 		extractTestSuite(this.student_tests).forEach((test_suite) => {
 
 
-			const xor = (a: boolean, b: boolean): boolean => {
-				return (a && !b) || (!a && b);
-			};
-			
 			const predicate_under_test = test_suite.predicateName;	
 			const examples = test_suite.tests.examples;
 			const assertions = test_suite.tests.assertions;
@@ -333,15 +338,28 @@ export class Mutator {
 			
 			// Now for each example, modify predicates.
 			examples.forEach((example) => {
-				if(this.isPredOrNegationInstructorAuthored(example['examplePredicate'])) {
+
+
+				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
+				if(pred_info.predIsInstructorAuthored) {
 					// Ensure the types match up
 					// I *think* this is right?
+
+
+					if (pred_info.isNegation) {
+						example['examplePredicate'] = pred_info.pred;
+					}
+					// Need to deal with negative predicates here
+
+
+
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.student_tests));
 	
-					// We want to mutate to the negation of the characteristic predicate of the example.
-
 					predicates_to_add_to_mutation.push(p);
-					expressions_in_mutation.push({ "name" : example['exampleName'], "expression" : example['exampleName'], predicate_under_test	});
+					expressions_in_mutation.push({ "name" : example['exampleName'], "expression" : example['exampleName'], predicate_under_test: example['examplePredicate'], isNegativeTest : pred_info.isNegation	});
+				}
+				else {
+					this.error_messages.push(`Excluding ${example['exampleName']} from analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
 				}
 			});
 
@@ -351,7 +369,7 @@ export class Mutator {
 
 			// For each assertion, modify predicates.
 			assertions.forEach((assertion) => {
-				if(xor(this.isInstructorAuthored(assertion['lhs']),
+				if(this.xor(this.isInstructorAuthored(assertion['lhs']),
 				 	   this.isInstructorAuthored(assertion['rhs']))) {
 					
 						// Create the appropriate predicate.
@@ -361,10 +379,10 @@ export class Mutator {
 						
 				}
 			});
-``
+
 			// For each quantified assertion, modify predicates.
 			quantified_assertions.forEach((qassertion) => {
-				if(xor(this.isInstructorAuthored(qassertion['lhsPredicate']),
+				if(this.xor(this.isInstructorAuthored(qassertion['lhsPredicate']),
 				 	   this.isInstructorAuthored(qassertion['rhsPredicate']))) {
 					
 						// Create the appropriate predicate (ie create the characteristic predicate of the example.)
@@ -380,7 +398,19 @@ export class Mutator {
 		
 		// I think this is it
 		for (let e of expressions_in_mutation) {
-			this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
+
+			if (e.hasOwnProperty('isNegativeTest') && e['isNegativeTest']) {
+				// I think we easy the predicate here right?
+				// TODO: Think about this.
+				this.mutant = this.easePredicate(this.mutant, e['predicate_under_test'], e['expression']);
+			} else {
+				// TODO: This works for positive examples and implications, but NOT negative examples.
+				this.mutant = this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
+			}
+
+
+			
+			
 		}
 	}
 
