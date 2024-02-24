@@ -1,4 +1,4 @@
-# Forge languager server 
+# Forge language server 
 
 Adapted from the [documented sample code](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)
 
