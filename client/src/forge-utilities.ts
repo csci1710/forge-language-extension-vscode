@@ -68,7 +68,7 @@ function findForgePredicates(inputText : string) : [string] {
     return predicates;
 }
 
-
+// TODO: This is buggy!
 export function findForgeExamples(inputText) {
     const withoutComments = removeForgeComments(inputText);
     const lines = withoutComments.split('\n');
@@ -136,7 +136,10 @@ export function getPredList(fileContent: string): string[] {
 
 export function findAllExamples(fileContent : string) {
 	// TODO: A language server would help us not have to write these long (possibly buggy) regexes.
-	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/g;
+
+	// TODO:THis is buggy. Perhaps we can make sure that the word example does not show up inside this?
+	// Think of other ways to parse an example.
+	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*?)}/g;
  
 
 	let examples = [];
@@ -158,7 +161,6 @@ export function findAllExamples(fileContent : string) {
 
 export function findAllAssertions(fileContent : string) {
 	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/g;
-
 
     let assertions = [];
 	let matches = fileContent.matchAll(assertRegex);
@@ -451,6 +453,8 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 
 
 		const indices : Object[] = [];
+
+		// TODO: This *SHOULD* bottom out
 		if (input.length == 0 || input == null) {
 			return indices;
 		}
@@ -460,8 +464,8 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 
 
 
-
-		let suiteEnd = 0;
+		// 1 , so that in the worst case we move forward only slightly
+		let suiteEnd = 1;
 		// This only catches the first one.
 		// Now there is a second one.
 
@@ -494,7 +498,15 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 			}
 		}
 		const remaining = input.substring(suiteEnd);
-		const next = findTestSuiteIndices(remaining)
+		console.log(remaining);
+
+
+
+
+		return indices;
+		// Needs to be in test suite fors, well formed. But I think somethign is wrong
+		// TODO: Issue here? If it doesn't match, it'll start spinning
+		const next = findTestSuiteIndices(remaining);
 		return indices.concat(next);
 	}
 	  

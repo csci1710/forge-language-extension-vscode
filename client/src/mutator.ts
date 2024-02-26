@@ -1,4 +1,3 @@
-import { get } from 'http';
 import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite , assertionToExpr} from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName , test_regex, getFailingTestName} from './forge-utilities';
 
@@ -339,7 +338,7 @@ export class Mutator {
 			// Now for each example, modify predicates.
 			examples.forEach((example) => {
 
-
+				
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
 				if(pred_info.predIsInstructorAuthored) {
 					// Ensure the types match up
@@ -396,9 +395,8 @@ export class Mutator {
 		var added_preds = predicates_to_add_to_mutation.join("\n");
 		this.mutant += added_preds;
 		
-		// I think this is it
 		for (let e of expressions_in_mutation) {
-
+			
 			if (e.hasOwnProperty('isNegativeTest') && e['isNegativeTest']) {
 				// I think we easy the predicate here right?
 				// TODO: Think about this.
@@ -407,10 +405,6 @@ export class Mutator {
 				// TODO: This works for positive examples and implications, but NOT negative examples.
 				this.mutant = this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
 			}
-
-
-			
-			
 		}
 	}
 
