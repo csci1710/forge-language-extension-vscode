@@ -85,8 +85,8 @@ export class HalpRunner {
 		
 			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
 			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
-			this.forgeOutput.appendLine(`🐸 Step 2: JTrying to generate a hint around the thoroughness of your test-suite .
-			This feedback ignores any tests that are not assertions or examples that directly reference the problem specification.`);
+			this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite.
+			This feedback ignores ANY tests that are not in 'test-suite's`);
 
 			// Flush the output
 			this.forgeOutput.show(); 
@@ -95,12 +95,21 @@ export class HalpRunner {
 			let skipped_tests = mutator.error_messages.join("\n");
 			this.forgeOutput.appendLine(skipped_tests);
 
-			let x = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
-
-			if (x.length == 0) {
-				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+			this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you think of another test case, with the remaining ${mutator.inconsistent_tests.length} tests in mind⌛\n`);
+			this.forgeOutput.show(); 
+			try {
+				let thoroughness_hints = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
+				if (thoroughness_hints.length == 0) {
+					return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+				}
+				return thoroughness_hints;
 			}
-			return x;
+			catch (e) {
+				vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+				this.forgeOutput.appendLine(e.message);
+				return [this.SOMETHING_WENT_WRONG];
+			}
+			
 		}
 
 
@@ -111,11 +120,15 @@ ${w_o}`;
 		if (testNames.length == 0) {
 			return [noTestFound];
 		}
-		
-		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
-		
-		mutator.mutateToStudentMisunderstanding();
-
+		try
+		{
+			mutator.mutateToStudentMisunderstanding();
+		}
+		catch (e)
+		{
+			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+			return [this.SOMETHING_WENT_WRONG];
+		}
 
 		let assessed_tests = mutator.inconsistent_tests.join("\n");
 		
