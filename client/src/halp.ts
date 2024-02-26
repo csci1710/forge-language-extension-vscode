@@ -72,14 +72,35 @@ export class HalpRunner {
 			return []
 		}
 
+		
 
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
+		
 
 		const  w_o = await this.runTestsAgainstModel(studentTests, w);
+		const source_text = combineTestsWithModel(w, studentTests);
+		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
+
 		if (this.isConsistent(w_o)) {
-			return [`Your tests are all consistent with the assignment specification.
-			However, it's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.`];
-			// TODO: Can we add some sort of thoroughness metric here?
+		
+			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
+			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
+			this.forgeOutput.appendLine(`🐸 Step 2: JTrying to generate a hint around the thoroughness of your test-suite .
+			This feedback ignores any tests that are not assertions or examples that directly reference the problem specification.`);
+
+			// Flush the output
+			this.forgeOutput.show(); 
+
+			mutator.mutateToStudentUnderstanding();
+			let skipped_tests = mutator.error_messages.join("\n");
+			this.forgeOutput.appendLine(skipped_tests);
+
+			let x = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
+
+			if (x.length == 0) {
+				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+			}
+			return x;
 		}
 
 
@@ -90,14 +111,9 @@ ${w_o}`;
 		if (testNames.length == 0) {
 			return [noTestFound];
 		}
-
-
-		const source_text = combineTestsWithModel(w, studentTests);
-		
-		
 		
 		// (wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string)
-		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
+		
 		mutator.mutateToStudentMisunderstanding();
 
 
@@ -253,6 +269,18 @@ please fill out this form: ${formurl}`];
 		return hint_candidates;
 	}
 
+	private async tryGetThoroughnessFromAutograderOutput(ag_output : string, testFileName : string) : Promise<string[]> {
+		
+		const failed_tests = getFailingTestNames(ag_output);
+		const hint_map = await this.getHintMap(testFileName);
+
+		const test_names = Object.keys(hint_map);
+		let missingTests = test_names.filter(x => !failed_tests.includes(x));
+		const hint_candidates = missingTests.map((tName) => hint_map[tName]);
+		return hint_candidates;
+	}
+
+
 
 	async tryGetHintsFromMutant(testFileName: string, mutant : string, student_preds : string, w_o : string) : Promise<string[]> {
 
@@ -268,6 +296,24 @@ please fill out this form: ${formurl}`];
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
 		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
+	}
+
+
+
+	async tryGetThoroughnessFromMutant(testFileName: string, mutant : string, student_preds : string) : Promise<string[]> {
+
+			
+		const payload = {
+			"testFileName": testFileName,
+			"assignment": testFileName.replace('.test.frg', ''),
+			"student_preds": student_preds,
+			"conceptual_mutant": mutant
+		}
+		this.logger.log_payload(payload, LogLevel.INFO, Event.THOROUGHNESS_MUTANT)
+
+		const autograderTests = await this.getAutograderTests(testFileName);
+		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
+		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
 	}
 
 }

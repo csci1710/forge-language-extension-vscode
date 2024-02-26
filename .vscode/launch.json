@@ -32,7 +32,8 @@
 				"--extensionTestsPath=${workspaceRoot}/client/out/test/index",
 				"${workspaceRoot}/client/testFixture"
 			],
-			"outFiles": ["${workspaceRoot}/client/out/test/**/*.js"]
+			"outFiles": ["${workspaceRoot}/client/out/test/**/*.js"],
+			// Remove the "target" property
 		}
 	],
 	"compounds": [

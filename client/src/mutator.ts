@@ -1,14 +1,14 @@
-import { get } from 'http';
-import { example_regex, assertion_regex, quantified_assertion_regex } from './forge-utilities';
-import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName , test_regex, getFailingTestName} from './forge-utilities';
-
+import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
+import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName } from './forge-utilities';
 
 /*
+	ISSUES:
+	- Quantifier Predicates and their mutation needs to be thought through a bit!
 
-	TODO: 
-	    - List the names of tests around which you are giving feedback (locations?), and say they are *not* consistent with the problem specification.
-		- List the names of tests around which you cannot give feedback (locations?)
+
+
 */
+
 
 // This is buggy in cases where tests are the same
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
@@ -16,7 +16,6 @@ function extractSubstring(text: string, startRow: number, startColumn: number, s
 	// 1 index to 0 index
 	startRow -= 1;
 
-	//TODO: Forge output has span incorrect
 	span += 1;
 
 	// Split the text into rows
@@ -48,16 +47,16 @@ export class Mutator {
 	forge_output: string;
 	test_file_name: string;
 	mutant: string;
-	source_text : string;
+	source_text: string;
 
-	error_messages : string[];
+	error_messages: string[];
 
-	inconsistent_tests : string[];
+	inconsistent_tests: string[];
 
 
-	num_mutations : number = 0;
+	num_mutations: number = 0;
 
-	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
+	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string) {
 		this.wheat = wheat;
 
 		this.student_tests = removeForgeComments(student_tests);
@@ -98,11 +97,15 @@ export class Mutator {
 		const i_inner = i + this.getInnerPostfix();
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
-		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
+
+		const target_regexp = new RegExp("\\b" + i + "\\b", 'g');
+
+		let w_wrapped = w.replace(target_regexp, i_inner);
+		let exp_to_constrain = s.replace(target_regexp, i_inner);
 		let added_pred =
 			`
 			pred ${i} { 
-				${quantifer_prefix} ${i_inner} and not ${s}
+				${quantifer_prefix} ${i_inner} and not ${exp_to_constrain}
 			}
 			`
 		return w_wrapped + added_pred;
@@ -123,13 +126,36 @@ export class Mutator {
 	}
 
 	isInstructorAuthored(pred: string): boolean {
+		if (pred.includes('[')) {
+			pred = pred.substring(0, pred.indexOf('['));
+		}
+		pred = pred.trim();
+
 		var exp = `pred\\s+${pred}\\b`
+
 		var x = new RegExp(exp).test(this.wheat);
+
 		return x;
 	}
 
 
-	mutateToAssertion(test_name : string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = "") : void {
+	checkTargetPredicate(pred: string) {
+		const negationRegex = /(not|!)\s*(\b\w+\b)/;
+		const isNegation = pred.match(negationRegex);
+
+		// Change the target predicate.
+		if (isNegation != null) {
+			pred = isNegation[2];
+		}
+		return {
+			predIsInstructorAuthored: this.isInstructorAuthored(pred),
+			isNegation: isNegation != null,
+			pred: pred
+		}
+	}
+
+
+	mutateToAssertion(test_name: string, lhs_pred: string, rhs_pred: string, op: string, quantified_prefix: string = ""): void {
 
 
 		const isLhsInstructorAuthored = this.isInstructorAuthored(lhs_pred);
@@ -148,7 +174,7 @@ export class Mutator {
 			return;
 		}
 
-		
+
 		// If the student believes that i => s,
 		// then they believe that if i then s. So constrain i to be { i AND s }
 		if (isLhsInstructorAuthored) {
@@ -185,7 +211,7 @@ export class Mutator {
 	// failed_example needs to be an object, as returned by findExampleByName.
 	mutateToExample(failed_example) {
 
-		// TODO!! Should these be called on the wheat or the mutant?
+
 		const sigNames = getSigList(this.wheat);
 		const wheatPredNames = getPredList(this.wheat);
 
@@ -216,21 +242,21 @@ export class Mutator {
 			: this.easePredicate(mutant_with_example, failed_example.examplePredicate, failed_example.exampleName);
 	}
 
-// TODO: This does not error  loudly!
-	mutateToStudentMisunderstanding()  {
+	// TODO: This does not error  loudly!
+	mutateToStudentMisunderstanding() {
 
 		let w_os = this.forge_output.split("\n");
-		for (let w_o of w_os) {	
+		for (let w_o of w_os) {
 			const testName = getFailingTestName(w_o);
 
-			if (example_regex.test(w_o)) {				
+			if (example_regex.test(w_o)) {
 				// Fundamentally the issue is that the characteristic predicate from a 
 				// positive example gives us such a *specific* modification to a predicate,
 				// that it is rare for us to offer meaningful feedback.
-				
+
 				const failedExample = findExampleByName(this.student_tests, testName);
 				this.mutateToExample(failedExample);
-				
+
 			} else if (quantified_assertion_regex.test(w_o)) {
 
 
@@ -251,12 +277,12 @@ export class Mutator {
 				const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
 				const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
 				const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
-				
+
 				this.mutateToAssertion(testName, lhs_instantiation, rhs_instantiation, op, quantifier);
 
 
-	
-			}else if (assertion_regex.test(w_o)) {
+
+			} else if (assertion_regex.test(w_o)) {
 
 
 				// mutate to assertion
@@ -270,7 +296,7 @@ export class Mutator {
 			else if (test_regex.test(w_o)) {
 
 				const test_expect_failure_msg = `Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
-				this.error_messages.push(test_expect_failure_msg)	
+				this.error_messages.push(test_expect_failure_msg)
 			}
 			else if (testName != "") {
 				throw new Error("Something went very wrong!");
@@ -279,8 +305,120 @@ export class Mutator {
 
 		return this.num_mutations;
 	}
+
+
+	xor(a: boolean, b: boolean): boolean {
+		return (a && !b) || (!a && b);
+	};
+
+
+	mutateToStudentUnderstanding() {
+
+
+		/*
+			- For each test-suite, identify the predicate being tested.
+			- For each test in the suite.
+				- Produce a predicate that characterizes the test.
+				- Exclude these predicates from the predicate under test.
+		*/
+
+		// Mutant already has all student predicates in it.
+
+
+		let predicates_to_add_to_mutation = [];
+		let expressions_in_mutation = [];
+
+
+		extractTestSuite(this.student_tests).forEach((test_suite) => {
+
+
+			const predicate_under_test = test_suite.predicateName;
+			const examples = test_suite.tests.examples;
+			const assertions = test_suite.tests.assertions;
+			const quantified_assertions = test_suite.tests.quantifiedAssertions;
+
+			// For each of these, filter out examples around which we cannot give feedback.
+
+			// Now for each example, modify predicates.
+			examples.forEach((example) => {
+
+
+				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
+				if (pred_info.predIsInstructorAuthored) {
+					// Ensure the types match up
+					// I *think* this is right?
+
+
+					if (pred_info.isNegation) {
+						example['examplePredicate'] = pred_info.pred;
+					}
+					// Need to deal with negative predicates here
+
+
+
+					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
+
+					predicates_to_add_to_mutation.push(p);
+					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: example['examplePredicate'], isNegativeTest: pred_info.isNegation });
+				}
+				else {
+					this.error_messages.push(`Excluding ${example['exampleName']} from analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+				}
+			});
+
+			/*
+				{ assertionName, quantifiedVars, lhs, op, rhs }
+			*/
+
+			// For each assertion, modify predicates.
+			assertions.forEach((assertion) => {
+				if (this.xor(this.isInstructorAuthored(assertion['lhs']),
+					this.isInstructorAuthored(assertion['rhs']))) {
+
+					// Create the appropriate predicate.
+					// ie create the characteristic predicate of the example.				
+					let e = assertionToExpr(assertion['lhs'], assertion['rhs'], assertion['op']);
+					expressions_in_mutation.push({ "name": assertion['assertionName'], "expression": e, predicate_under_test });
+
+				}
+				else {
+					this.error_messages.push(`Excluding ${assertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+				}
+			});
+
+			// For each quantified assertion, modify predicates.
+			quantified_assertions.forEach((qassertion) => {
+
+
+				// This is where we need to check if the predicate is instructor authored.
+				const lhs = this.isInstructorAuthored(qassertion['lhs']);
+				const rhs = this.isInstructorAuthored(qassertion['rhs']);
+
+				if (this.xor(lhs, rhs)) {
+
+					// Create the appropriate predicate (ie create the characteristic predicate of the example.)
+					let e = assertionToExpr(qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars']);
+					expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
+				}
+				else {
+					this.error_messages.push(`Excluding ${qassertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+				}
+			});
+		});
+
+		// Now add all the predicates to the current mutation.
+		var added_preds = predicates_to_add_to_mutation.join("\n");
+		this.mutant += added_preds;
+
+		for (let e of expressions_in_mutation) {
+
+			if (e.hasOwnProperty('isNegativeTest') && e['isNegativeTest']) {
+				this.mutant = this.easePredicate(this.mutant, e['predicate_under_test'], e['expression']);
+			} else {
+				this.mutant = this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
+			}
+		}
+	}
+
 }
-
-
-
 
