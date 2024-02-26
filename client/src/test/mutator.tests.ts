@@ -6,7 +6,7 @@ import { removeForgeComments } from '../forge-utilities';
 import { strict as assert, strictEqual } from 'assert';
 
 // TODO: This is duplicated, find a better place to put it.
-export function combineTestsWithModel(wheatText: string, tests: string) : string {
+export function combineTestsWithModel(wheatText: string, tests: string): string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 	const hashlang_decl = "#lang";
@@ -80,10 +80,6 @@ describe('Mutator', () => {
 
 		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 		mutator.mutateToStudentMisunderstanding();
-
-		//assert strictEqual(mutator.error_messages[0], )
-
-
 		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(DIRTREE_INFO.wheat));
 	});
 
@@ -143,13 +139,13 @@ describe('Mutator', () => {
 
 		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 		mutator.mutateToStudentMisunderstanding();
-	  	assert.strictEqual(mutator.num_mutations, 0);
+		assert.strictEqual(mutator.num_mutations, 0);
 
-	   let outputs = mutator.error_messages;
+		let outputs = mutator.error_messages;
 
-	   for (let output of outputs) {
+		for (let output of outputs) {
 			assert.strict(output.includes('someexamplename1') || output.includes('someexamplename'));
-	   }
+		}
 
 	});
 
@@ -192,7 +188,7 @@ describe('Mutator', () => {
 		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 		let num_mutations = mutator.mutateToStudentMisunderstanding();
 
-		
+
 
 		const expectedMutant = `#lang forge
 
@@ -223,7 +219,7 @@ describe('Mutator', () => {
 				 isDirectedTree_inner2 and mustHaveRoot
 			}`;
 
-			assert.strictEqual(num_mutations, 2);
+		assert.strictEqual(num_mutations, 2);
 		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
 	});
 
@@ -253,7 +249,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, truncated_forge_output, DIRTREE_INFO.filename, source_text);
 		let num_mutations = mutator.mutateToStudentMisunderstanding();
 
-		
+
 
 		const expectedMutant = `#lang forge
 
@@ -287,9 +283,9 @@ assert all x : Node | loops is sufficient for isDirectedTree
 
 
 
-		it(' : mutate to Misunderstanding carries out mutations on positive examples.', () => {
-	
-			const tests = `
+	it(' : mutate to Misunderstanding carries out mutations on positive examples.', () => {
+
+		const tests = `
 		  
 			  #lang forge
 	
@@ -302,16 +298,16 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			edges = \`Node1->\`Node2 + \`Node2->\`Node2
 		  }
 		  `;
-			const forge_output = `[directedtree.test.frg:13:0 (span 168)] Invalid example 'lasso'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
+		const forge_output = `[directedtree.test.frg:13:0 (span 168)] Invalid example 'lasso'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
 			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 36) (time-solving 0) (time-building 1708545562033) (time-core 0)) unsat)
 			`;
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentMisunderstanding();
-	
-		  	const expected_mutant = `
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentMisunderstanding();
+
+		const expected_mutant = `
 			#lang forge
 			option run_sterling off
 
@@ -335,14 +331,14 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			  pred isDirectedTree { 
 			   isDirectedTree_inner1 or lasso
 			  }`;
-	
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
+
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
 
 
-		it(' : mutate to Misunderstanding carries out mutations on negative examples.', () => {
-	
-			const tests = `
+	it(' : mutate to Misunderstanding carries out mutations on negative examples.', () => {
+
+		const tests = `
 		  
 			  #lang forge
 	
@@ -355,16 +351,16 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			edges = \`Node1->\`Node2 
 		  }
 		  `;
-			const forge_output = `[directedtree.test.frg:13:0 (span 168)] Invalid example 'line'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
+		const forge_output = `[directedtree.test.frg:13:0 (span 168)] Invalid example 'line'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
 			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 36) (time-solving 0) (time-building 1708545562033) (time-core 0)) unsat)
 			`;
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentMisunderstanding();
-	
-		  	const expected_mutant = `
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentMisunderstanding();
+
+		const expected_mutant = `
 			#lang forge
 			option run_sterling off
 
@@ -388,13 +384,13 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			  pred isDirectedTree { 
 			   isDirectedTree_inner1 and not line
 			  }`;
-	
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
 
-		it(' : mutate to Misunderstanding carries out mutations on examples and assertions when combined.', () => {
-	
-			const tests = `
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
+
+	it(' : mutate to Misunderstanding carries out mutations on examples and assertions when combined.', () => {
+
+		const tests = `
 		  
 			  #lang forge
 	
@@ -412,20 +408,20 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			edges = \`Node1->\`Node2  + \`Node2->\`Node1
 		  }
 		  `;
-			const forge_output = `[directedtree.test.frg:21:19 (span 50)] Theorem Assertion_mustBeEmpty_is_necessary_for_isDirectedTree failed. Found instance:
+		const forge_output = `[directedtree.test.frg:21:19 (span 50)] Theorem Assertion_mustBeEmpty_is_necessary_for_isDirectedTree failed. Found instance:
 			#(struct:Sat (#hash((Node . ((Node2) (Node3))) (edges . ((Node3 Node2))))) ((size-variables 390) (size-clauses 558) (size-primary 20) (time-translation 77) (time-solving 9) (time-building 1708555673207)) ()) Sterling disabled, so reporting raw instance data:
 			#(struct:Sat (#hash((Node . ((Node2) (Node3))) (edges . ((Node3 Node2))))) ((size-variables 390) (size-clauses 558) (size-primary 20) (time-translation 77) (time-solving 9) (time-building 1708555673207)) ())
 			
 			[directedtree.test.frg:23:18 (span 114)] Invalid example 'loop'; the instance specified does not satisfy the given predicate. Sterling disabled, so reporting raw instance data:
 			#(struct:Unsat #f ((size-variables 0) (size-clauses 0) (size-primary 0) (time-translation 5) (time-solving 0) (time-building 1708555673326) (time-core 0)) unsat)			
 			`;
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
-		
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentMisunderstanding();
-	
-		  	const expected_mutant = `#lang forge
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentMisunderstanding();
+
+		const expected_mutant = `#lang forge
 
 			  option run_sterling off
 			  
@@ -456,30 +452,30 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			  pred isDirectedTree { 
 				  isDirectedTree_inner2 or loop
 			  }`;
-	
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
+
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
 
 
 
 
-		// TODO: MutateToStudentUnderstanding here
+	// TODO: MutateToStudentUnderstanding here
 
 
-		/*
-			Test cases:
-			- [x] Mutate to positive examples ( I suspect multiple examples will be an issue?)
-			- Mutate to negative examples
-			- [x] Mutate to assertions
-			- Mutate to quantified assertions
+	/*
+		Test cases:
+		- [x] Mutate to positive examples ( I suspect multiple examples will be an issue?)
+		- [x] Mutate to negative examples
+		- [x] Mutate to assertions
+		- Mutate to quantified assertions
 
-			- Mutate to example + assertion + quantified assertion
+		- Mutate to example + assertion + quantified assertion
 
-		*/
+	*/
 
-		it(' : mutate to Understanding carries out no mutations if not in test suites.', () => {
+	it(' : mutate to Understanding carries out no mutations if not in test suites.', () => {
 
-			const tests = `
+		const tests = `
 		  
 			  #lang forge
 	
@@ -496,21 +492,21 @@ assert all x : Node | loops is sufficient for isDirectedTree
 					edges = \`Node2->\`Node1 + \`Node2->\`Node3
 				}
 		  `;
-			const forge_output = "";
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentUnderstanding();
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-			const expected_mutant = `#lang forge`
-		
-			assert.strictEqual(mutator.num_mutations, 0);
-		});
-	
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
 
-		it(' : mutate to Understanding carries mutations on examples.', () => {
+		const expected_mutant = `#lang forge`
 
-			const tests = `
+		assert.strictEqual(mutator.num_mutations, 0);
+	});
+
+
+	it(' : mutate to Understanding carries mutations on examples.', () => {
+
+		const tests = `
 		  
 			  #lang forge
 	
@@ -529,13 +525,13 @@ assert all x : Node | loops is sufficient for isDirectedTree
 				}
 			}
 		  `;
-			const forge_output = "";
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentUnderstanding();
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-			const expected_mutant = `
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
+
+		const expected_mutant = `
 			#lang forge
 
 			option run_sterling off
@@ -571,15 +567,15 @@ assert all x : Node | loops is sufficient for isDirectedTree
 						isDirectedTree_inner2 and not e2
 			}
 			`;
-			
-			assert.strictEqual(mutator.num_mutations, 2);
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
+
+		assert.strictEqual(mutator.num_mutations, 2);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
 
 
-		it(' : mutate to Understanding carries mutations on assertions.', () => {
+	it(' : mutate to Understanding carries mutations on assertions.', () => {
 
-			const tests = `
+		const tests = `
 		  
 			  #lang forge
 	
@@ -601,13 +597,13 @@ assert all x : Node | loops is sufficient for isDirectedTree
 				assert a2 is necessary for isDirectedTree
 			}
 		  `;
-			const forge_output = "";
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentUnderstanding();
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-			const expected_mutant = `
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
+
+		const expected_mutant = `
 			#lang forge
 
 			option run_sterling off
@@ -636,17 +632,17 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			 isDirectedTree_inner2 and not ( isDirectedTree_inner2 => a2)
 	}
 			`;
-			
-			assert.strictEqual(mutator.num_mutations, 2);
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
+
+		assert.strictEqual(mutator.num_mutations, 2);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
 
 
 
-		// TODO: Negative ex
-		it(' : mutate to Understanding carries out mutations on negative examples.', () => {
-	
-			const tests = `
+	// TODO: Negative ex
+	it(' : mutate to Understanding carries out mutations on negative examples.', () => {
+
+		const tests = `
 		  
 			#lang forge
 	
@@ -665,14 +661,14 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			}
 		}
 		  `;
-			const forge_output = ``;
-			const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+		const forge_output = ``;
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-	
-			const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-			mutator.mutateToStudentUnderstanding();
-			
-		  	const expected_mutant = `
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
+
+		const expected_mutant = `
 			                  
 #lang forge
 
@@ -714,14 +710,169 @@ pred isDirectedTree_inner2 {
 pred isDirectedTree { 
  isDirectedTree_inner2 or loop
 }`;
-			assert.strictEqual(mutator.num_mutations, 2);
-			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
-		});
+		assert.strictEqual(mutator.num_mutations, 2);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
 
 
-		// TODO: Quantified assertions
 
-		// TODO: All together
+	it(' : mutate to Understanding carries mutations on quantified assertions.', () => {
+
+		const tests = `
+		  
+			  #lang forge
+	
+			open "${DIRTREE_INFO.filename}"
+			//// Do not edit anything above this line ////
+		 
+			// sufficient
+			pred a1[r : Node] {
+				one Node
+				r->r not in edges
+			}
+
+			// necessary
+			pred a2[n : Node] {
+				n not in (^edges & iden)
+			}
+
+
+			test suite for isDirectedTree {
+				assert all x : Node | a1[x] is sufficient for isDirectedTree
+				assert all x : Node | a2[x] is necessary for isDirectedTree
+			}
+		  `;
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
+
+		const expected_mutant = `
+			#lang forge
+
+option run_sterling off
+
+sig Node {edges: set Node}
+
+pred isDirectedTree_inner1 {
+        edges.~edges in iden
+        lone edges.Node - Node.edges 
+        no (^edges & iden)
+        lone Node or Node in edges.Node + Node.edges 
+}
+
+pred a1[r : Node] {
+        one Node
+        r->r not in edges
+}
+pred a2[n : Node] {
+        n not in (^edges & iden)
+}
+
+pred isDirectedTree_inner2 { 
+                isDirectedTree_inner1 and not (all x : Node | a1[x] => isDirectedTree_inner1)
+}
+
+pred isDirectedTree { 
+                isDirectedTree_inner2 and not (all x : Node | isDirectedTree_inner2 => a2[x])
+}
+			`;
+
+		assert.strictEqual(mutator.num_mutations, 2);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
+
+
+
+	it(' : mutate to Understanding carries mutations out when tests are of various types.', () => {
+
+		const tests = `
+		  
+			  #lang forge
+	
+			open "${DIRTREE_INFO.filename}"
+			//// Do not edit anything above this line ////
+		 
+			// sufficient
+			pred a1[r : Node] {
+				one Node
+				r->r not in edges
+			}
+
+			pred a2 {
+				edges.~edges in iden 
+			}
+
+			example willBeIgnored is isDirectedTree for {
+				Node = \`Node1
+				no edges
+			}
+
+			test suite for isDirectedTree {
+				assert all x : Node | a1[x] is sufficient for isDirectedTree
+				assert a2 is necessary for isDirectedTree
+
+
+				example lasso is !isDirectedTree for {
+					Node = \`Node1 + \`Node2
+					edges = \`Node1->\`Node2 + \`Node2->\`Node2
+				}
+
+
+			}
+		  `;
+		const forge_output = "";
+		const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+
+		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToStudentUnderstanding();
+
+
+		const expected_mutant = `#lang forge
+
+option run_sterling off
+
+sig Node {edges: set Node}
+
+pred isDirectedTree_inner1 {
+        edges.~edges in iden
+        lone edges.Node - Node.edges 
+        no (^edges & iden)
+        lone Node or Node in edges.Node + Node.edges 
+}
+
+pred a1[r : Node] {
+        one Node
+        r->r not in edges
+}
+pred a2 {
+    edges.~edges in iden 
+}
+pred lasso {
+        some disj Node1, Node2 : Node | {
+                Node = Node1 + Node2
+                edges = Node1->Node2 + Node2->Node2
+        }
+}
+
+pred isDirectedTree_inner2 { 
+        isDirectedTree_inner1 or lasso
+}
+
+pred isDirectedTree_inner3 { 
+        isDirectedTree_inner2 and not ( isDirectedTree_inner2 => a2)
+}
+
+pred isDirectedTree { 
+        isDirectedTree_inner3 and not (all x : Node | a1[x] => isDirectedTree_inner3)
+}
+			`;
+
+		assert.strictEqual(mutator.num_mutations, 3);
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
+	});
+
 
 });
 

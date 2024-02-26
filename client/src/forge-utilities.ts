@@ -137,8 +137,6 @@ export function getPredList(fileContent: string): string[] {
 export function findAllExamples(fileContent : string) {
 	// TODO: A language server would help us not have to write these long (possibly buggy) regexes.
 
-	// TODO:THis is buggy. Perhaps we can make sure that the word example does not show up inside this?
-	// Think of other ways to parse an example.
 	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*?)}/g;
  
 
@@ -183,8 +181,11 @@ export function findAllAssertions(fileContent : string) {
 
 
 export function findAllQuantifiedAssertions(fileContent : string) {
-	// TODO: Fix!! This regex is not working.
-	const quantifiedAssertRegex = /assert\s+all([\s\S]+?)\|\s*(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/gs;
+
+	// TODO: BUGYY REGEX
+	// ex: Needn't be word characters
+	// not sure how to end assertion match. Need not be []
+	const quantifiedAssertRegex = /assert\s+(all\s+[\s\S]+?\|)\s*(.+?)\s+is\s+(necessary|sufficient)\s+for\s+(\w+|[^]]+])/gs;
 
 	if (fileContent == null || fileContent == "") {
 		return [];
@@ -196,14 +197,14 @@ export function findAllQuantifiedAssertions(fileContent : string) {
 
     for (const match of matches){
         
+		
 		const quantifiedVars = match[1].trim();
         const lhs = match[2].trim();
 		const op = match[3].trim();
         const rhs = match[4].trim();
 
-
 		const assertionName = `Assert All ${lhs} is ${op} for ${rhs}`;
-
+		
         assertions.push({
             assertionName,
 			quantifiedVars,
@@ -224,10 +225,11 @@ export function findExampleByName(fileContent : string, exampleName: string) {
 	// HACK: We first isolate examples and then parse the correct one because I was
 	// having trouble with the regex. A language server would help.
 	const all_examples = findForgeExamples(fileContent);
-	const r = new RegExp(`\\b${exampleName}\\b`);
+	const r = new RegExp(`\\b${exampleName}\\b`, 'g'); // Add 'g' flag for global search
 	var to_search = all_examples.filter(e => r.test(e))[0];
 
-	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*)}`);
+
+	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*?)}`, 'g'); // Add 'g' flag for global search
 	const match = exampleRegex.exec(to_search);
 
 	if (match == null) {
