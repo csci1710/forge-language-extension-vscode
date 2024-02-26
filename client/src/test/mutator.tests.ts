@@ -44,9 +44,6 @@ const DIRTREE_INFO = {
 					lone Node or Node in edges.Node + Node.edges 
 				}`,
 	filename: "dirTree.frg",
-
-
-
 }
 
 
@@ -54,7 +51,7 @@ const DIRTREE_INFO = {
 
 // mutator constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
 describe('Mutator', () => {
-	it('carries out no mutations if there are no wheat failures.', () => {
+	it(' : mutate to Misunderstanding carries out no mutations if there are no wheat failures.', () => {
 
 		const tests = `
 	  
@@ -91,7 +88,7 @@ describe('Mutator', () => {
 
 
 
-	it('ignores test expects for mutations.', () => {
+	it(' : mutate to Misunderstanding ignores test expects for mutations.', () => {
 
 		const tests = `
 		
@@ -114,7 +111,7 @@ describe('Mutator', () => {
 	});
 
 
-	it('ignores examples that do not directly reference a predicate.', () => {
+	it(' : mutate to Misunderstanding ignores examples that do not directly reference a predicate.', () => {
 
 		const tests = `
 	  
@@ -155,7 +152,7 @@ describe('Mutator', () => {
 
 	});
 
-	it('can mutate on multiple assertion failures.', () => {
+	it(' : mutate to Misunderstanding can mutate on multiple assertion failures.', () => {
 
 		const tests = `
 		
@@ -229,7 +226,7 @@ describe('Mutator', () => {
 		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
 	});
 
-	it('can mutate on quantified assertion failures.', () => {
+	it(' : mutate to Misunderstanding can mutate on quantified assertion failures.', () => {
 
 		const tests = `
 		#lang forge
@@ -289,7 +286,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 
 
 
-		it('carries out mutations on positive examples.', () => {
+		it(' : mutate to Misunderstanding carries out mutations on positive examples.', () => {
 	
 			const tests = `
 		  
@@ -342,7 +339,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 		});
 
 
-		it('carries out mutations on negative examples.', () => {
+		it(' : mutate to Misunderstanding carries out mutations on negative examples.', () => {
 	
 			const tests = `
 		  
@@ -394,7 +391,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
 
-		it('carries out mutations on examples and assertions when combined.', () => {
+		it(' : mutate to Misunderstanding carries out mutations on examples and assertions when combined.', () => {
 	
 			const tests = `
 		  
@@ -461,4 +458,9 @@ assert all x : Node | loops is sufficient for isDirectedTree
 	
 			assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 		});
+
+
+
+
+		// TODO: MutateToStudentUnderstanding here
 });
