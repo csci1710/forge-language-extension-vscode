@@ -38,7 +38,7 @@ const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assi
 
 export class HalpRunner {
 
-	private SOMETHING_WENT_WRONG = "Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff.";
+	private SOMETHING_WENT_WRONG = "Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff. You may find it useful to share the the VSCode Error log with them. You can access it as follows: Ctrl-shift-p or cmd-shift-p -> Search Show Logs -> Extension Host";
 	static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles";
 	logger : Logger;
 	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
@@ -85,8 +85,7 @@ export class HalpRunner {
 		
 			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
 			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
-			this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite.
-			This feedback ignores ANY tests that are not in 'test-suite's`);
+			this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
 
 			// Flush the output
 			this.forgeOutput.show(); 
@@ -94,8 +93,8 @@ export class HalpRunner {
 			mutator.mutateToStudentUnderstanding();
 			let skipped_tests = mutator.error_messages.join("\n");
 			this.forgeOutput.appendLine(skipped_tests);
-
-			this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you think of another test case, with the remaining ${mutator.inconsistent_tests.length} tests in mind⌛\n`);
+			// There should be one mutation per considered, consistent test
+			this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
 			this.forgeOutput.show(); 
 			try {
 				let thoroughness_hints = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
