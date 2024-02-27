@@ -2,7 +2,7 @@ import { RacketProcess } from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { removeForgeComments, getFailingTestNames } from './forge-utilities';
+import { removeForgeComments, getFailingTestNames, getFailingTestName } from './forge-utilities';
 import { Mutator } from './mutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
@@ -59,6 +59,12 @@ export class HalpRunner {
 	}
 
 
+
+
+
+
+
+
 	async runHalp(studentTests: string, testFileName: string): Promise<string[]> {
 		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 		studentTests = studentTests.replace(/\r/g, "\n");
@@ -73,43 +79,13 @@ export class HalpRunner {
 			return []
 		}
 
-
-
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
-
-
 		const w_o = await this.runTestsAgainstModel(studentTests, w);
 		const source_text = combineTestsWithModel(w, studentTests);
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
-
-			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
-			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
-			this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
-
-			// Flush the output
-			this.forgeOutput.show();
-
-			mutator.mutateToStudentUnderstanding();
-			let skipped_tests = mutator.error_messages.join("\n");
-			this.forgeOutput.appendLine(skipped_tests);
-			// There should be one mutation per considered, consistent test
-			this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
-			this.forgeOutput.show();
-			try {
-				let thoroughness_hints = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
-				if (thoroughness_hints.length == 0) {
-					return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
-				}
-				return thoroughness_hints;
-			}
-			catch (e) {
-				vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
-				this.forgeOutput.appendLine(e.message);
-				return [this.SOMETHING_WENT_WRONG];
-			}
-
+			return await this.generateThoroughnessFeedback(mutator);
 		}
 
 
@@ -121,10 +97,41 @@ ${w_o}`;
 			return [noTestFound];
 		}
 
-
 		
+		// TODO: If the strategy is per-test, we should create a new mutator for each line of w_o where get_failing_test_names(w_o) is not empty.
 		try {
-			mutator.mutateToStudentMisunderstanding();
+
+			var isPerTest = true;
+			
+
+			// TODO: Move this out into its own function
+			if (isPerTest) {
+
+				let per_test_hints = {}
+				let lines = w_o.split("\n");
+				
+				for (var outputline of lines) {
+
+					const tn = getFailingTestName(outputline);
+					if (tn == "") {
+						continue;
+					}
+
+					const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
+					lineMutator.mutateToStudentMisunderstanding();
+					var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, mutator.student_preds, outputline);
+					per_test_hints[tn] = hints;
+				}
+				
+				
+
+			}
+			else {
+				mutator.mutateToStudentMisunderstanding();
+			}
+
+
+			
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
@@ -132,8 +139,6 @@ ${w_o}`;
 		}
 
 		let assessed_tests = mutator.inconsistent_tests.join("\n");
-
-
 		let skipped_tests = mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
 
@@ -282,19 +287,6 @@ please fill out this form: ${formurl}`];
 		return hint_candidates;
 	}
 
-	private async tryGetThoroughnessFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
-
-		const failed_tests = getFailingTestNames(ag_output);
-		const hint_map = await this.getHintMap(testFileName);
-
-		const test_names = Object.keys(hint_map);
-		let missingTests = test_names.filter(x => !failed_tests.includes(x));
-		const hint_candidates = missingTests.map((tName) => hint_map[tName]);
-		return hint_candidates;
-	}
-
-
-
 	async tryGetHintsFromMutant(testFileName: string, mutant: string, student_preds: string, w_o: string): Promise<string[]> {
 
 		const payload = {
@@ -311,7 +303,16 @@ please fill out this form: ${formurl}`];
 		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
+	private async tryGetThoroughnessFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
+		const failed_tests = getFailingTestNames(ag_output);
+		const hint_map = await this.getHintMap(testFileName);
+
+		const test_names = Object.keys(hint_map);
+		let missingTests = test_names.filter(x => !failed_tests.includes(x));
+		const hint_candidates = missingTests.map((tName) => hint_map[tName]);
+		return hint_candidates;
+	}
 
 	async tryGetThoroughnessFromMutant(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
 
@@ -327,6 +328,35 @@ please fill out this form: ${formurl}`];
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);
 		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
+	}
+
+	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
+
+		this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
+		Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
+		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
+
+		// Flush the output
+		this.forgeOutput.show();
+
+		mutator.mutateToStudentUnderstanding();
+		let skipped_tests = mutator.error_messages.join("\n");
+		this.forgeOutput.appendLine(skipped_tests);
+		// There should be one mutation per considered, consistent test
+		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
+		this.forgeOutput.show();
+		try {
+			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(mutator.test_file_name, mutator.mutant, mutator.student_preds);
+			if (thoroughness_hints.length == 0) {
+				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
+			}
+			return thoroughness_hints;
+		}
+		catch (e) {
+			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+			this.forgeOutput.appendLine(e.message);
+			return [this.SOMETHING_WENT_WRONG];
+		}
 	}
 
 }

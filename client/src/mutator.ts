@@ -2,14 +2,6 @@ import { example_regex, assertion_regex, quantified_assertion_regex, extractTest
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName } from './forge-utilities';
 
 
-export class MutationStrategy {
-
-	static TestSuite = "Comprehensive";
-	static PerTest = "Per Test";
-
-}
-
-
 
 // This is buggy in cases where tests are the same
 function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
@@ -48,25 +40,30 @@ export class Mutator {
 	source_text: string;
 
 	error_messages: string[];
-
 	inconsistent_tests: string[];
-
-
 	num_mutations: number = 0;
+	max_mutations: number;
 
-	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string) {
+	/**
+	 * Creates a new Mutator instance.
+	 * @param wheat - The 'wheat'
+	 * @param student_tests - Tests authored by the student.
+	 * @param forge_output - Forge output after the source_text was run in Forge.
+	 * @param test_file_name - The name of the student test file.
+	 * @param source_text - The source_text of the *actual* file that was run in Forge.
+	 * @param max_mutations - The maximum number of mutations that can be carried out(default: 200).
+	 */
+	constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string, max_mutations: number = 200) {
 		this.wheat = wheat;
-
 		this.student_tests = removeForgeComments(student_tests);
 		this.forge_output = forge_output;
 		this.student_preds = getPredicatesOnly(this.student_tests);
 		this.test_file_name = test_file_name;
-
-
 		this.mutant = this.wheat + "\n" + this.student_preds + "\n";
 		this.source_text = source_text;
 		this.error_messages = [];
 		this.inconsistent_tests = [];
+		this.max_mutations = max_mutations;
 	}
 
 
@@ -137,6 +134,7 @@ export class Mutator {
 	}
 
 
+	// Checks if the target predicate is instructor authored, and if it is a negation.
 	checkTargetPredicate(pred: string) {
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		const isNegation = pred.match(negationRegex);
@@ -241,33 +239,21 @@ export class Mutator {
 	}
 
 
-	mutateToStudentMisunderstanding(strat : string = MutationStrategy.TestSuite) {
-		
-		if (strat == MutationStrategy.TestSuite) {
-		this.mutateToStudentMisunderstandingTestSuite();
-		} else if (strat == MutationStrategy.PerTest) {
-
-		}
-		else {
-			throw new Error("Invalid mutation strategy");
-		}
-
-	}
-
-
 
 	// TODO: This does not error  loudly!
-	mutateToStudentMisunderstandingTestSuite() {
+	mutateToStudentMisunderstanding() {
 
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
+
+			// Do not carry out any more than the maximum number of mutations.
+			if (this.num_mutations >= this.max_mutations) {
+				break;
+			}
+
 			const testName = getFailingTestName(w_o);
 
 			if (example_regex.test(w_o)) {
-				// Fundamentally the issue is that the characteristic predicate from a 
-				// positive example gives us such a *specific* modification to a predicate,
-				// that it is rare for us to offer meaningful feedback.
-
 				const failedExample = findExampleByName(this.student_tests, testName);
 				this.mutateToExample(failedExample);
 
@@ -284,22 +270,14 @@ export class Mutator {
 				const rhs_pred = match[6];
 				var failing_test = extractSubstring(this.source_text, row, col, span).trim();
 
-				// Ensure this extraction works?
 				const quantifier_match = /\bassert\b(.*?)\|/;
 				const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
 				const lhs_match = /\|\s*(.*?)\s+is\b/;
 				const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
 				const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
 				const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
-
 				this.mutateToAssertion(testName, lhs_instantiation, rhs_instantiation, op, quantifier);
-
-
-
 			} else if (assertion_regex.test(w_o)) {
-
-
-				// mutate to assertion
 				const match = w_o.match(assertion_regex);
 				const lhs_pred = match[1];
 				const op = match[2];
