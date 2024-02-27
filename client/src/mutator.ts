@@ -1,13 +1,14 @@
 import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName } from './forge-utilities';
 
-/*
-	ISSUES:
-	- Quantifier Predicates and their mutation needs to be thought through a bit!
 
+export class MutationStrategy {
 
+	static TestSuite = "Comprehensive";
+	static PerTest = "Per Test";
 
-*/
+}
+
 
 
 // This is buggy in cases where tests are the same
@@ -28,9 +29,6 @@ function extractSubstring(text: string, startRow: number, startColumn: number, s
 	if (startColumn > rows[startRow - 1].length + 1) {
 		throw new Error("Something went wrong while I was reading Forge output.");
 	}
-
-	let row_to_check = rows[startRow];
-
 
 	// Calculate the starting index
 	let startIndex = rows.slice(0, startRow).reduce((acc, currRow) => acc + currRow.length + 1, 0) + startColumn;
@@ -242,8 +240,24 @@ export class Mutator {
 			: this.easePredicate(mutant_with_example, failed_example.examplePredicate, failed_example.exampleName);
 	}
 
+
+	mutateToStudentMisunderstanding(strat : string = MutationStrategy.TestSuite) {
+		
+		if (strat == MutationStrategy.TestSuite) {
+		this.mutateToStudentMisunderstandingTestSuite();
+		} else if (strat == MutationStrategy.PerTest) {
+
+		}
+		else {
+			throw new Error("Invalid mutation strategy");
+		}
+
+	}
+
+
+
 	// TODO: This does not error  loudly!
-	mutateToStudentMisunderstanding() {
+	mutateToStudentMisunderstandingTestSuite() {
 
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {

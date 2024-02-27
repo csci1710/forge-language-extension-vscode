@@ -1,17 +1,18 @@
-import {RacketProcess} from './racketprocess';
+import { RacketProcess } from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { removeForgeComments, getFailingTestNames } from './forge-utilities'; 
-import { Mutator } from './mutator'; 
+import { removeForgeComments, getFailingTestNames } from './forge-utilities';
+import { Mutator } from './mutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
-import {tempFile} from './gen-utilities';
+import { tempFile } from './gen-utilities';
 
 
 
-export function combineTestsWithModel(wheatText: string, tests: string) : string {
+
+export function combineTestsWithModel(wheatText: string, tests: string): string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 	const hashlang_decl = "#lang";
@@ -40,8 +41,8 @@ export class HalpRunner {
 
 	private SOMETHING_WENT_WRONG = "Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff. You may find it useful to share the the VSCode Error log with them. You can access it as follows: Ctrl-shift-p or cmd-shift-p -> Search Show Logs -> Extension Host";
 	static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles";
-	logger : Logger;
-	encryptor : SymmetricEncryptor = new SymmetricEncryptor();
+	logger: Logger;
+	encryptor: SymmetricEncryptor = new SymmetricEncryptor();
 	forgeOutput: vscode.OutputChannel;
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
@@ -72,30 +73,30 @@ export class HalpRunner {
 			return []
 		}
 
-		
+
 
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
-		
 
-		const  w_o = await this.runTestsAgainstModel(studentTests, w);
+
+		const w_o = await this.runTestsAgainstModel(studentTests, w);
 		const source_text = combineTestsWithModel(w, studentTests);
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
-		
+
 			this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
 			Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
 			this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
 
 			// Flush the output
-			this.forgeOutput.show(); 
+			this.forgeOutput.show();
 
 			mutator.mutateToStudentUnderstanding();
 			let skipped_tests = mutator.error_messages.join("\n");
 			this.forgeOutput.appendLine(skipped_tests);
 			// There should be one mutation per considered, consistent test
 			this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
-			this.forgeOutput.show(); 
+			this.forgeOutput.show();
 			try {
 				let thoroughness_hints = await this.tryGetThoroughnessFromMutant(testFileName, mutator.mutant, mutator.student_preds);
 				if (thoroughness_hints.length == 0) {
@@ -108,7 +109,7 @@ export class HalpRunner {
 				this.forgeOutput.appendLine(e.message);
 				return [this.SOMETHING_WENT_WRONG];
 			}
-			
+
 		}
 
 
@@ -119,18 +120,19 @@ ${w_o}`;
 		if (testNames.length == 0) {
 			return [noTestFound];
 		}
-		try
-		{
+
+
+		
+		try {
 			mutator.mutateToStudentMisunderstanding();
 		}
-		catch (e)
-		{
+		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
 			return [this.SOMETHING_WENT_WRONG];
 		}
 
 		let assessed_tests = mutator.inconsistent_tests.join("\n");
-		
+
 
 		let skipped_tests = mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
@@ -141,20 +143,19 @@ ${w_o}`;
 		try {
 			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
 		}
-		catch (e)
-		{
+		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
 			this.forgeOutput.appendLine(e.message);
 			return [this.SOMETHING_WENT_WRONG];
 		}
 
 		if (hints.length == 0) {
-			
+
 			const payload = {
 
 				"studentTests": studentTests,
-				"wheat_output" : w_o,
-				"testFile" : testFileName
+				"wheat_output": w_o,
+				"testFile": testFileName
 			}
 			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
 
@@ -166,12 +167,12 @@ They are not necessarily incorrect, but I cannot provide feedback around it.
 If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
 please fill out this form: ${formurl}`];
 
-		}		
+		}
 		return hints;
 	}
 
 
-	private async runTestsAgainstModel (tests: string, model: string): Promise<string> {
+	private async runTestsAgainstModel(tests: string, model: string): Promise<string> {
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
@@ -204,11 +205,11 @@ please fill out this form: ${formurl}`];
 				r.on('exit', resolve);
 			});
 			return stderrput;
-		}  catch (e) {
+		} catch (e) {
 
 			vscode.window.showErrorMessage(`Toadus Ponens run failed, perhaps be because VS Code did not have permission to write a file to your OS temp folder (${os.tmpdir()}). Consult the Toadus Ponens guide for how to modify this. Full error message : ${e}`);
 		}
-		
+
 		finally {
 			// Delete the temporary file in the finally block
 			fs.unlinkSync(tempFilePath);
@@ -216,15 +217,15 @@ please fill out this form: ${formurl}`];
 	}
 
 
-	private async downloadFile(url: string): Promise<string>  {
+	private async downloadFile(url: string): Promise<string> {
 
 		const response = await fetch(url);
 		if (response.ok) {
 			const t = await response.text();
 			return this.encryptor.decrypt(t);
-		} 
-		
-		this.logger.log_payload({"url": url}, LogLevel.ERROR, Event.FILE_DOWNLOAD)
+		}
+
+		this.logger.log_payload({ "url": url }, LogLevel.ERROR, Event.FILE_DOWNLOAD)
 		if (response.status === 404) {
 			vscode.window.showErrorMessage(NOT_ENABLED_MESSAGE)
 			return NOT_ENABLED_MESSAGE;
@@ -262,8 +263,8 @@ please fill out this form: ${formurl}`];
 	}
 
 
-	private async tryGetHintsFromAutograderOutput(ag_output : string, testFileName : string) : Promise<string[]> {
-		
+	private async tryGetHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+
 		if (ag_output == "") {
 			return [];
 		}
@@ -277,12 +278,12 @@ please fill out this form: ${formurl}`];
 
 
 		var hint_candidates = tNames.filter((tName) => tName in hint_map)
-							 .map((tName) => hint_map[tName]);						
+			.map((tName) => hint_map[tName]);
 		return hint_candidates;
 	}
 
-	private async tryGetThoroughnessFromAutograderOutput(ag_output : string, testFileName : string) : Promise<string[]> {
-		
+	private async tryGetThoroughnessFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+
 		const failed_tests = getFailingTestNames(ag_output);
 		const hint_map = await this.getHintMap(testFileName);
 
@@ -294,7 +295,7 @@ please fill out this form: ${formurl}`];
 
 
 
-	async tryGetHintsFromMutant(testFileName: string, mutant : string, student_preds : string, w_o : string) : Promise<string[]> {
+	async tryGetHintsFromMutant(testFileName: string, mutant: string, student_preds: string, w_o: string): Promise<string[]> {
 
 		const payload = {
 			"testFileName": testFileName,
@@ -306,15 +307,15 @@ please fill out this form: ${formurl}`];
 		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
+		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);
 		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
 
 
-	async tryGetThoroughnessFromMutant(testFileName: string, mutant : string, student_preds : string) : Promise<string[]> {
+	async tryGetThoroughnessFromMutant(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
 
-			
+
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
@@ -324,7 +325,7 @@ please fill out this form: ${formurl}`];
 		this.logger.log_payload(payload, LogLevel.INFO, Event.THOROUGHNESS_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);	
+		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);
 		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
 	}
 
