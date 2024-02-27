@@ -75,10 +75,9 @@
 					"default": "3.2.1",
 					"description": "Minimum version of Forge required to run this extension."
 				},
-				"forge.toadusPonens.feedbackStrategy" : {
+				"forge.feedbackStrategy" : {
 					"scope": "resource",
 					"type": "string",
-					"enum" : ["Comprehensive", "Per Test"],
 					"default": "Comprehensive",
 					"description": "Feedback strategy used by Toadus Ponens. Comprehensive will provide feedback for the test suite as a whole, Per Test will provide feedback for each test."
 				}

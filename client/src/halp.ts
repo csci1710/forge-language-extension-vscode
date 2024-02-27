@@ -51,10 +51,15 @@ export class HalpRunner {
 
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 
+	mutationStrategy : string;
+
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
 		this.logger = logger;
 		this.forgeOutput = output;
+
+		let currentSettings = vscode.workspace.getConfiguration('forge');
+		this.mutationStrategy = currentSettings.get('feedbackStrategy').toString();
 	}
 
 
@@ -116,11 +121,8 @@ ${w_o}`;
 		}
 		
 		try {
-			// TODO: Need to access the strategy here!
-			var isPerTest = true;
-			
 
-			if (isPerTest) {
+			if (this.mutationStrategy == "Per Test") {
 
 				let per_test_hints = await this.runPerTestStrategy(w, w_o, studentTests, testFileName, source_text);
 				
@@ -143,9 +145,12 @@ ${w_o}`;
 				return composite_hint;
 			}
 
-			else {
+			else if (this.mutationStrategy == "Comprehensive"){
 				var hints = await this.runComprehensiveStrategy(mutator, studentTests, testFileName);
 				return this.chooseHint(hints);
+			}
+			else {
+				return "Something was wrong in the extension settings. toadusponens.feedbackStrategy must be either 'Comprehensive' or 'Per Test'";
 			}
 
 
