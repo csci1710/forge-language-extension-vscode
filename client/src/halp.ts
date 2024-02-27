@@ -104,30 +104,50 @@ ${w_o}`;
 			var isPerTest = true;
 			
 
-			// TODO: Move this out into its own function
 			if (isPerTest) {
 
-				let per_test_hints = {}
-				let lines = w_o.split("\n");
+				let per_test_hints = await this.runPerTestStrategy(w, w_o, studentTests, testFileName, source_text);
 				
-				for (var outputline of lines) {
-
-					const tn = getFailingTestName(outputline);
-					if (tn == "") {
-						continue;
-					}
-
-					const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
-					lineMutator.mutateToStudentMisunderstanding();
-					var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, mutator.student_preds, outputline);
-					per_test_hints[tn] = hints;
-				}
-				
-				
-
+				// Now need to annotate per test hints with the test name.
 			}
+
+			// TODO: Move this out into its own function
 			else {
 				mutator.mutateToStudentMisunderstanding();
+				this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
+				this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
+
+				try {
+					var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
+				}
+				catch (e) {
+					vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+					this.forgeOutput.appendLine(e.message);
+					return [this.SOMETHING_WENT_WRONG];
+				}
+				let assessed_tests = mutator.inconsistent_tests.join("\n");
+				let skipped_tests = mutator.error_messages.join("\n");
+				this.forgeOutput.appendLine(skipped_tests);
+				if (hints.length == 0) {
+
+					const payload = {
+		
+						"studentTests": studentTests,
+						"wheat_output": w_o,
+						"testFile": testFileName
+					}
+					this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+		
+		
+					// HOWEVER: A LOSS HERE IS THAT WE DO NOT KNOW WHICH TESTS ARE AMBIGUOUS.
+					return [`Analyzed tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+		They are not necessarily incorrect, but I cannot provide feedback around it. 
+		
+		If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
+		please fill out this form: ${formurl}`];
+		
+				}
+				return hints;
 			}
 
 
@@ -138,42 +158,35 @@ ${w_o}`;
 			return [this.SOMETHING_WENT_WRONG];
 		}
 
-		let assessed_tests = mutator.inconsistent_tests.join("\n");
-		let skipped_tests = mutator.error_messages.join("\n");
-		this.forgeOutput.appendLine(skipped_tests);
 
-		this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
-		this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
-		try {
-			var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
-		}
-		catch (e) {
-			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
-			this.forgeOutput.appendLine(e.message);
-			return [this.SOMETHING_WENT_WRONG];
-		}
+		
 
-		if (hints.length == 0) {
+	}
 
-			const payload = {
 
-				"studentTests": studentTests,
-				"wheat_output": w_o,
-				"testFile": testFileName
+	
+	private async runPerTestStrategy(w : string, w_o : string, studentTests : string, testFileName : string, source_text : string): Promise<Object> {
+
+
+		let per_test_hints = {}
+		let lines = w_o.split("\n");
+		
+		for (var outputline of lines) {
+
+			const tn = getFailingTestName(outputline);
+			if (tn == "") {
+				continue;
 			}
-			this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
 
-
-			// HOWEVER: A LOSS HERE IS THAT WE DO NOT KNOW WHICH TESTS ARE AMBIGUOUS.
-			return [`Analyzed tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-They are not necessarily incorrect, but I cannot provide feedback around it. 
-
-If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-please fill out this form: ${formurl}`];
-
+			const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
+			lineMutator.mutateToStudentMisunderstanding();
+			var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, mutator.student_preds, outputline);
+			per_test_hints[tn] = hints;
 		}
-		return hints;
+
+		return per_test_hints;
+
 	}
 
 
