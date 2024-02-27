@@ -45,6 +45,9 @@ export class HalpRunner {
 	encryptor: SymmetricEncryptor = new SymmetricEncryptor();
 	forgeOutput: vscode.OutputChannel;
 
+	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
+
+
 	constructor(logger: Logger, output: vscode.OutputChannel) {
 		this.logger = logger;
 		this.forgeOutput = output;
@@ -60,23 +63,29 @@ export class HalpRunner {
 
 
 
+	chooseHint(hint_candidates: string[]): string {
+
+		if (hint_candidates.length == 0) {
+			return "";
+		}
+		return hint_candidates[Math.floor(Math.random() * hint_candidates.length)];
+	}
 
 
 
 
-
-	async runHalp(studentTests: string, testFileName: string): Promise<string[]> {
-		const formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
+	async runHalp(studentTests: string, testFileName: string): Promise<string> {
+		
 		studentTests = studentTests.replace(/\r/g, "\n");
 		const w = await this.getWheat(testFileName);
 
 		if (w === "") {
 			vscode.window.showErrorMessage("Toadus : Network error. Terminating run.");
-			return [];
+			return "";
 		}
 		else if (w === NOT_ENABLED_MESSAGE) {
 			vscode.window.showErrorMessage(NOT_ENABLED_MESSAGE);
-			return []
+			return "";
 		}
 
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
@@ -85,7 +94,8 @@ export class HalpRunner {
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
-			return await this.generateThoroughnessFeedback(mutator);
+			let thoroughness_candidates = await this.generateThoroughnessFeedback(mutator);
+			return this.chooseHint(thoroughness_candidates);
 		}
 
 
@@ -94,13 +104,11 @@ export class HalpRunner {
 ${w_o}`;
 
 		if (testNames.length == 0) {
-			return [noTestFound];
+			return noTestFound;
 		}
-
 		
-		// TODO: If the strategy is per-test, we should create a new mutator for each line of w_o where get_failing_test_names(w_o) is not empty.
 		try {
-
+			// TODO: Need to access the strategy here!
 			var isPerTest = true;
 			
 
@@ -109,45 +117,27 @@ ${w_o}`;
 				let per_test_hints = await this.runPerTestStrategy(w, w_o, studentTests, testFileName, source_text);
 				
 				// Now need to annotate per test hints with the test name.
-			}
-
-			// TODO: Move this out into its own function
-			else {
-				mutator.mutateToStudentMisunderstanding();
-				this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
+				this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following test(s) may be inconsistent with the problem specification.`);
 				this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
-				try {
-					var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, w_o);
-				}
-				catch (e) {
-					vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
-					this.forgeOutput.appendLine(e.message);
-					return [this.SOMETHING_WENT_WRONG];
-				}
-				let assessed_tests = mutator.inconsistent_tests.join("\n");
-				let skipped_tests = mutator.error_messages.join("\n");
-				this.forgeOutput.appendLine(skipped_tests);
-				if (hints.length == 0) {
 
-					const payload = {
-		
-						"studentTests": studentTests,
-						"wheat_output": w_o,
-						"testFile": testFileName
+				let composite_hint = "";
+				// Now we need to choose a hint per test. But what about ambiguous tests? This is where it happens?
+				for (var test in per_test_hints) {
+
+					var hint = this.chooseHint(per_test_hints[test])
+					if (hint == "") {
+						hint = this.recordAmbiguousTest(testFileName, studentTests, mutator.forge_output);
 					}
-					this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
-		
-		
-					// HOWEVER: A LOSS HERE IS THAT WE DO NOT KNOW WHICH TESTS ARE AMBIGUOUS.
-					return [`Analyzed tests examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-		They are not necessarily incorrect, but I cannot provide feedback around it. 
-		
-		If you disagree with this assessment, and believe that this test does deal with behavior explicitly described in the problem specification,
-		please fill out this form: ${formurl}`];
-		
+
+					composite_hint += `\n${test} : ${hint}\n`;
 				}
-				return hints;
+				return composite_hint;
+			}
+
+			else {
+				var hints = await this.runComprehensiveStrategy(mutator, studentTests, testFileName);
+				return this.chooseHint(hints);
 			}
 
 
@@ -155,17 +145,41 @@ ${w_o}`;
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
-			return [this.SOMETHING_WENT_WRONG];
+			return this.SOMETHING_WENT_WRONG;
 		}
-
-
-
-		
-
 	}
 
 
-	
+	private async runComprehensiveStrategy(mutator : Mutator, studentTests : string, testFileName : string, ): Promise<string[]> {
+
+			mutator.mutateToStudentMisunderstanding();
+			let assessed_tests = mutator.inconsistent_tests.join("\n");
+			let skipped_tests = mutator.error_messages.join("\n");
+			this.forgeOutput.appendLine(skipped_tests);
+
+
+			
+			this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
+			this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
+
+			try {
+				var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, mutator.forge_output);
+			}
+			catch (e) {
+				vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
+				this.forgeOutput.appendLine(e.message);
+				return [this.SOMETHING_WENT_WRONG];
+			}
+			
+			if (hints.length == 0) {
+				// One lost piece of information is that students do not know
+				// *which* tests are ambiguous. We lose this granularity with a comprehensive mutation strategy.
+				return [this.recordAmbiguousTest(testFileName, studentTests, mutator.forge_output)];
+			}
+			return hints;
+
+	}
+
 	private async runPerTestStrategy(w : string, w_o : string, studentTests : string, testFileName : string, source_text : string): Promise<Object> {
 
 
@@ -181,11 +195,34 @@ ${w_o}`;
 
 			const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
 			lineMutator.mutateToStudentMisunderstanding();
-			var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, mutator.student_preds, outputline);
+			var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
 			per_test_hints[tn] = hints;
+
+
+			/*
+				We should do something about the ambiguous tests here
+
+
+			*/
+			
 		}
 
 		return per_test_hints;
+
+	}
+
+
+	recordAmbiguousTest(testFileName: string, studentTests: string, forge_output : string) : string {
+		const payload = {
+
+			"studentTests": studentTests,
+			"wheat_output": forge_output,
+			"testFile": testFileName
+		}
+		this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
+		return `Analyzed test(s) examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+		They are not necessarily incorrect, but I cannot provide feedback around them. If you disagree with this assessment, and believe that these test(s) do deal with behavior explicitly described in the problem specification,
+		please fill out this form: ${this.formurl}`;
 
 	}
 

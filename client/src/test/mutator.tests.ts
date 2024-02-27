@@ -80,7 +80,7 @@ describe('Mutator', () => {
 
 		const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
 		mutator.mutateToStudentMisunderstanding();
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(DIRTREE_INFO.wheat));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(DIRTREE_INFO.wheat));
 	});
 
 
@@ -104,7 +104,7 @@ describe('Mutator', () => {
 		mutator.mutateToStudentMisunderstanding();
 
 
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(DIRTREE_INFO.wheat));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(DIRTREE_INFO.wheat));
 	});
 
 
@@ -220,7 +220,7 @@ describe('Mutator', () => {
 			}`;
 
 		assert.strictEqual(num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expectedMutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
 	});
 
 	it(' : mutate to Misunderstanding can mutate on quantified assertion failures.', () => {
@@ -277,7 +277,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 		   }`;
 
 		assert.strictEqual(num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expectedMutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
 	});
 
 
@@ -332,7 +332,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			   isDirectedTree_inner1 or lasso
 			  }`;
 
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -385,7 +385,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			   isDirectedTree_inner1 and not line
 			  }`;
 
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 	it(' : mutate to Misunderstanding carries out mutations on examples and assertions when combined.', () => {
@@ -453,7 +453,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 				  isDirectedTree_inner2 or loop
 			  }`;
 
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -569,7 +569,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			`;
 
 		assert.strictEqual(mutator.num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -634,7 +634,7 @@ assert all x : Node | loops is sufficient for isDirectedTree
 			`;
 
 		assert.strictEqual(mutator.num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -711,7 +711,7 @@ pred isDirectedTree {
  isDirectedTree_inner2 or loop
 }`;
 		assert.strictEqual(mutator.num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -780,7 +780,7 @@ pred isDirectedTree {
 			`;
 
 		assert.strictEqual(mutator.num_mutations, 2);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 
@@ -870,7 +870,7 @@ pred isDirectedTree {
 			`;
 
 		assert.strictEqual(mutator.num_mutations, 3);
-		assert.strictEqual(removeWhitespace(mutator.mutants), removeWhitespace(expected_mutant));
+		assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expected_mutant));
 	});
 
 

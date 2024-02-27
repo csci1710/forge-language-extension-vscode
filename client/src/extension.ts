@@ -306,13 +306,12 @@ export async function activate(context: ExtensionContext) {
 					
 					try {
 						var documentData = textDocumentToLog(document, true);
-						documentData['halp_output'] = result.join("\n");
+						documentData['halp_output'] = result;
 						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 
 						if (result.length > 0) {
-							// TODO: What should I do when we have multiple hints? Should I choose one at random?
-							var hint = result[Math.floor(Math.random() * result.length)];
-							halpOutput.appendLine("💡🐸💡 " + hint);
+
+							halpOutput.appendLine("💡🐸💡 " + result);
 						}
 					}
 					finally {
