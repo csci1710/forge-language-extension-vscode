@@ -90,9 +90,6 @@ export async function activate(context: ExtensionContext) {
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
 
-			// TODO: THis needs to be updated to handle multiple errors
-
-
 			const matcher = racket.matchForgeError(context.line);
 			if (!matcher) {
 				return [];

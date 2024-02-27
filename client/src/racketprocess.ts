@@ -59,9 +59,7 @@ export class RacketProcess {
 		this.childProcess = null;
 	}
 
-
-
-	// This is broken		
+		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 
 

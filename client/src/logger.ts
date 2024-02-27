@@ -64,7 +64,8 @@ export class Logger {
         let p = this.payload(payload, loglevel, event);
         let log = doc(this.log_target);
         try {
-           await setDoc(log, p);
+            //TODO: UNCOMMENT ME
+          //await setDoc(log, p);
         } catch (error) {
             console.error("Log failure ", error);
         }

@@ -29,6 +29,11 @@ function extractSubstring(text: string, startRow: number, startColumn: number, s
 	return text.substring(startIndex, startIndex + span);
 }
 
+
+
+// TODO: We should do something here that allows us to
+// correctly underline predicates.
+
 export class Mutator {
 
 	wheat: string;
@@ -239,8 +244,6 @@ export class Mutator {
 	}
 
 
-
-	// TODO: This does not error  loudly!
 	mutateToStudentMisunderstanding() {
 
 		let w_os = this.forge_output.split("\n");
@@ -268,6 +271,11 @@ export class Mutator {
 				const lhs_pred = match[4];
 				const op = match[5];
 				const rhs_pred = match[6];
+
+
+				///// SOMETHING IS WRONG WITH THE REPORTED ROW, COL, SPAN /////
+				// WHY?
+
 				var failing_test = extractSubstring(this.source_text, row, col, span).trim();
 
 				const quantifier_match = /\bassert\b(.*?)\|/;

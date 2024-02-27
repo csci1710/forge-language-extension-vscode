@@ -27,6 +27,10 @@ export function combineTestsWithModel(wheatText: string, tests: string): string 
 	var combined = wheatText + "\n" + tests;
 	combined = removeForgeComments(combined);
 
+	combined = combined.replace(/\t/g, " ");
+	combined = combined.replace(/\r/g, " ");
+	
+
 	return combined;
 
 }
@@ -89,8 +93,12 @@ export class HalpRunner {
 		}
 
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
-		const w_o = await this.runTestsAgainstModel(studentTests, w);
-		const source_text = combineTestsWithModel(w, studentTests);
+
+		const run_result = await this.runTestsAgainstModel(studentTests, w);
+
+		// TODO: This is hacky
+		const w_o = run_result['stderrput'];
+		const source_text = run_result['toRun'];
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
@@ -227,7 +235,7 @@ ${w_o}`;
 	}
 
 
-	private async runTestsAgainstModel(tests: string, model: string): Promise<string> {
+	private async runTestsAgainstModel(tests: string, model: string): Promise<Object> {
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
@@ -242,7 +250,7 @@ ${w_o}`;
 			if (!r) {
 				vscode.window.showErrorMessage("Could not run Forge process.");
 				console.error("Could not run Forge process.");
-				return "Toadus Ponens run failed."
+				return {stderrput : "Toadus Ponens run failed.", toRun : toRun};
 			}
 
 			let stdoutput = "";
@@ -259,7 +267,7 @@ ${w_o}`;
 			await new Promise((resolve) => {
 				r.on('exit', resolve);
 			});
-			return stderrput;
+			return {stderrput, toRun};
 		} catch (e) {
 
 			vscode.window.showErrorMessage(`Toadus Ponens run failed, perhaps be because VS Code did not have permission to write a file to your OS temp folder (${os.tmpdir()}). Consult the Toadus Ponens guide for how to modify this. Full error message : ${e}`);
@@ -349,7 +357,8 @@ ${w_o}`;
 		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);
+		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
+		const ag_output = ag_meta['stderrput'];
 		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
@@ -376,7 +385,8 @@ ${w_o}`;
 		this.logger.log_payload(payload, LogLevel.INFO, Event.THOROUGHNESS_MUTANT)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
-		const ag_output = await this.runTestsAgainstModel(autograderTests, mutant);
+		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
+		const ag_output = ag_meta['stderrput'];
 		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
 	}
 
