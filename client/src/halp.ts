@@ -330,6 +330,10 @@ ${w_o}`;
 	}
 
 	private async getWheat(testFileName: string): Promise<string> {
+
+		// TODO: Need a timer here!
+
+
 		const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
 		const wheatURI = `${HalpRunner.WHEATSTORE}/${wheatName}`;
 		const wheat = await this.downloadFile(wheatURI);
