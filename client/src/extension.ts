@@ -90,9 +90,6 @@ export async function activate(context: ExtensionContext) {
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
 
-			// TODO: THis needs to be updated to handle multiple errors
-
-
 			const matcher = racket.matchForgeError(context.line);
 			if (!matcher) {
 				return [];
@@ -287,7 +284,7 @@ export async function activate(context: ExtensionContext) {
 		}
 
 		
-		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
+		
 
 		const editor = vscode.window.activeTextEditor;
 
@@ -306,13 +303,11 @@ export async function activate(context: ExtensionContext) {
 					
 					try {
 						var documentData = textDocumentToLog(document, true);
-						documentData['halp_output'] = result.join("\n");
+						documentData['halp_output'] = result;
 						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 
 						if (result.length > 0) {
-							// TODO: What should I do when we have multiple hints? Should I choose one at random?
-							var hint = result[Math.floor(Math.random() * result.length)];
-							halpOutput.appendLine("💡🐸💡 " + hint);
+							halpOutput.appendLine(result);
 						}
 					}
 					finally {

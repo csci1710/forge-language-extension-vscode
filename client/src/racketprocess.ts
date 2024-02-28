@@ -3,6 +3,9 @@ import * as vscode from 'vscode';
 import { Diagnostic, DiagnosticCollection, DiagnosticSeverity } from 'vscode';
 
 
+
+
+
 export class RacketProcess {
 
 	private childProcess: ChildProcess | null;
@@ -59,9 +62,7 @@ export class RacketProcess {
 		this.childProcess = null;
 	}
 
-
-
-	// This is broken		
+		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
 
 

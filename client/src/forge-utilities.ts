@@ -68,7 +68,7 @@ function findForgePredicates(inputText : string) : [string] {
     return predicates;
 }
 
-// TODO: This is buggy!
+
 export function findForgeExamples(inputText) {
     const withoutComments = removeForgeComments(inputText);
     const lines = withoutComments.split('\n');
@@ -182,9 +182,6 @@ export function findAllAssertions(fileContent : string) {
 
 export function findAllQuantifiedAssertions(fileContent : string) {
 
-	// TODO: BUGYY REGEX
-	// ex: Needn't be word characters
-	// not sure how to end assertion match. Need not be []
 	const quantifiedAssertRegex = /assert\s+(all\s+[\s\S]+?\|)\s*(.+?)\s+is\s+(necessary|sufficient)\s+for\s+(\w+|[^]]+])/gs;
 
 	if (fileContent == null || fileContent == "") {
@@ -443,7 +440,6 @@ export function findAllStructuredTests(suite: string) {
 }
   
 
-// TODO: THis is not quite correct! It's not finding the test suites.
 export function extractTestSuite(input: string): ExtractedTestSuite[] {
 	
 	const results: ExtractedTestSuite[] = [];
@@ -456,7 +452,6 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 
 		const indices : Object[] = [];
 
-		// TODO: This *SHOULD* bottom out
 		if (input.length == 0 || input == null) {
 			return indices;
 		}
@@ -502,14 +497,7 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 		const remaining = input.substring(suiteEnd);
 		console.log(remaining);
 
-
-
-
 		return indices;
-		// Needs to be in test suite fors, well formed. But I think somethign is wrong
-		// TODO: Issue here? If it doesn't match, it'll start spinning
-		const next = findTestSuiteIndices(remaining);
-		return indices.concat(next);
 	}
 	  
 	//const pattern = /test suite for\s+(\w+)\s*\{(.*)\}/gs;
@@ -615,4 +603,28 @@ export async function ensureForgeVersion(minVersion: string, error_reporter : (s
 			error_reporter(ERR_FORGE);
 		}
 	}
+}
+
+export function combineTestsWithModel(wheatText: string, tests: string): string {
+	// If separator doesn't exist (in that case, look for #lang forge)
+	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+	const hashlang_decl = "#lang";
+
+	if (tests.includes(TEST_SEPARATOR)) {
+		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+		tests = tests.substring(startIndex).trim();
+	}
+
+	tests = tests.replace(hashlang_decl, "// #lang");
+
+
+	var combined = wheatText + "\n" + tests;
+	combined = removeForgeComments(combined);
+
+	combined = combined.replace(/\t/g, " ");
+	combined = combined.replace(/\r/g, " ");
+	
+
+	return combined;
+
 }
