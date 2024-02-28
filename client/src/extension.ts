@@ -284,7 +284,7 @@ export async function activate(context: ExtensionContext) {
 		}
 
 		
-		logger.log_payload({}, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
+		
 
 		const editor = vscode.window.activeTextEditor;
 
