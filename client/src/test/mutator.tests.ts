@@ -7,7 +7,6 @@ import { strict as assert, strictEqual } from 'assert';
 
 // TODO: This is duplicated, find a better place to put it.
 export function combineTestsWithModel(wheatText: string, tests: string): string {
-	// todo: What if separator doesn't exist (in that case, look for #lang forge)
 	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
 	const hashlang_decl = "#lang";
 
@@ -457,22 +456,6 @@ assert all x : Node | loops is sufficient for isDirectedTree
 	});
 
 
-
-
-	// TODO: MutateToStudentUnderstanding here
-
-
-	/*
-		Test cases:
-		- [x] Mutate to positive examples ( I suspect multiple examples will be an issue?)
-		- [x] Mutate to negative examples
-		- [x] Mutate to assertions
-		- Mutate to quantified assertions
-
-		- Mutate to example + assertion + quantified assertion
-
-	*/
-
 	it(' : mutate to Understanding carries out no mutations if not in test suites.', () => {
 
 		const tests = `
@@ -638,8 +621,6 @@ assert all x : Node | loops is sufficient for isDirectedTree
 	});
 
 
-
-	// TODO: Negative ex
 	it(' : mutate to Understanding carries out mutations on negative examples.', () => {
 
 		const tests = `
