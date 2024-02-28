@@ -307,8 +307,7 @@ export async function activate(context: ExtensionContext) {
 						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 
 						if (result.length > 0) {
-
-							halpOutput.appendLine("💡🐸💡 " + result);
+							halpOutput.appendLine(result);
 						}
 					}
 					finally {

@@ -2,7 +2,7 @@ import { RacketProcess } from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { removeForgeComments, getFailingTestNames, getFailingTestName } from './forge-utilities';
+import { removeForgeComments, getFailingTestNames, getFailingTestName, combineTestsWithModel } from './forge-utilities';
 import { Mutator } from './mutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
@@ -21,34 +21,11 @@ export class RunResult {
 	runsource: string;
 }
 
-export function combineTestsWithModel(wheatText: string, tests: string): string {
-	// todo: What if separator doesn't exist (in that case, look for #lang forge)
-	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
-	const hashlang_decl = "#lang";
-
-	if (tests.includes(TEST_SEPARATOR)) {
-		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-		tests = tests.substring(startIndex).trim();
-	}
-
-	tests = tests.replace(hashlang_decl, "// #lang");
-
-	var combined = wheatText + "\n" + tests;
-	combined = removeForgeComments(combined);
-
-	combined = combined.replace(/\t/g, " ");
-	combined = combined.replace(/\r/g, " ");
-	
-
-	return combined;
-
-}
+// The maximum number of hints to display to the user for a single run.
+const MAX_HINT = 3;
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
-
-/*
-	Potential issues : Name clash between student files and grader files.
-*/
+const CONSISTENCY_MESSAGE = `🎉 Your tests are all consistent with the assignment specification! 🎉 Just because your tests are consistent, however, does not mean they thoroughly explore the problem space.`
 
 export class HalpRunner {
 
@@ -61,6 +38,7 @@ export class HalpRunner {
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 
 	mutationStrategy : string;
+	thoroughnessEnabled : boolean;
 
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
@@ -69,6 +47,7 @@ export class HalpRunner {
 
 		let currentSettings = vscode.workspace.getConfiguration('forge');
 		this.mutationStrategy = currentSettings.get('feedbackStrategy').toString();
+		this.thoroughnessEnabled = currentSettings.get('thoroughnessFeedbackEnabled');
 	}
 
 
@@ -80,17 +59,43 @@ export class HalpRunner {
 	}
 
 
+	chooseN(arr: any[], n : number): any[] {
+		const randomElements = [];
+		const maxElements = Math.min(arr.length, n);
+		for (let i = 0; i < maxElements; i++) {
+			const randomIndex = Math.floor(Math.random() * arr.length);
+			randomElements.push(arr[randomIndex]);
+			arr.splice(randomIndex, 1);
+		}
+		return randomElements;
+	}
 
-	chooseHint(hint_candidates: string[]): string {
+
+	generateHintFromCandidates(hint_candidates: string[]): string {
 
 		if (hint_candidates.length == 0) {
 			return "";
 		}
-		return hint_candidates[Math.floor(Math.random() * hint_candidates.length)];
+
+		const chosen_hints = this.chooseN(hint_candidates, MAX_HINT)
+								.map(hint => `🐸💡 ${hint}`)
+								.join("\n");
+
+		return chosen_hints;
 	}
 
 
+	generateThoroughnessFeedbackFromCandidates(thoroughness_hints: string[]): string {
+		if (thoroughness_hints.length == 0) {
+				return "I could not generate a hint to help evaluate test thoroughness. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem.";
+		}
+		
+		const feedback = this.chooseN(thoroughness_hints, MAX_HINT)
+								.map(hint => `🐸 🗯️ ${hint}`)
+								.join("\n");
 
+		return feedback;
+	}
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
 		
@@ -117,8 +122,15 @@ export class HalpRunner {
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
-			let thoroughness_candidates = await this.generateThoroughnessFeedback(mutator);
-			return this.chooseHint(thoroughness_candidates);
+
+			if (this.thoroughnessEnabled == false) {
+				return CONSISTENCY_MESSAGE;
+			}
+			else {
+				
+				let thoroughness_candidates = await this.generateThoroughnessFeedback(mutator);
+				return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
+			}
 		}
 
 
@@ -145,7 +157,7 @@ ${w_o}`;
 				// Now we need to choose a hint per test. But what about ambiguous tests? This is where it happens?
 				for (var test in per_test_hints) {
 
-					var hint = this.chooseHint(per_test_hints[test])
+					var hint = this.generateHintFromCandidates(per_test_hints[test])
 					if (hint == "") {
 						hint = this.recordAmbiguousTest(testFileName, studentTests, mutator.forge_output);
 					}
@@ -157,7 +169,7 @@ ${w_o}`;
 
 			else if (this.mutationStrategy == "Comprehensive"){
 				var hints = await this.runComprehensiveStrategy(mutator, studentTests, testFileName);
-				return this.chooseHint(hints);
+				return this.generateHintFromCandidates(hints);
 			}
 			else {
 				return "Something was wrong in the extension settings. toadusponens.feedbackStrategy must be either 'Comprehensive' or 'Per Test'";
@@ -247,7 +259,6 @@ ${w_o}`;
 	}
 
 
-	// TODO: Should return ForgeRunResult
 	private async runTestsAgainstModel(tests: string, model: string): Promise<RunResult> {
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
@@ -411,8 +422,7 @@ ${w_o}`;
 
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
 
-		this.forgeOutput.appendLine(`🎉 Your tests are all consistent with the assignment specification! 🎉
-		Just because your tests are consistent does not mean they thoroughly explore the problem space.`);
+		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
 		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
 
 		// Flush the output
@@ -426,9 +436,6 @@ ${w_o}`;
 		this.forgeOutput.show();
 		try {
 			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(mutator.test_file_name, mutator.mutant, mutator.student_preds);
-			if (thoroughness_hints.length == 0) {
-				return ["I could not generate a hint. It's important to remember that this doesn't automatically mean the tests are exhaustive or explore every aspect of the problem."]
-			}
 			return thoroughness_hints;
 		}
 		catch (e) {

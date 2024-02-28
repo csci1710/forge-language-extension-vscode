@@ -80,6 +80,12 @@
 					"type": "string",
 					"default": "Comprehensive",
 					"description": "Feedback strategy used by Toadus Ponens. Comprehensive will provide feedback for the test suite as a whole, Per Test will provide feedback for each test."
+				},
+				"forge.thoroughnessFeedbackEnabled" : {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Determines if the experimental Toadus Ponens test feedback feature is enabled"
 				}
 			}
 		},
