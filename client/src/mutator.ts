@@ -272,10 +272,6 @@ export class Mutator {
 				const op = match[5];
 				const rhs_pred = match[6];
 
-
-				///// SOMETHING IS WRONG WITH THE REPORTED ROW, COL, SPAN /////
-				// WHY?
-
 				var failing_test = extractSubstring(this.source_text, row, col, span).trim();
 
 				const quantifier_match = /\bassert\b(.*?)\|/;
