@@ -9,8 +9,17 @@ import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
 import { tempFile } from './gen-utilities';
 
+export class RunResult {
 
-
+	constructor(stderr: string = "", stdout: string = "", runsource: string = "") {
+		this.stderr = stderr;
+		this.stdout = stdout;
+		this.runsource = runsource;
+	}
+	stderr: string;
+	stdout: string;
+	runsource: string;
+}
 
 export function combineTestsWithModel(wheatText: string, tests: string): string {
 	// todo: What if separator doesn't exist (in that case, look for #lang forge)
@@ -85,6 +94,8 @@ export class HalpRunner {
 
 	async runHalp(studentTests: string, testFileName: string): Promise<string> {
 		
+		this.logger.log_payload({'feedbackstrategy' : this.mutationStrategy }, LogLevel.INFO, Event.ASSISTANCE_REQUEST);
+		
 		studentTests = studentTests.replace(/\r/g, "\n");
 		const w = await this.getWheat(testFileName);
 
@@ -100,10 +111,9 @@ export class HalpRunner {
 		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
 
 		const run_result = await this.runTestsAgainstModel(studentTests, w);
+		const w_o = run_result.stderr;
+		const source_text = run_result.runsource;
 
-		// TODO: This is hacky
-		const w_o = run_result['stderrput'];
-		const source_text = run_result['toRun'];
 		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
@@ -152,9 +162,6 @@ ${w_o}`;
 			else {
 				return "Something was wrong in the extension settings. toadusponens.feedbackStrategy must be either 'Comprehensive' or 'Per Test'";
 			}
-
-
-			
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
@@ -240,11 +247,15 @@ ${w_o}`;
 	}
 
 
-	private async runTestsAgainstModel(tests: string, model: string): Promise<Object> {
+	// TODO: Should return ForgeRunResult
+	private async runTestsAgainstModel(tests: string, model: string): Promise<RunResult> {
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
 		let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
 		const toRun = combineTestsWithModel(model, tests);
+		const LAUNCH_FAILURE_ERR = "Could not run Toadus Ponens process.";
+
+		let runresult = new RunResult("", "", toRun);
 
 		// Write the contents of toRun to a temporary file
 		const tempFilePath = tempFile();
@@ -253,35 +264,38 @@ ${w_o}`;
 			let r = racket.runFile(tempFilePath);
 
 			if (!r) {
-				vscode.window.showErrorMessage("Could not run Forge process.");
-				console.error("Could not run Forge process.");
-				return {stderrput : "Toadus Ponens run failed.", toRun : toRun};
+				vscode.window.showErrorMessage(LAUNCH_FAILURE_ERR);
+				console.error(LAUNCH_FAILURE_ERR);
+				runresult.stderr = LAUNCH_FAILURE_ERR;
+				return runresult;
 			}
 
-			let stdoutput = "";
+
 			r.stdout.on('data', (data: string) => {
-				stdoutput += data;
+				runresult.stdout += data;
 			});
 
-			let stderrput = "";
 			r.stderr.on('data', (err: string) => {
-				stderrput += err;
+				runresult.stderr += err;
 			});
 
 
 			await new Promise((resolve) => {
 				r.on('exit', resolve);
 			});
-			return {stderrput, toRun};
+		
 		} catch (e) {
 
 			vscode.window.showErrorMessage(`Toadus Ponens run failed, perhaps be because VS Code did not have permission to write a file to your OS temp folder (${os.tmpdir()}). Consult the Toadus Ponens guide for how to modify this. Full error message : ${e}`);
+			runresult.stderr = e;
 		}
 
 		finally {
-			// Delete the temporary file in the finally block
+			// Delete the temporary file 
 			fs.unlinkSync(tempFilePath);
 		}
+
+		return runresult;
 	}
 
 
@@ -363,7 +377,7 @@ ${w_o}`;
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
-		const ag_output = ag_meta['stderrput'];
+		const ag_output = ag_meta.stderr;
 		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
@@ -391,7 +405,7 @@ ${w_o}`;
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
-		const ag_output = ag_meta['stderrput'];
+		const ag_output = ag_meta.stderr;
 		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
 	}
 
