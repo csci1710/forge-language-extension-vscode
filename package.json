@@ -72,7 +72,7 @@
 				"forge.minVersion" : {
 					"scope": "resource",
 					"type": "string",
-					"default": "3.2.1",
+					"default": "3.3.0",
 					"description": "Minimum version of Forge required to run this extension."
 				},
 				"forge.feedbackStrategy" : {
