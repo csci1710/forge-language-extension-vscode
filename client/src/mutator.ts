@@ -238,12 +238,12 @@ export class Mutator {
 		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
 		
 		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
-			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
+			this.error_messages.push(`Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
 
 		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-			this.error_messages.push(`Test ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
+			this.error_messages.push(`Example ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
 			return;
 		}
 

@@ -189,7 +189,9 @@ ${w_o}`;
 			let skipped_tests = mutator.error_messages.join("\n");
 			this.forgeOutput.appendLine(skipped_tests);
 
-
+			if (mutator.inconsistent_tests.length == 0) {
+				return [];
+			}
 			
 			this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following ${mutator.inconsistent_tests.length} test(s) may be inconsistent with the problem specification:\n ${assessed_tests}`);
 			this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
