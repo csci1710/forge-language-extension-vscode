@@ -641,10 +641,11 @@ export async function ensureForgeVersion(minVersion: string, error_reporter : (s
 	} else if (stdout == '') {
 		error_reporter(ERR_FORGE);
 	} else {
-		const forgeVersionRegex = /Forge version: (\d+\.\d+\.\d+)/;
+		const forgeVersionRegex = /Forge version: (\d+\.\d+\.\d+)|(\d+.\d+)/;
 		const match = stdout.match(forgeVersionRegex);
 		if (match) {
-			let version = match[1];
+
+			let version = (match[1] == undefined) ? (match[2] + ".0") : match[1];
 			if (compareVersions(version, minVersion) < 0) {
 				error_reporter(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
 			}			
