@@ -150,6 +150,8 @@ export class Mutator {
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		const isNegation = pred.match(negationRegex);
 
+		const isParameterized = pred.includes('[');
+
 		// Change the target predicate.
 		if (isNegation != null) {
 			pred = isNegation[2];
@@ -157,7 +159,8 @@ export class Mutator {
 		return {
 			predIsInstructorAuthored: this.isInstructorAuthored(pred),
 			isNegation: isNegation != null,
-			pred: pred
+			pred: pred,
+			isParameterized: isParameterized
 		}
 	}
 
@@ -170,16 +173,16 @@ export class Mutator {
 
 
 		if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-			this.error_messages.push(`Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
+			this.error_messages.push(`❗Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
+			return;
+		}
+		
+
+		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
+			this.error_messages.push(`❗Excluding ${test_name} from analysis, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
 			return;
 		}
 		this.inconsistent_tests.push(test_name);
-
-
-		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-			this.error_messages.push(`I cannot provide you with further feedback around ${test_name}, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
-			return;
-		}
 
 
 		// If the student believes that i => s,
@@ -238,12 +241,12 @@ export class Mutator {
 		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
 		
 		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
-			this.error_messages.push(`Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
+			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
 
 		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-			this.error_messages.push(`Example ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
+			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
 			return;
 		}
 
@@ -358,6 +361,13 @@ export class Mutator {
 
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
 				if (pred_info.predIsInstructorAuthored) {
+
+
+					if (pred_info.isParameterized) {
+						this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
+						return;
+					}
+
 					if (pred_info.isNegation) {
 						example['examplePredicate'] = pred_info.pred;
 					}
@@ -367,7 +377,7 @@ export class Mutator {
 					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 				}
 				else {
-					this.error_messages.push(`Excluding ${example['exampleName']} from analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
 				}
 			});
 
@@ -387,7 +397,7 @@ export class Mutator {
 
 				}
 				else {
-					this.error_messages.push(`Excluding ${assertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding ${assertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
 				}
 			});
 
@@ -406,7 +416,7 @@ export class Mutator {
 					expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
 				}
 				else {
-					this.error_messages.push(`Excluding ${qassertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
 				}
 			});
 		});

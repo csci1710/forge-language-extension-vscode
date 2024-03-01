@@ -113,7 +113,7 @@ export class HalpRunner {
 			return "";
 		}
 
-		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests...');
+		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests for validity...');
 
 		const run_result = await this.runTestsAgainstModel(studentTests, w);
 		const w_o = run_result.stderr;
