@@ -1,41 +1,14 @@
+
+import {spawn } from 'child_process';
+import * as fs from 'fs';
+import { tempFile } from './gen-utilities';
+
+
 /*
 	Utilites related to Forge syntax.
 	Could change with Forge updates and/or a language server.
 */
-/* Extracts a substring from a forge file */
-function extractSubstring(text: string, startRow: number, startColumn: number, span: number): string {
-	
-	// 1 index to 0 index
-	startRow -= 1;
 
-	//TODO: Forge output has span incorrect
-	span += 1;
-
-	// Split the text into rows
-	const rows = text.split("\n");
-	
-	// Validate if startRow and startColumn are within bounds
-	if (startRow < 1 || startRow > rows.length) {
-	  throw new Error("Something went wrong while I was reading Forge output.");
-	}
-	if (startColumn > rows[startRow - 1].length + 1) {
-	  throw new Error("Something went wrong while I was reading Forge output.");
-	}
-	
-	// Calculate the starting index
-	let startIndex = rows.slice(0, startRow - 1).reduce((acc, currRow) => acc + currRow.length + 1, 0) + startColumn;
-	
-	// Extract and return the substring
-	return text.substring(startIndex, startIndex + span);
-  }
-
-// Raise when an assertion is student predicates on both sides.
-export class BothPredsStudentError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = 'BothPredsStudentError';
-	}
-}
 
 // Returns only the predicates from the input text.
 export function getPredicatesOnly(inputText : string) : string {
@@ -45,8 +18,21 @@ export function getPredicatesOnly(inputText : string) : string {
 
 
 export function removeForgeComments(inputText: string): string {
-	return removeInlineComments(removeCStyleComments(inputText));
+	let x = removeInlineComments(removeCStyleComments(inputText));
+	// Normalize windows line endings
+	x = x.replace(/\r/g, '');
+	return x;
 }
+
+export function getNameUpToParameters(pred: string,): string {
+	let _pred = pred;
+	if (pred.includes('[')) {
+		_pred = pred.substring(0, pred.indexOf('['));
+	}
+	_pred = _pred.trim();
+	return _pred;
+}
+
 
 function removeCStyleComments(inputText: string): string {
 	const regex = /\/\*[\s\S]*?\*\/|\/\/.*/g;
@@ -134,197 +120,6 @@ export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
 
 
 
-// s: student pred
-// i: instructor pred
-// AH, we should think of it in terms of constraining. So use ORs.
-// If the student believes that s => i 
-// then they believe that if s then i. So ease i to be { i or s }
-
-// If the student believes that i => s,
-// then they believe that if i then s. So constrict i to be { i AND s }
-
-export function adjustWheatToStudentMisunderstanding(testFileName: string, w : string, student_preds : string, w_o : string) : string {
-	const match = w_o.match(assertion_regex);
-	const lhs_pred = match[1];
-	const op = match[2];
-	const rhs_pred = match[3];
-
-	const isLhsInstructorAuthored = new RegExp(`\\b${lhs_pred}\\b`).test(w);
-	const isRhsInstructorAuthored = new RegExp(`\\b${rhs_pred}\\b`).test(w); 
-
-
-	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
-	}
-	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-
-		throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
-	}
-
-	w = w + "\n" + student_preds + "\n";
-
-	// If the student believes that s => i 
-	// then they believe that if s then i. So ease i to be { i or s }
-
-	// If the student believes that i => s,
-	// then they believe that if i then s. So constrain i to be { i AND s }
-	if (isLhsInstructorAuthored) {
-
-		// i is lhs
-		// s is rhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// (ie i => s)
-			return constrainPredicate(w, lhs_pred, rhs_pred)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie s => i
-			return easePredicate(w, lhs_pred, rhs_pred)
-		}
-	}
-	else {
-		// i is rhs
-		// s is lhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// ie s => i
-			return easePredicate(w, rhs_pred, lhs_pred)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie i => s
-			return constrainPredicate(w, rhs_pred, lhs_pred)
-		}
-	}
-	throw new Error("Something went wrong!");
-}
-
-
-export function adjustWheatToQuantifiedStudentMisunderstanding(source_text : string, w : string, student_preds : string, w_o : string) : string {
-	const match = w_o.match(quantified_assertion_regex);
-	
-	const row = parseInt(match[1]);
-	const col = parseInt(match[2]);
-	const span = parseInt(match[3]);
-	const lhs_pred = match[4];
-	const op = match[5];
-	const rhs_pred = match[6];
-
-
-	
-
-	// I think this is still correct, since the regex doesn't check any opening '['s.
-	const isLhsInstructorAuthored = new RegExp(`\\b${lhs_pred}\\b`).test(w);
-	const isRhsInstructorAuthored = new RegExp(`\\b${rhs_pred}\\b`).test(w); 
-
-
-	if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-		throw new Error("I cannot provide you with any more feedback, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.");
-	}
-	else if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-
-		throw new BothPredsStudentError("I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.");
-	}
-
-	w = w + "\n" + student_preds + "\n";
-
-
-	var failing_test = extractSubstring( source_text  , row, col, span).trim();
-
-	// Ensure this extraction works?
-	const quantifier_match = /\bassert\b(.*?)\|/;
-	const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
-	const lhs_match = /\|\s*(.*?)\s+is\b/;
-	const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
-	const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
-	const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
-	
-
-
-	// If the student believes that s => i 
-	// then they believe that if s then i. So ease i to be { i or s }
-
-	// If the student believes that i => s,
-	// then they believe that if i then s. So constrain i to be { i AND s }
-	if (isLhsInstructorAuthored) {
-
-		// i is lhs
-		// s is rhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// (ie i => s)
-			return constrainPredicate(w, lhs_instantiation, rhs_instantiation, quantifier)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie s => i
-			return easePredicate(w, lhs_instantiation, rhs_instantiation, quantifier)
-		}
-	}
-	else {
-		// i is rhs
-		// s is lhs
-		if (op == 'sufficient') {
-			// User believes lhs => rhs
-			// ie s => i
-			return easePredicate(w, rhs_instantiation, lhs_instantiation, quantifier)
-
-		} else if (op == 'necessary') {
-
-			// User believes rhs => lhs
-			// ie i => s
-			return constrainPredicate(w, rhs_instantiation, lhs_instantiation, quantifier)
-		}
-	}
-	throw new Error("Something went wrong!");
-}
-
-function constrainPredicate(w : string, i : string, s : string, quantifer_prefix : string = "") : string {
-	const i_inner = i + "_inner";
-	// User believes that i => s (ie if i then s).
-	// So constrict i to be { i AND s }
-	let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
-	let added_pred =
-		`
-		pred ${i} { 
-		 	${quantifer_prefix}	${i_inner} and ${s}
-		}
-		`
-	return w_wrapped + added_pred;
-}
-
-export function constrainPredicateByExclusion(w : string, i : string, s : string, quantifer_prefix : string = "") : string {
-	const i_inner = i + "_inner";
-	// User believes that ! s => i, even thought s => i.
-	// So constrict i to be { i AND !s }
-	let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
-	let added_pred =
-		`
-		pred ${i} { 
-			${quantifer_prefix} ${i_inner} and not ${s}
-		}
-		`
-	return w_wrapped + added_pred;
-}
-
-export function easePredicate(w : string, i : string, s : string, quantifer_prefix : string = "") : string {
-	const i_inner = i + "_inner";
-	// User believes that s => i (ie if s then i)
-	// So ease i to be { i or s }
-	let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
-	let added_pred =
-		`
-		pred ${i} { 
-			${quantifer_prefix} ${i_inner} or ${s}
-		}
-		`
-	return w_wrapped + added_pred;
-}
-
 export function getSigList(s : string) : string[] {
 	const pattern = /\bsig\s+(\w+)/g;
     var matches = [];
@@ -351,11 +146,14 @@ export function getPredList(fileContent: string): string[] {
 
 export function findAllExamples(fileContent : string) {
 	// TODO: A language server would help us not have to write these long (possibly buggy) regexes.
-	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*)}/;
-    let match;
-    let examples = [];
 
-    while ((match = exampleRegex.exec(fileContent)) != null) {
+	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*?)}/g;
+ 
+
+	let examples = [];
+	let matches = fileContent.matchAll(exampleRegex);
+
+	for (const match of matches){
         const exampleName = match[1];
         const examplePredicate = match[2].trim();
         const exampleBody = match[3].trim();
@@ -369,16 +167,76 @@ export function findAllExamples(fileContent : string) {
     return examples;
 }
 
+export function findAllAssertions(fileContent : string) {
+	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/g;
+
+    let assertions = [];
+	let matches = fileContent.matchAll(assertRegex);
+
+    for (const match of matches){
+        const assertionName = `Assert ${match[1]} is ${match[2]} for ${match[3]}`;
+        const lhs = match[1].trim();
+		const op = match[2].trim();
+        const rhs = match[3].trim();
+
+        assertions.push({
+            assertionName,
+            lhs,
+			op,
+            rhs
+        });
+    }
+    return assertions;
+}
+
+
+export function findAllQuantifiedAssertions(fileContent : string) {
+
+	const quantifiedAssertRegex = /assert\s+(all\s+[\s\S]+?\|)\s*(.+?)\s+is\s+(necessary|sufficient)\s+for\s+(\w+|[^]]+])/gs;
+
+	if (fileContent == null || fileContent == "") {
+		return [];
+	}
+
+
+    let assertions = [];
+	let matches  = fileContent.matchAll(quantifiedAssertRegex);
+
+    for (const match of matches){
+        
+		
+		const quantifiedVars = match[1].trim();
+        const lhs = match[2].trim();
+		const op = match[3].trim();
+        const rhs = match[4].trim();
+
+		const assertionName = `Assert All ${lhs} is ${op} for ${rhs}`;
+		
+        assertions.push({
+            assertionName,
+			quantifiedVars,
+            lhs,
+			op,
+            rhs
+        });
+    }
+    return assertions;
+}
+
+
+
+
 
 export function findExampleByName(fileContent : string, exampleName: string) {
 	
 	// HACK: We first isolate examples and then parse the correct one because I was
 	// having trouble with the regex. A language server would help.
 	const all_examples = findForgeExamples(fileContent);
-	const r = new RegExp(`\\b${exampleName}\\b`);
+	const r = new RegExp(`\\b${exampleName}\\b`, 'g'); // Add 'g' flag for global search
 	var to_search = all_examples.filter(e => r.test(e))[0];
 
-	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*)}`);
+
+	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*?)}`, 'g'); // Add 'g' flag for global search
 	const match = exampleRegex.exec(to_search);
 
 	if (match == null) {
@@ -395,6 +253,39 @@ export function findExampleByName(fileContent : string, exampleName: string) {
 }
 
 
+export function assertionToExpr(lhs, rhs, op, quantifier_prefix = "") : string {
+
+
+	if (op == "sufficient") {
+		return `(${quantifier_prefix} ${lhs} => ${rhs})`;
+	}
+	else if (op == "necessary") {
+		return `(${quantifier_prefix} ${rhs} => ${lhs})`;
+	}
+	else {
+		throw new Error("Invalid op");
+	}
+}
+
+
+
+export function retrievePredName(pred: string, wheat : string) : Object {
+
+	var exp = new RegExp(`pred\\s+(${pred})\\b\s*([[\\s\\S]+])?`);
+	var match = wheat.match(exp);
+
+	if (match == null) {
+		return null;
+	}
+	else {
+		return {
+			predName: match[1],
+			params : match[2] || ""
+		}
+	}
+}
+
+
 // Converts an example to a predicate reflecting the characteristics of the example.
 export function exampleToPred(example, sigNames: string[], wheatPredNames : string[] ) : string {
 	
@@ -404,10 +295,10 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const examplePredicate = example.examplePredicate;
     const exampleBody = example.exampleBody;
 
-	if (!wheatPredNames.includes(examplePredicate)) {
-		throw new Error("I provide feedbacl unless your example explicitly tests a predicate defined in the assignment.");
+	if (!wheatPredNames.includes(getNameUpToParameters(examplePredicate))) {
+		throw new Error("I provide feedback unless your example explicitly tests a predicate defined in the assignment.");
 	}
-
+	// This may be buggy!
 
 	function extractAssignments() {
 
@@ -425,10 +316,11 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		let currentAssignment = { variable: '', value: '' };
 		let isAssignmentContinued = false;
 	
-		lines.forEach(l => {
-
+		for (var l of lines) {
 			var line = l.trim();
-			if (line === '') return; // Skip empty lines
+			if (line == '') {
+				continue
+			} 
 	
 			isAssignmentContinued = assignmentContinued(line);
 			if (isAssignmentContinued) {
@@ -438,13 +330,17 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 				assignments.push({...currentAssignment});
 				if (/^\s*\w+\s*=/.test(line)) {
 					let parts = line.split('=');
-					currentAssignment = { variable: parts[0].trim(), value: parts[1].trim() };
+					const lhs = parts[0].trim();
+					const rhs = parts[1].trim();
+					currentAssignment = { variable: lhs, value: rhs };
+					isAssignmentContinued = true;
 				} else {
 					expressions.push(line);
 				}
 			}
-		});
+		};
 	
+
 		if (isAssignmentContinued) {
 			assignments.push({...currentAssignment});
 		}
@@ -507,4 +403,256 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 	}`;
 
 	return exampleAsPred;
+}
+
+
+
+export function getFailingTestNames(o: string): string[] {
+
+	let lines = o.split("\n");
+	return lines.map(getFailingTestName).filter((x) => x != "");
+}
+
+
+export function getFailingTestName(o: string): string {
+	if (quantified_assertion_regex.test(o)) {
+		const match = o.match(quantified_assertion_regex);
+		const lhs_pred = match[4];	
+		const op = match[5];
+		const rhs_pred = match[6];
+		return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
+
+	} else if (assertion_regex.test(o)) {
+		const match = o.match(assertion_regex);
+		const lhs_pred = match[1];	
+		const op = match[2];
+		const rhs_pred = match[3];
+		return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
+	} else if (example_regex.test(o)) {
+		const match = o.match(example_regex);
+		return match[1];
+	} else if (test_regex.test(o)) {
+		const match = o.match(test_regex);
+		if (match[1]) return match[1];
+		return match[2]
+	} 
+	return "";
+}
+
+/*******For test suite  */
+
+export type ExtractedTests = {
+
+	examples: Object[];
+	assertions: Object[];
+	quantifiedAssertions: Object[];
+  
+} ;
+
+export type ExtractedTestSuite = {
+	predicateName: string;
+	tests: ExtractedTests;
+  } | null;
+
+
+
+
+export function findAllStructuredTests(suite: string) {
+
+
+	var examples = findAllExamples(suite);
+	var assertions = findAllAssertions(suite);
+	var quantifiedAssertions = findAllQuantifiedAssertions(suite);
+
+	return {examples, assertions, quantifiedAssertions};
+}
+  
+
+export function extractTestSuite(input: string): ExtractedTestSuite[] {
+	
+	const results: ExtractedTestSuite[] = [];
+
+
+
+	// Need to keep getting the input string in
+	function findTestSuiteIndices(input: string) : Object[] {
+
+
+		const indices : Object[] = [];
+
+		if (input.length == 0 || input == null) {
+			return indices;
+		}
+
+		const pattern = /test\s+suite\s+for\s+(\w+)\s*\{/g;
+		const matches = Array.from(input.matchAll(pattern));
+
+
+
+		// 1 , so that in the worst case we move forward only slightly
+		let suiteEnd = 1;
+		// This only catches the first one.
+		// Now there is a second one.
+
+		for (const match of matches) {
+			const startIndex = match.index;
+			const endIndex = startIndex + match[0].length;
+			const pred = match[1];
+			
+			if (startIndex !== undefined && endIndex !== undefined) {
+				
+				var to_search = input.substring(endIndex);
+				// Search till you find a matched closing brace.
+
+				var i = endIndex + 1;
+				var s = "{";
+
+				while (!isBalancedBraces(s) && i < input.length) {
+					s += input[i]
+					i++;
+				}
+
+				suiteEnd = i;
+				
+				if (isBalancedBraces(s)) {
+				// These include braces though!!
+					s = s.trim();
+					s = s.substring(1, s.length - 1); // Remove first and last characters '{' and '}'
+					indices.push({pred, s});
+				}
+			}
+		}
+		const remaining = input.substring(suiteEnd);
+		console.log(remaining);
+
+		return indices;
+	}
+	  
+	//const pattern = /test suite for\s+(\w+)\s*\{(.*)\}/gs;
+	let identifiedSuites = findTestSuiteIndices(input);
+
+  
+	for (const suite of identifiedSuites) {
+	  const predicateName = suite['pred'];
+	  const content = suite['s'];
+
+		let ts: ExtractedTestSuite = {
+			predicateName: predicateName,
+			tests: findAllStructuredTests(content)
+			};
+
+	    results.push(ts);
+	}
+  
+	return results;
+}
+  
+  function isBalancedBraces(content: string): boolean {
+	const stack: string[] = [];
+	for (const char of content) {
+	  if (char === '{') {
+		stack.push(char);
+	  } else if (char === '}') {
+		if (stack.length === 0) return false;
+		stack.pop();
+	  }
+	}
+	return stack.length === 0;
+  }
+
+
+
+///// Version Check //////////
+
+function compareVersions(version1: string, version2: string): number {
+	const parseVersion = (version: string) => version.split('.').map(Number);
+	
+	const v1 = parseVersion(version1);
+	const v2 = parseVersion(version2);
+	
+	for (let i = 0; i < Math.max(v1.length, v2.length); i++) {
+	  // Treat missing parts as 0 (e.g., "1.0" is equal to "1.0.0")
+	  const num1 = i < v1.length ? v1[i] : 0;
+	  const num2 = i < v2.length ? v2[i] : 0;
+	  
+	  if (num1 > num2) return 1;
+	  if (num2 > num1) return -1;
+	}
+	
+	return 0; // Versions are equal
+  }
+  
+
+export async function ensureForgeVersion(minVersion: string, error_reporter : (s : string) => void){
+
+	const filePath = tempFile();
+	const emptyForgeFile = `
+	#lang forge
+	test expect {
+
+		{} is sat
+	}
+	`;
+
+	fs.writeFileSync(filePath, emptyForgeFile);
+	let p = spawn('racket', [`"${filePath}"`], { shell: true });
+
+	var stdout = '';
+	var stderr = '';
+
+	const ERR_FORGE = "Could not determine Forge version. Please ensure that Forge is installed.";
+	p.stderr.on('data', (err: string) => {
+		stderr += err;
+	});
+
+	p.stdout.on('data', (err: string) => {
+		stdout += err;
+	});
+
+	await new Promise<void>((resolve, _) => {
+		p.on('exit', (code: string) => {		
+			resolve();
+		});
+	});
+
+	if (stderr != '') {
+		error_reporter(stderr);
+	} else if (stdout == '') {
+		error_reporter(ERR_FORGE);
+	} else {
+		const forgeVersionRegex = /Forge version: (\d+\.\d+\.\d+)/;
+		const match = stdout.match(forgeVersionRegex);
+		if (match) {
+			let version = match[1];
+			if (compareVersions(version, minVersion) < 0) {
+				error_reporter(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
+			}			
+		} else {
+			error_reporter(ERR_FORGE);
+		}
+	}
+}
+
+export function combineTestsWithModel(wheatText: string, tests: string): string {
+	// If separator doesn't exist (in that case, look for #lang forge)
+	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+	const hashlang_decl = "#lang";
+
+	if (tests.includes(TEST_SEPARATOR)) {
+		const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+		tests = tests.substring(startIndex).trim();
+	}
+
+	tests = tests.replace(hashlang_decl, "// #lang");
+
+
+	var combined = wheatText + "\n" + tests;
+	combined = removeForgeComments(combined);
+
+	combined = combined.replace(/\t/g, " ");
+	combined = combined.replace(/\r/g, " ");
+	
+
+	return combined;
+
 }
