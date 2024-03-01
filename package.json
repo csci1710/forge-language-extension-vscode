@@ -1,10 +1,9 @@
 {
 	"name": "forge-language-server",
 	"description": "Forge Language Server",
-
 	"author": "",
 	"license": "",
-	"version": "2.3.1",
+	"version": "2.3.2",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -69,13 +68,13 @@
 					"default": "messages",
 					"description": "Traces the communication between VS Code and the language server."
 				},
-				"forge.minVersion" : {
+				"forge.minVersion": {
 					"scope": "resource",
 					"type": "string",
 					"default": "3.3.0",
 					"description": "Minimum version of Forge required to run this extension."
 				},
-				"forge.feedbackStrategy" : {
+				"forge.feedbackStrategy": {
 					"scope": "resource",
 					"type": "string",
 					"enum": [
@@ -85,7 +84,7 @@
 					"default": "Comprehensive",
 					"description": "Feedback strategy used by Toadus Ponens. Comprehensive will provide feedback for the test suite as a whole, Per Test will provide feedback for each test."
 				},
-				"forge.thoroughnessFeedbackEnabled" : {
+				"forge.thoroughnessFeedbackEnabled": {
 					"scope": "resource",
 					"type": "boolean",
 					"default": true,
@@ -189,11 +188,10 @@
 		"@types/node": "^12.12.0",
 		"@typescript-eslint/eslint-plugin": "^4.23.0",
 		"@typescript-eslint/parser": "^4.23.0",
-		"@vscode/vsce": "^2.23.0",
+		"@vscode/vsce": "^2.24.0",
 		"eslint": "^7.26.0",
 		"mocha": "^8.4.0",
 		"typescript": "^4.4.3"
-		
 	},
 	"dependencies": {
 		"@firebase/auth": "^0.21.0",
