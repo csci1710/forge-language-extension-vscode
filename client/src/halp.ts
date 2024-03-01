@@ -46,8 +46,8 @@ export class HalpRunner {
 		this.forgeOutput = output;
 
 		let currentSettings = vscode.workspace.getConfiguration('forge');
-		this.mutationStrategy = currentSettings.get('feedbackStrategy').toString();
-		this.thoroughnessEnabled = currentSettings.get('thoroughnessFeedbackEnabled');
+		this.mutationStrategy = String(currentSettings.get('feedbackStrategy'));
+		this.thoroughnessEnabled = Boolean(currentSettings.get('thoroughnessFeedbackEnabled'));
 	}
 
 
@@ -60,7 +60,7 @@ export class HalpRunner {
 
 
 	chooseN(arr: any[], n : number): any[] {
-		const randomElements = [];
+		const randomElements : any[] = [];
 		const maxElements = Math.min(arr.length, n);
 		for (let i = 0; i < maxElements; i++) {
 			const randomIndex = Math.floor(Math.random() * arr.length);
@@ -283,18 +283,20 @@ ${w_o}`;
 				return runresult;
 			}
 
+			if (r?.stdout != null) {
+				r.stdout.on('data', (data: string) => {
+					runresult.stdout += data;
+				});
+			}
 
-			r.stdout.on('data', (data: string) => {
-				runresult.stdout += data;
-			});
-
-			r.stderr.on('data', (err: string) => {
-				runresult.stderr += err;
-			});
-
+			if (r?.stderr != null) {
+				r.stderr.on('data', (err: string) => {
+					runresult.stderr += err;
+				});
+			}
 
 			await new Promise((resolve) => {
-				r.on('exit', resolve);
+				r?.on('exit', resolve);
 			});
 		
 		} catch (e) {
