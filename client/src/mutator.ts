@@ -232,11 +232,19 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
-		// TODO: Fix
-		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement, or perhaps tests a parameterized predicate.`);
+		// This makes a best effort to adjust for parameterized predicates.
+		var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
+		var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
+		
+		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
+			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
+
+		// if (!wheatPredNames.includes(failed_example.examplePredicate)) {
+		// 	this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it tests a parameterized predicate.`);
+		// 	return;
+		// }
 
 		const exampleAsPred = exampleToPred(failed_example, sigNames, wheatPredNames);
 		let mutant_with_example = this.mutant + "\n" + exampleAsPred + "\n";
