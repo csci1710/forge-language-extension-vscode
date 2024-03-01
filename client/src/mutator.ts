@@ -222,7 +222,7 @@ export class Mutator {
 		const sigNames = getSigList(this.wheat);
 		const wheatPredNames = getPredList(this.wheat);
 
-		this.inconsistent_tests.push(failed_example.exampleName);
+
 		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
 		const negationRegex = /(not|!)\s+(\b\w+\b)/;
 		const isNegation = failed_example.examplePredicate.match(negationRegex);
@@ -232,19 +232,22 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
+		// Better messaging
 		// This makes a best effort to adjust for parameterized predicates.
-		var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
-		var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
+		// var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
+		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
 		
 		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
 			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
 
-		// if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-		// 	this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it tests a parameterized predicate.`);
-		// 	return;
-		// }
+		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
+			this.error_messages.push(`Test ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
+			return;
+		}
+
+		this.inconsistent_tests.push(failed_example.exampleName);
 
 		const exampleAsPred = exampleToPred(failed_example, sigNames, wheatPredNames);
 		let mutant_with_example = this.mutant + "\n" + exampleAsPred + "\n";
