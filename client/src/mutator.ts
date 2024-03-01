@@ -1,5 +1,6 @@
-import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
-import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName } from './forge-utilities';
+import { info } from 'console';
+import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
+import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
 
 
 
@@ -72,15 +73,20 @@ export class Mutator {
 	}
 
 
-	getInnerPostfix() {
+	getInnerName(i : string) {
+
+		
+		
 		this.num_mutations++;
-		return `_inner${this.num_mutations}`;
+		let name = i.includes('[') ? i.substring(0, i.indexOf('[')) : i;
+		let params = i.includes('[') ? i.substring(i.indexOf('[')) : '';
+		return `${name}_inner${this.num_mutations}${params}`;
 	}
 
 
 	// w : Current wheat, i : predicate to be constrained, s : predicate by which to constrain
 	constrainPredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that i => s (ie if i then s).
 		// So constrict i to be { i AND s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -94,7 +100,7 @@ export class Mutator {
 	}
 
 	constrainPredicateByExclusion(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
 
@@ -112,7 +118,7 @@ export class Mutator {
 	}
 
 	easePredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that s => i (ie if s then i)
 		// So ease i to be { i or s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -144,6 +150,8 @@ export class Mutator {
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		const isNegation = pred.match(negationRegex);
 
+		const isParameterized = pred.includes('[');
+
 		// Change the target predicate.
 		if (isNegation != null) {
 			pred = isNegation[2];
@@ -151,7 +159,8 @@ export class Mutator {
 		return {
 			predIsInstructorAuthored: this.isInstructorAuthored(pred),
 			isNegation: isNegation != null,
-			pred: pred
+			pred: pred,
+			isParameterized: isParameterized
 		}
 	}
 
@@ -164,16 +173,16 @@ export class Mutator {
 
 
 		if (!isLhsInstructorAuthored && !isRhsInstructorAuthored) {
-			this.error_messages.push(`Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
+			this.error_messages.push(`❗Excluding ${test_name} from analysis. I can only give feedback around assertions that directly reference at least one predicate from the assignment statement.`);
+			return;
+		}
+		
+
+		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
+			this.error_messages.push(`❗Excluding ${test_name} from analysis, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
 			return;
 		}
 		this.inconsistent_tests.push(test_name);
-
-
-		if (isLhsInstructorAuthored && isRhsInstructorAuthored) {
-			this.error_messages.push(`I cannot provide you with further feedback around ${test_name}, since both predicates in the in failing assertion were written by the instructor. For more feedback, be sure to directly reference only one predicate from the assignment statement.`);
-			return;
-		}
 
 
 		// If the student believes that i => s,
@@ -216,7 +225,7 @@ export class Mutator {
 		const sigNames = getSigList(this.wheat);
 		const wheatPredNames = getPredList(this.wheat);
 
-		this.inconsistent_tests.push(failed_example.exampleName);
+
 		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
 		const negationRegex = /(not|!)\s+(\b\w+\b)/;
 		const isNegation = failed_example.examplePredicate.match(negationRegex);
@@ -226,11 +235,22 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
-
-		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
+		// Better messaging
+		// This makes a best effort to adjust for parameterized predicates.
+		// var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
+		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
+		
+		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
+			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
+
+		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
+			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the problem statement. However, I cannot provide more detailed feedback since it tests parameterized predicate ${getNameUpToParameters(failed_example.examplePredicate)}.`);
+			return;
+		}
+
+		this.inconsistent_tests.push(failed_example.exampleName);
 
 		const exampleAsPred = exampleToPred(failed_example, sigNames, wheatPredNames);
 		let mutant_with_example = this.mutant + "\n" + exampleAsPred + "\n";
@@ -341,24 +361,23 @@ export class Mutator {
 
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
 				if (pred_info.predIsInstructorAuthored) {
-					// Ensure the types match up
-					// I *think* this is right?
 
+
+					if (pred_info.isParameterized) {
+						this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
+						return;
+					}
 
 					if (pred_info.isNegation) {
 						example['examplePredicate'] = pred_info.pred;
 					}
-					// Need to deal with negative predicates here
-
-
-
+					
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
-
 					predicates_to_add_to_mutation.push(p);
-					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: example['examplePredicate'], isNegativeTest: pred_info.isNegation });
+					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 				}
 				else {
-					this.error_messages.push(`Excluding ${example['exampleName']} from analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
 				}
 			});
 
@@ -378,7 +397,7 @@ export class Mutator {
 
 				}
 				else {
-					this.error_messages.push(`Excluding ${assertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding ${assertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
 				}
 			});
 
@@ -397,7 +416,7 @@ export class Mutator {
 					expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
 				}
 				else {
-					this.error_messages.push(`Excluding ${qassertion['assertionName']} from analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
 				}
 			});
 		});

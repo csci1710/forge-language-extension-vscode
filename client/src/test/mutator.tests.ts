@@ -1,8 +1,5 @@
 import { Mutator } from '../mutator';
 import { removeForgeComments } from '../forge-utilities';
-
-
-
 import { strict as assert, strictEqual } from 'assert';
 
 // TODO: This is duplicated, find a better place to put it.
