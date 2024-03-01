@@ -234,7 +234,7 @@ export class Mutator {
 
 		// TODO: Fix
 		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
-			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
+			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement, or perhaps tests a parameterized predicate.`);
 			return;
 		}
 
@@ -352,13 +352,6 @@ export class Mutator {
 					}
 					
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
-
-
-					
-					let targetPredInfo = retrievePredName(getNameUpToParameters(example['examplePredicate']), this.wheat);
-
-					let exampleName = getNameUpToParameters(example['exampleName']) + targetPredInfo['params'];
-
 					predicates_to_add_to_mutation.push(p);
 					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 				}
