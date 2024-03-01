@@ -1,5 +1,6 @@
-import { example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
-import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName } from './forge-utilities';
+import { info } from 'console';
+import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
+import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
 
 
 
@@ -72,15 +73,20 @@ export class Mutator {
 	}
 
 
-	getInnerPostfix() {
+	getInnerName(i : string) {
+
+		
+		
 		this.num_mutations++;
-		return `_inner${this.num_mutations}`;
+		let name = i.includes('[') ? i.substring(0, i.indexOf('[')) : i;
+		let params = i.includes('[') ? i.substring(i.indexOf('[')) : '';
+		return `${name}_inner${this.num_mutations}${params}`;
 	}
 
 
 	// w : Current wheat, i : predicate to be constrained, s : predicate by which to constrain
 	constrainPredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that i => s (ie if i then s).
 		// So constrict i to be { i AND s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -94,7 +100,7 @@ export class Mutator {
 	}
 
 	constrainPredicateByExclusion(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that ! s => i, even thought s => i.
 		// So constrict i to be { i AND !s }
 
@@ -112,7 +118,7 @@ export class Mutator {
 	}
 
 	easePredicate(w: string, i: string, s: string, quantifer_prefix: string = ""): string {
-		const i_inner = i + this.getInnerPostfix();
+		const i_inner = this.getInnerName(i);
 		// User believes that s => i (ie if s then i)
 		// So ease i to be { i or s }
 		let w_wrapped = w.replace(new RegExp("\\b" + i + "\\b", 'g'), i_inner);
@@ -226,7 +232,7 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
-
+		// TODO: Fix
 		if (!wheatPredNames.includes(failed_example.examplePredicate)) {
 			this.error_messages.push(`I cannot provide feedback around ${failed_example.exampleName} since it does not test a predicate defined in the assignment statement.`);
 			return;
@@ -341,21 +347,20 @@ export class Mutator {
 
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
 				if (pred_info.predIsInstructorAuthored) {
-					// Ensure the types match up
-					// I *think* this is right?
-
-
 					if (pred_info.isNegation) {
 						example['examplePredicate'] = pred_info.pred;
 					}
-					// Need to deal with negative predicates here
-
-
-
+					
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
 
+
+					
+					let targetPredInfo = retrievePredName(getNameUpToParameters(example['examplePredicate']), this.wheat);
+
+					let exampleName = getNameUpToParameters(example['exampleName']) + targetPredInfo['params'];
+
 					predicates_to_add_to_mutation.push(p);
-					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: example['examplePredicate'], isNegativeTest: pred_info.isNegation });
+					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 				}
 				else {
 					this.error_messages.push(`Excluding ${example['exampleName']} from analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);

@@ -24,6 +24,16 @@ export function removeForgeComments(inputText: string): string {
 	return x;
 }
 
+export function getNameUpToParameters(pred: string,): string {
+	let _pred = pred;
+	if (pred.includes('[')) {
+		_pred = pred.substring(0, pred.indexOf('['));
+	}
+	_pred = _pred.trim();
+	return _pred;
+}
+
+
 function removeCStyleComments(inputText: string): string {
 	const regex = /\/\*[\s\S]*?\*\/|\/\/.*/g;
 	return inputText.replace(regex, '');
@@ -258,6 +268,24 @@ export function assertionToExpr(lhs, rhs, op, quantifier_prefix = "") : string {
 }
 
 
+
+export function retrievePredName(pred: string, wheat : string) : Object {
+
+	var exp = new RegExp(`pred\\s+(${pred})\\b\s*([[\\s\\S]+])?`);
+	var match = wheat.match(exp);
+
+	if (match == null) {
+		return null;
+	}
+	else {
+		return {
+			predName: match[1],
+			params : match[2] || ""
+		}
+	}
+}
+
+
 // Converts an example to a predicate reflecting the characteristics of the example.
 export function exampleToPred(example, sigNames: string[], wheatPredNames : string[] ) : string {
 	
@@ -267,10 +295,10 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
     const examplePredicate = example.examplePredicate;
     const exampleBody = example.exampleBody;
 
-	if (!wheatPredNames.includes(examplePredicate)) {
+	if (!wheatPredNames.includes(getNameUpToParameters(examplePredicate))) {
 		throw new Error("I provide feedback unless your example explicitly tests a predicate defined in the assignment.");
 	}
-
+	// This may be buggy!
 
 	function extractAssignments() {
 
