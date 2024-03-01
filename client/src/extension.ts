@@ -82,7 +82,7 @@ export async function activate(context: ExtensionContext) {
 
 
 	let currentSettings = vscode.workspace.getConfiguration('forge');
-	let minSupportedVersion = currentSettings.get('minVersion').toString();
+	let minSupportedVersion = String(currentSettings.get<string>('minVersion'));
 	await ensureForgeVersion(minSupportedVersion, (s : string) => vscode.window.showErrorMessage(s));
 
 
@@ -96,8 +96,8 @@ export async function activate(context: ExtensionContext) {
 			} else {
 				const filename = matcher['fileName'];
 				// verify that filename matches?
-				const filePath = vscode.window.activeTextEditor.document.uri.fsPath;
-				const filePathFilename = filePath.split(/[/\\]/).pop();
+				const filePath = vscode.window.activeTextEditor?.document.uri.fsPath;
+				const filePathFilename = filePath?.split(/[/\\]/).pop();
 				// console.log(`${filePath}: active filename: ${filePathFilename}; filename: ${filename}`);
 				if (filePathFilename !== filename) {
 					// console.log("the line name is not the active filename");
@@ -154,15 +154,22 @@ export async function activate(context: ExtensionContext) {
 
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 		const editor = vscode.window.activeTextEditor;
-		const fileURI = editor.document.uri;
-		const filepath = fileURI.fsPath;
+
+
+		if (!editor) {
+			vscode.window.showErrorMessage(`No active text editor!`);
+			return null;
+		}
+
+		const fileURI = editor?.document.uri;
+		const filepath = fileURI?.fsPath;
 		const runId = uuidv4();
 
 		forgeOutput.clear();
 		forgeOutput.show();
 
 		// always auto-save before any run
-		if (!editor.document.save())
+		if (!editor?.document.save())
 		{
 			console.error(`Could not save ${filepath}`);
 			vscode.window.showErrorMessage(`Could not save ${filepath}`);
@@ -188,11 +195,12 @@ export async function activate(context: ExtensionContext) {
 			logger.log_payload(log, LogLevel.ERROR, Event.FORGE_RUN);
 			vscode.window.showErrorMessage("Could not run Forge process.");
 			console.error("Could not run Forge process.");
+			return null;
 		}
 
 		// :'Some tests failed. Reporting failures in order.'
 
-		racketProcess.stdout.on('data', (data: string) => {
+		racketProcess.stdout?.on('data', (data: string) => {
 			const lst = data.toString().split(/[\n]/);
 			for (let i = 0; i < lst.length; i++) {
 				// this is a bit ugly but trying to avoid confusing students
@@ -205,7 +213,7 @@ export async function activate(context: ExtensionContext) {
 		});
 
 		let myStderr = '';
-		racketProcess.stderr.on('data', (err: string) => {
+		racketProcess.stderr?.on('data', (err: string) => {
 			myStderr += err;
 		});
 

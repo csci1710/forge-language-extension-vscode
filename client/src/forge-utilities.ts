@@ -85,7 +85,7 @@ export function findForgeExamples(inputText) {
     let inExample = false;
     let braceLevel = 0;
     let currentExample = '';
-    let examples = [];
+    let examples : string[]= [];
 
     for (let line of lines) {
         if (inExample) {
@@ -122,7 +122,7 @@ export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
 
 export function getSigList(s : string) : string[] {
 	const pattern = /\bsig\s+(\w+)/g;
-    var matches = [];
+    var matches : string[] = [];
     var match;
     while ((match = pattern.exec(s)) !== null) {
         matches.push(match[1]);
@@ -150,7 +150,7 @@ export function findAllExamples(fileContent : string) {
 	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*?)}/g;
  
 
-	let examples = [];
+	let examples : Object[] = [];
 	let matches = fileContent.matchAll(exampleRegex);
 
 	for (const match of matches){
@@ -170,7 +170,7 @@ export function findAllExamples(fileContent : string) {
 export function findAllAssertions(fileContent : string) {
 	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/g;
 
-    let assertions = [];
+    let assertions : Object[] = [];
 	let matches = fileContent.matchAll(assertRegex);
 
     for (const match of matches){
@@ -199,7 +199,7 @@ export function findAllQuantifiedAssertions(fileContent : string) {
 	}
 
 
-    let assertions = [];
+    let assertions : Object[] = [];
 	let matches  = fileContent.matchAll(quantifiedAssertRegex);
 
     for (const match of matches){
@@ -275,7 +275,10 @@ export function retrievePredName(pred: string, wheat : string) : Object {
 	var match = wheat.match(exp);
 
 	if (match == null) {
-		return null;
+		return {
+			predName: pred,
+			params :  ""
+		}
 	}
 	else {
 		return {
@@ -310,8 +313,8 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 
 		const lines = exampleBody.split('\n');
-		let expressions = [];
-		let assignments = [];
+		let expressions : string[] = [];
+		let assignments : Object[] = [];
 		
 		let currentAssignment = { variable: '', value: '' };
 		let isAssignmentContinued = false;
@@ -417,22 +420,40 @@ export function getFailingTestNames(o: string): string[] {
 export function getFailingTestName(o: string): string {
 	if (quantified_assertion_regex.test(o)) {
 		const match = o.match(quantified_assertion_regex);
-		const lhs_pred = match[4];	
+
+		if (match == null) {
+			return "";
+		}
+
+
+		const lhs_pred = match[4] ;	
 		const op = match[5];
 		const rhs_pred = match[6];
 		return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
 
 	} else if (assertion_regex.test(o)) {
+
+		
 		const match = o.match(assertion_regex);
+		if (match == null) {
+			return "";
+		}
+
 		const lhs_pred = match[1];	
 		const op = match[2];
 		const rhs_pred = match[3];
 		return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
 	} else if (example_regex.test(o)) {
 		const match = o.match(example_regex);
+		if (match == null) {
+			return "";
+		}
 		return match[1];
 	} else if (test_regex.test(o)) {
 		const match = o.match(test_regex);
+		if (match == null) {
+			return "";
+		}
 		if (match[1]) return match[1];
 		return match[2]
 	} 
@@ -495,7 +516,7 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 		// Now there is a second one.
 
 		for (const match of matches) {
-			const startIndex = match.index;
+			const startIndex = match.index || 0;
 			const endIndex = startIndex + match[0].length;
 			const pred = match[1];
 			

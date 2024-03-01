@@ -285,6 +285,11 @@ export class Mutator {
 
 				const match = w_o.match(quantified_assertion_regex);
 
+				if (match == null) {
+					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
+					return;
+				}
+
 				const row = parseInt(match[1]);
 				const col = parseInt(match[2]);
 				const span = parseInt(match[3]);
@@ -294,15 +299,32 @@ export class Mutator {
 
 				var failing_test = extractSubstring(this.source_text, row, col, span).trim();
 
+				
+
+				function extractMatch(rx, s, index) {
+					let match = s.match(rx);
+					if (!match || !match[index] ) {
+						return "";
+					}
+					return match[index].trim();
+				}
+
+
 				const quantifier_match = /\bassert\b(.*?)\|/;
-				const quantifier = failing_test.match(quantifier_match)[1].trim() + " | ";
+				const quantifier = extractMatch(quantifier_match, failing_test, 1) + " | ";
 				const lhs_match = /\|\s*(.*?)\s+is\b/;
-				const lhs_instantiation = failing_test.match(lhs_match)[1].trim();
+				const lhs_instantiation = extractMatch(quantifier_match, lhs_match, 1)
 				const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
-				const rhs_instantiation = failing_test.match(rhs_match)[1].trim();
+				const rhs_instantiation = extractMatch(quantifier_match, rhs_match, 1);
 				this.mutateToAssertion(testName, lhs_instantiation, rhs_instantiation, op, quantifier);
 			} else if (assertion_regex.test(w_o)) {
 				const match = w_o.match(assertion_regex);
+
+				if (match == null) {
+					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
+					return;
+				}
+
 				const lhs_pred = match[1];
 				const op = match[2];
 				const rhs_pred = match[3];
@@ -311,7 +333,7 @@ export class Mutator {
 			}
 			else if (test_regex.test(w_o)) {
 
-				const test_expect_failure_msg = `Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
+				const test_expect_failure_msg = `❗Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
 				this.error_messages.push(test_expect_failure_msg)
 			}
 			else if (testName != "") {
@@ -341,17 +363,17 @@ export class Mutator {
 		// Mutant already has all student predicates in it.
 
 
-		let predicates_to_add_to_mutation = [];
-		let expressions_in_mutation = [];
+		let predicates_to_add_to_mutation : string[] = [];
+		let expressions_in_mutation : Object[] = [];
 
 
 		extractTestSuite(this.student_tests).forEach((test_suite) => {
 
 
-			const predicate_under_test = test_suite.predicateName;
-			const examples = test_suite.tests.examples;
-			const assertions = test_suite.tests.assertions;
-			const quantified_assertions = test_suite.tests.quantifiedAssertions;
+			const predicate_under_test = test_suite?.predicateName;
+			const examples = test_suite?.tests.examples || [];
+			const assertions = test_suite?.tests.assertions || [];
+			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
 			// For each of these, filter out examples around which we cannot give feedback.
 
