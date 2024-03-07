@@ -46,7 +46,7 @@ function removeInlineComments(inputText: string): string {
 
 
 // Need to test this, but hopefully works.
-function findForgePredicates(inputText : string) : [string] {
+export function findForgePredicates(inputText : string) : [string] {
 	const withoutComments = removeForgeComments(inputText);
     const lines = withoutComments.split('\n');
     let inPredicate = false;

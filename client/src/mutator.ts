@@ -1,6 +1,8 @@
 import { info } from 'console';
-import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
+import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, findForgePredicates } from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
+
+
 
 
 
@@ -72,6 +74,38 @@ export class Mutator {
 		this.max_mutations = max_mutations;
 	}
 
+
+	emptyOutPredicate(predicateName: string) {
+		const predicates = findForgePredicates(this.mutant);
+		let outputText = this.mutant;
+
+
+		if (predicateName.includes('[')) {
+			predicateName = predicateName.substring(0, predicateName.indexOf('['));
+		}
+		predicateName = predicateName.trim();
+	
+		predicates.forEach(predicate => {
+			// Match the predicate up to the first opening brace '{'
+			const predicateStartRegex = predicate.match(/(pred\s+[a-zA-Z_][a-zA-Z0-9_]*\s*(\[(.*?)\])?[\s\S]*)\{/);
+			if (predicateStartRegex) {
+				const predicateStart = predicateStartRegex[0];
+				const predicateBodyStartIndex = predicate.indexOf(predicateStart) + predicateStart.length;
+				const predicateBodyEndIndex = predicate.lastIndexOf('}');
+
+				const predDecl = new RegExp(`pred\\s+\\b${predicateName}\\b`);
+				if (predicate.match(predDecl)) {
+					// Construct the new predicate with an empty body
+					const newPredicate = `${predicate.substring(0, predicateBodyStartIndex)}}${predicate.substring(predicateBodyEndIndex + 1)}`;
+					// Replace the original predicate in the output text
+					outputText = outputText.replace(predicate, newPredicate);
+				}
+
+			}
+		});
+	
+		this.mutant = outputText;
+	}
 
 	getInnerName(i : string) {
 
@@ -235,10 +269,8 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
-		// Better messaging
-		// This makes a best effort to adjust for parameterized predicates.
-		// var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
-		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
+		// TODO: Better messaging
+
 		
 		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
 			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
@@ -362,12 +394,30 @@ export class Mutator {
 
 		// Mutant already has all student predicates in it.
 
+		let testSuites = extractTestSuite(this.student_tests);
+		
 
-		let predicates_to_add_to_mutation : string[] = [];
-		let expressions_in_mutation : Object[] = [];
+		testSuites.forEach((test_suite) => {
+
+			const predicate_under_test = test_suite?.predicateName;
+
+			const examples = test_suite?.tests.examples || [];
+			const assertions = test_suite?.tests.assertions || [];
+			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
+
+			if (examples.length > 0 || assertions.length > 0 || quantified_assertions.length > 0) {
+				this.emptyOutPredicate(predicate_under_test);
+			}
+			else
+			{
+				this.error_messages.push(`❗You have written no examples or assertions in the test suite for ${predicate_under_test}.`);
+			}
+		});
 
 
-		extractTestSuite(this.student_tests).forEach((test_suite) => {
+		
+		
+		testSuites.forEach((test_suite) => {
 
 
 			const predicate_under_test = test_suite?.predicateName;
@@ -375,10 +425,18 @@ export class Mutator {
 			const assertions = test_suite?.tests.assertions || [];
 			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
+
+
+
+
 			// For each of these, filter out examples around which we cannot give feedback.
 
 			// Now for each example, modify predicates.
 			examples.forEach((example) => {
+
+
+				// Mutate to example
+
 
 
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
@@ -394,9 +452,7 @@ export class Mutator {
 						example['examplePredicate'] = pred_info.pred;
 					}
 					
-					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
-					predicates_to_add_to_mutation.push(p);
-					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
+					this.mutateToExample(example);
 				}
 				else {
 					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
@@ -409,14 +465,15 @@ export class Mutator {
 
 			// For each assertion, modify predicates.
 			assertions.forEach((assertion) => {
-				if (this.xor(this.isInstructorAuthored(assertion['lhs']),
-					this.isInstructorAuthored(assertion['rhs']))) {
 
-					// Create the appropriate predicate.
-					// ie create the characteristic predicate of the example.				
-					let e = assertionToExpr(assertion['lhs'], assertion['rhs'], assertion['op']);
-					expressions_in_mutation.push({ "name": assertion['assertionName'], "expression": e, predicate_under_test });
 
+				// Just mutate to assertion
+
+
+				const lhs = this.isInstructorAuthored(assertion['lhs']);
+				const rhs = this.isInstructorAuthored(assertion['rhs']);
+				if (this.xor(lhs, rhs)) {
+					this.mutateToAssertion(assertion['assertionName'], assertion['lhs'], assertion['rhs'], assertion['op'])
 				}
 				else {
 					this.error_messages.push(`❗Excluding ${assertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
@@ -425,7 +482,10 @@ export class Mutator {
 
 			// For each quantified assertion, modify predicates.
 			quantified_assertions.forEach((qassertion) => {
+ 
 
+
+				// Just mutate to assertion
 
 				// This is where we need to check if the predicate is instructor authored.
 				const lhs = this.isInstructorAuthored(qassertion['lhs']);
@@ -433,9 +493,12 @@ export class Mutator {
 
 				if (this.xor(lhs, rhs)) {
 
-					// Create the appropriate predicate (ie create the characteristic predicate of the example.)
-					let e = assertionToExpr(qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars']);
-					expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
+
+					this.mutateToAssertion(qassertion['assertionName'], qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars'])
+
+
+					
+	
 				}
 				else {
 					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
@@ -443,18 +506,6 @@ export class Mutator {
 			});
 		});
 
-		// Now add all the predicates to the current mutation.
-		var added_preds = predicates_to_add_to_mutation.join("\n");
-		this.mutant += added_preds;
-
-		for (let e of expressions_in_mutation) {
-
-			if (e.hasOwnProperty('isNegativeTest') && e['isNegativeTest']) {
-				this.mutant = this.easePredicate(this.mutant, e['predicate_under_test'], e['expression']);
-			} else {
-				this.mutant = this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
-			}
-		}
 	}
 
 }

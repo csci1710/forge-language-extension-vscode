@@ -425,7 +425,8 @@ ${w_o}`;
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
 		const ag_output = ag_meta.stderr;
-		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
+		//return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
