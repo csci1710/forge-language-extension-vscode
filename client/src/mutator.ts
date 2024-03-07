@@ -114,6 +114,8 @@ export class Mutator {
 				${quantifer_prefix} ${i_inner} and not ${exp_to_constrain}
 			}
 			`
+
+
 		return w_wrapped + added_pred;
 	}
 
@@ -227,7 +229,7 @@ export class Mutator {
 
 
 		// TODO: Potential ISSUE: What if they wrap the negation in () or extra {}? 
-		const negationRegex = /(not|!)\s+(\b\w+\b)/;
+		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		const isNegation = failed_example.examplePredicate.match(negationRegex);
 
 		// Change the target predicate.
@@ -235,11 +237,7 @@ export class Mutator {
 			failed_example.examplePredicate = isNegation[2];
 		}
 
-		// Better messaging
-		// This makes a best effort to adjust for parameterized predicates.
-		// var predInfoFromWheat = retrievePredName(getNameUpToParameters(failed_example.examplePredicate), this.wheat);
-		// var correctlyParameterizedExamplePredicate = predInfoFromWheat['predName'] + predInfoFromWheat['params'];
-		
+
 		if (!wheatPredNames.includes(getNameUpToParameters(failed_example.examplePredicate))) {
 			this.error_messages.push(`⛔ Example ${failed_example.exampleName} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
 			return;
@@ -254,6 +252,9 @@ export class Mutator {
 
 		const exampleAsPred = exampleToPred(failed_example, sigNames, wheatPredNames);
 		let mutant_with_example = this.mutant + "\n" + exampleAsPred + "\n";
+
+
+
 
 		this.mutant = (isNegation != null) ?
 			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
@@ -401,30 +402,7 @@ export class Mutator {
 			const assertions = test_suite?.tests.assertions || [];
 			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
-			// Ignore examples, since a negative example is a positive test of !pred
-			// examples.forEach((example) => {
-			// 	const pred_info = this.checkTargetPredicate(example['examplePredicate']);
-			// 	if (pred_info.predIsInstructorAuthored) {
-
-			// 		if (pred_info.isParameterized) {
-			// 			this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
-			// 			return;
-			// 		}
-
-			// 		// Negative examples only
-			// 		if (pred_info.isNegation) {
-
-			// 			example['examplePredicate'] = pred_info.pred;	
-			// 			// This is BUGGY.
-			// 			// It ORs the predicate with the orign pred, which accepts everything. As a result, we need to do something else.
-			// 			this.mutateToExample(example);
-			// 		}
-			// 	}
-			// 	else {
-			// 		this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
-			// 	}
-			// });
-
+			
 			assertions.forEach((assertion) => {
 
 				// Just mutate to assertion.
@@ -461,6 +439,29 @@ export class Mutator {
 					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
 				}
 			});
+
+
+			// Ignore examples, since a negative example is a positive test of !pred
+			examples.forEach((example) => {
+				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
+				if (pred_info.predIsInstructorAuthored) {
+
+					if (pred_info.isParameterized) {
+						this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
+						return;
+					}
+
+					// Negative examples only
+					if (pred_info.isNegation) {
+
+						this.mutateToExample(example);
+					}
+				}
+				else {
+					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+				}
+			});
+
 		});
 
 
@@ -490,13 +491,11 @@ export class Mutator {
 						return;
 					}
 
-					if (pred_info.isNegation) {
-						example['examplePredicate'] = pred_info.pred;
+					if (!pred_info.isNegation) {	
+						let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
+						predicates_to_add_to_mutation.push(p);
+						expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 					}
-					
-					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
-					predicates_to_add_to_mutation.push(p);
-					expressions_in_mutation.push({ "name": example['exampleName'], "expression": example['exampleName'], predicate_under_test: getNameUpToParameters(example['examplePredicate']), isNegativeTest: pred_info.isNegation });
 				}
 				else {
 					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
