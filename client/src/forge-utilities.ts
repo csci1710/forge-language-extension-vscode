@@ -710,5 +710,5 @@ export function emptyOutPredicate(wheat : string, predicateName: string) {
 		}
 	});
 
-	 wheat = outputText;
+	return outputText;
 }

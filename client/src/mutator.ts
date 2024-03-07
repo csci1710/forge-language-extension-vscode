@@ -301,7 +301,7 @@ export class Mutator {
 
 				
 
-				function extractMatch(rx, s, index) {
+				function extractMatch(rx, s : string, index) {
 					let match = s.match(rx);
 					if (!match || !match[index] ) {
 						return "";
@@ -313,9 +313,9 @@ export class Mutator {
 				const quantifier_match = /\bassert\b(.*?)\|/;
 				const quantifier = extractMatch(quantifier_match, failing_test, 1) + " | ";
 				const lhs_match = /\|\s*(.*?)\s+is\b/;
-				const lhs_instantiation = extractMatch(quantifier_match, lhs_match, 1)
+				const lhs_instantiation = extractMatch(lhs_match,failing_test , 1)
 				const rhs_match = /\bfor\b(.*?)(\bfor\b|$)/;
-				const rhs_instantiation = extractMatch(quantifier_match, rhs_match, 1);
+				const rhs_instantiation = extractMatch(rhs_match, failing_test, 1);
 				this.mutateToAssertion(testName, lhs_instantiation, rhs_instantiation, op, quantifier);
 			} else if (assertion_regex.test(w_o)) {
 				const match = w_o.match(assertion_regex);
@@ -364,7 +364,7 @@ export class Mutator {
 			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
 			if (examples.length > 0 || assertions.length > 0 || quantified_assertions.length > 0) {
-				emptyOutPredicate(this.mutant, predicate_under_test);
+				this.mutant = emptyOutPredicate(this.mutant, predicate_under_test);
 			}
 			else
 			{
@@ -401,35 +401,33 @@ export class Mutator {
 			const assertions = test_suite?.tests.assertions || [];
 			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
-			// Now for each example, modify predicates.
-			examples.forEach((example) => {
-				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
-				if (pred_info.predIsInstructorAuthored) {
+			// Ignore examples, since a negative example is a positive test of !pred
+			// examples.forEach((example) => {
+			// 	const pred_info = this.checkTargetPredicate(example['examplePredicate']);
+			// 	if (pred_info.predIsInstructorAuthored) {
 
-					if (pred_info.isParameterized) {
-						this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
-						return;
-					}
+			// 		if (pred_info.isParameterized) {
+			// 			this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
+			// 			return;
+			// 		}
 
-					// Negative examples only
-					if (pred_info.isNegation) {
+			// 		// Negative examples only
+			// 		if (pred_info.isNegation) {
 
-						example['examplePredicate'] = pred_info.pred;	
-						// This is BUGGY
-						this.mutateToExample(example);
-					}
-				}
-				else {
-					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
-				}
-			});
+			// 			example['examplePredicate'] = pred_info.pred;	
+			// 			// This is BUGGY.
+			// 			// It ORs the predicate with the orign pred, which accepts everything. As a result, we need to do something else.
+			// 			this.mutateToExample(example);
+			// 		}
+			// 	}
+			// 	else {
+			// 		this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+			// 	}
+			// });
 
 			assertions.forEach((assertion) => {
 
-
-				// Just mutate to assertion
-
-
+				// Just mutate to assertion.
 				const lhs = this.isInstructorAuthored(assertion['lhs']);
 				const rhs = this.isInstructorAuthored(assertion['rhs']);
 				if (this.xor(lhs, rhs)) {
@@ -469,7 +467,7 @@ export class Mutator {
 
 	}
 
-	mutateForPositiveTests() {
+	mutateToPositiveTests() {
 		let predicates_to_add_to_mutation : string[] = [];
 		let expressions_in_mutation : Object[] = [];
 
@@ -493,7 +491,7 @@ export class Mutator {
 					}
 
 					if (pred_info.isNegation) {
-						return;
+						example['examplePredicate'] = pred_info.pred;
 					}
 					
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
