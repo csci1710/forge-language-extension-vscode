@@ -462,9 +462,10 @@ ${w_o}`;
 		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
 
+		let tests_analyzed = positiveMutator.num_mutations + negativeMutator.num_mutations;
 
 		// There should be one mutation per considered, consistent test
-		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
+		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
 			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
