@@ -432,47 +432,47 @@ ${w_o}`;
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
 		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
-
-		// Flush the output
 		this.forgeOutput.show();
 
+		/*
+			- For each test-suite, identify the predicate being tested.
+			- For each test in the suite.
+				- Produce a predicate that characterizes the test.
+				- Exclude these predicates from the predicate under test.
+		*/
 
-
-
-
-			/*
-				- For each test-suite, identify the predicate being tested.
-				- For each test in the suite.
-					- Produce a predicate that characterizes the test.
-					- Exclude these predicates from the predicate under test.
-			*/
-
+	
+		var positiveMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
+		var negativeMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
 		
+
+		positiveMutator.mutateToPositiveTests();
+		negativeMutator.mutateToNegativeTests();
+
+
 		// Now we have all the positive tests
 		// And all the negative tests
 
 
-		// We should segregate the test suite into both positive and negative tests.
-		// Positive tests should have a destructive approach and run
 
-		// Negative tests should have a constructive approach and run
-
-		// If an ag test passes *both*, it is a thoroughness candidate.
+		// If an ag test passes positive AND fails negative, it is a thoroughness candidate.
 
 
 
-
-
-
-		mutator.mutateToStudentUnderstanding();
-		let skipped_tests = mutator.error_messages.join("\n");
+		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
+
+
 		// There should be one mutation per considered, consistent test
 		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
-			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(mutator.test_file_name, mutator.mutant, mutator.student_preds);
-			return thoroughness_hints;
+			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
+			let negative_thoroughness_hints = await this.tryGetHintsFromMutant(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output);
+			
+			
+			const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
+			return intersection;
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
