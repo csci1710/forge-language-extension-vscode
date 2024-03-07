@@ -1,5 +1,5 @@
 import { info } from 'console';
-import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr } from './forge-utilities';
+import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, emptyOutPredicate } from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
 
 
@@ -350,8 +350,27 @@ export class Mutator {
 	};
 
 
-	mutateToStudentUnderstanding() {
+	mutateToNegativeTests() {
 
+
+		const test_suites = extractTestSuite(this.student_tests)
+
+		test_suites.forEach((test_suite) => {
+
+			const predicate_under_test = test_suite?.predicateName;
+
+			const examples = test_suite?.tests.examples || [];
+			const assertions = test_suite?.tests.assertions || [];
+			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
+
+			if (examples.length > 0 || assertions.length > 0 || quantified_assertions.length > 0) {
+				emptyOutPredicate(this.mutant, predicate_under_test);
+			}
+			else
+			{
+				this.error_messages.push(`❗You have written no examples or assertions in the test suite for ${predicate_under_test}.`);
+			}
+		});
 
 		/*
 			- For each test-suite, identify the predicate being tested.
@@ -363,11 +382,18 @@ export class Mutator {
 		// Mutant already has all student predicates in it.
 
 
-		let predicates_to_add_to_mutation : string[] = [];
-		let expressions_in_mutation : Object[] = [];
+		// Now we have all the positive tests
+		// And all the negative tests
 
 
-		extractTestSuite(this.student_tests).forEach((test_suite) => {
+		// We should segregate the test suite into both positive and negative tests.
+		// Positive tests should have a destructive approach and run
+
+		// Negative tests should have a constructive approach and run
+
+		// If an ag test passes *both*, it is a thoroughness candidate.
+
+		test_suites.forEach((test_suite) => {
 
 
 			const predicate_under_test = test_suite?.predicateName;
@@ -375,12 +401,88 @@ export class Mutator {
 			const assertions = test_suite?.tests.assertions || [];
 			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
 
-			// For each of these, filter out examples around which we cannot give feedback.
-
 			// Now for each example, modify predicates.
 			examples.forEach((example) => {
+				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
+				if (pred_info.predIsInstructorAuthored) {
+
+					if (pred_info.isParameterized) {
+						this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis, since it references parameterized predicate ${pred_info.pred}`);
+						return;
+					}
+
+					// Negative examples only
+					if (pred_info.isNegation) {
+
+						example['examplePredicate'] = pred_info.pred;	
+						// This is BUGGY
+						this.mutateToExample(example);
+					}
+				}
+				else {
+					this.error_messages.push(`❗Excluding Example ${example['exampleName']} from thoroughness analysis. I can only give feedback around examples that directly reference one predicate from the assignment statement.`);
+				}
+			});
+
+			assertions.forEach((assertion) => {
 
 
+				// Just mutate to assertion
+
+
+				const lhs = this.isInstructorAuthored(assertion['lhs']);
+				const rhs = this.isInstructorAuthored(assertion['rhs']);
+				if (this.xor(lhs, rhs)) {
+
+					// Now check if it is a negative assertion.
+					// That is: i => s
+
+					var isNegativeAssertion = (rhs && assertion['op'] == 'necessary')   || (lhs && assertion['op'] == 'sufficient');
+
+					if (isNegativeAssertion) {
+						this.mutateToAssertion(assertion['assertionName'], assertion['lhs'], assertion['rhs'], assertion['op'])
+					}
+				}
+				else {
+					this.error_messages.push(`❗Excluding ${assertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+				}
+			});
+
+			quantified_assertions.forEach((qassertion) => {
+				const lhs = this.isInstructorAuthored(qassertion['lhs']);
+				const rhs = this.isInstructorAuthored(qassertion['rhs']);
+
+				if (this.xor(lhs, rhs)) {
+
+					var isNegativeAssertion = (rhs && qassertion['op'] == 'necessary')   || (lhs && qassertion['op'] == 'sufficient');
+					if (isNegativeAssertion) {
+						this.mutateToAssertion(qassertion['assertionName'], qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars'])
+					}
+				}
+				else {
+					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
+				}
+			});
+		});
+
+
+
+	}
+
+	mutateForPositiveTests() {
+		let predicates_to_add_to_mutation : string[] = [];
+		let expressions_in_mutation : Object[] = [];
+
+
+		const test_suites = extractTestSuite(this.student_tests)
+		
+		test_suites.forEach((test_suite) => {
+			const predicate_under_test = test_suite?.predicateName;
+			const examples = test_suite?.tests.examples || [];
+			const assertions = test_suite?.tests.assertions || [];
+			const quantified_assertions = test_suite?.tests.quantifiedAssertions || [];
+
+			examples.forEach((example) => {
 				const pred_info = this.checkTargetPredicate(example['examplePredicate']);
 				if (pred_info.predIsInstructorAuthored) {
 
@@ -391,7 +493,7 @@ export class Mutator {
 					}
 
 					if (pred_info.isNegation) {
-						example['examplePredicate'] = pred_info.pred;
+						return;
 					}
 					
 					let p = exampleToPred(example, getSigList(this.wheat), getPredList(this.wheat));
@@ -403,19 +505,27 @@ export class Mutator {
 				}
 			});
 
-			/*
-				{ assertionName, quantifiedVars, lhs, op, rhs }
-			*/
 
-			// For each assertion, modify predicates.
 			assertions.forEach((assertion) => {
+				const lhs = this.isInstructorAuthored(assertion['lhs']);
+				const rhs = this.isInstructorAuthored(assertion['rhs']);
 				if (this.xor(this.isInstructorAuthored(assertion['lhs']),
 					this.isInstructorAuthored(assertion['rhs']))) {
 
+
+
+					// Now check if it is a negative assertion.
+					// That is: i => s
+					var isNegativeAssertion = (rhs && assertion['op'] == 'necessary')   || (lhs && assertion['op'] == 'sufficient');
+
 					// Create the appropriate predicate.
-					// ie create the characteristic predicate of the example.				
-					let e = assertionToExpr(assertion['lhs'], assertion['rhs'], assertion['op']);
-					expressions_in_mutation.push({ "name": assertion['assertionName'], "expression": e, predicate_under_test });
+					// ie create the characteristic predicate of the example.		
+					
+					
+					if (!isNegativeAssertion) {
+						let e = assertionToExpr(assertion['lhs'], assertion['rhs'], assertion['op']);
+						expressions_in_mutation.push({ "name": assertion['assertionName'], "expression": e, predicate_under_test });
+					}
 
 				}
 				else {
@@ -432,10 +542,12 @@ export class Mutator {
 				const rhs = this.isInstructorAuthored(qassertion['rhs']);
 
 				if (this.xor(lhs, rhs)) {
+					var isNegativeAssertion = (rhs && qassertion['op'] == 'necessary')   || (lhs && qassertion['op'] == 'sufficient');
 
-					// Create the appropriate predicate (ie create the characteristic predicate of the example.)
-					let e = assertionToExpr(qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars']);
-					expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
+					if (!isNegativeAssertion) {
+						let e = assertionToExpr(qassertion['lhs'], qassertion['rhs'], qassertion['op'], qassertion['quantifiedVars']);
+						expressions_in_mutation.push({ "name": qassertion['assertionName'], "expression": e, predicate_under_test });
+					}
 				}
 				else {
 					this.error_messages.push(`❗Excluding ${qassertion['assertionName']} from thoroughness analysis. I can only give feedback around assertions that directly reference at exactly one predicate from the assignment statement.`);
@@ -456,6 +568,5 @@ export class Mutator {
 			}
 		}
 	}
-
 }
 

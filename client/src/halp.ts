@@ -436,6 +436,34 @@ ${w_o}`;
 		// Flush the output
 		this.forgeOutput.show();
 
+
+
+
+
+			/*
+				- For each test-suite, identify the predicate being tested.
+				- For each test in the suite.
+					- Produce a predicate that characterizes the test.
+					- Exclude these predicates from the predicate under test.
+			*/
+
+		
+		// Now we have all the positive tests
+		// And all the negative tests
+
+
+		// We should segregate the test suite into both positive and negative tests.
+		// Positive tests should have a destructive approach and run
+
+		// Negative tests should have a constructive approach and run
+
+		// If an ag test passes *both*, it is a thoroughness candidate.
+
+
+
+
+
+
 		mutator.mutateToStudentUnderstanding();
 		let skipped_tests = mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);

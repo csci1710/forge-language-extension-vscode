@@ -678,3 +678,37 @@ export function combineTestsWithModel(wheatText: string, tests: string): string 
 	return combined;
 
 }
+
+
+
+export function emptyOutPredicate(wheat : string, predicateName: string) {
+	const predicates = findForgePredicates( wheat);
+	let outputText =  wheat;
+
+
+	if (predicateName.includes('[')) {
+		predicateName = predicateName.substring(0, predicateName.indexOf('['));
+	}
+	predicateName = predicateName.trim();
+
+	predicates.forEach(predicate => {
+		// Match the predicate up to the first opening brace '{'
+		const predicateStartRegex = predicate.match(/(pred\s+[a-zA-Z_][a-zA-Z0-9_]*\s*(\[(.*?)\])?[\s\S]*)\{/);
+		if (predicateStartRegex) {
+			const predicateStart = predicateStartRegex[0];
+			const predicateBodyStartIndex = predicate.indexOf(predicateStart) + predicateStart.length;
+			const predicateBodyEndIndex = predicate.lastIndexOf('}');
+
+			const predDecl = new RegExp(`pred\\s+\\b${predicateName}\\b`);
+			if (predicate.match(predDecl)) {
+				// Construct the new predicate with an empty body
+				const newPredicate = `${predicate.substring(0, predicateBodyStartIndex)}}${predicate.substring(predicateBodyEndIndex + 1)}`;
+				// Replace the original predicate in the output text
+				outputText = outputText.replace(predicate, newPredicate);
+			}
+
+		}
+	});
+
+	 wheat = outputText;
+}
