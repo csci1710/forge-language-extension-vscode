@@ -450,15 +450,6 @@ ${w_o}`;
 		negativeMutator.mutateToNegativeTests();
 
 
-		// Now we have all the positive tests
-		// And all the negative tests
-
-
-
-		// If an ag test passes positive AND fails negative, it is a thoroughness candidate.
-
-
-
 		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
 
@@ -469,9 +460,7 @@ ${w_o}`;
 		this.forgeOutput.show();
 		try {
 			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
-			let negative_thoroughness_hints = await this.tryGetHintsFromMutant(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output);
-			
-			
+			let negative_thoroughness_hints = await this.tryGetHintsFromMutant(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output);	
 			const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
 			return intersection;
 		}
