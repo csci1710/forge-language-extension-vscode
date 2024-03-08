@@ -38,7 +38,7 @@ export class HalpRunner {
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 
 	mutationStrategy : string;
-	thoroughnessEnabled : boolean;
+	thoroughnessStrategy : string;
 
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
@@ -47,7 +47,7 @@ export class HalpRunner {
 
 		let currentSettings = vscode.workspace.getConfiguration('forge');
 		this.mutationStrategy = String(currentSettings.get('feedbackStrategy'));
-		this.thoroughnessEnabled = Boolean(currentSettings.get('thoroughnessFeedbackEnabled'));
+		this.thoroughnessStrategy = String(currentSettings.get('thoroughnessFeedback'));
 	}
 
 
@@ -123,7 +123,7 @@ export class HalpRunner {
 
 		if (this.isConsistent(w_o)) {
 
-			if (this.thoroughnessEnabled == false) {
+			if (this.thoroughnessStrategy == "Off") {
 				return CONSISTENCY_MESSAGE;
 			}
 			else {
@@ -459,16 +459,44 @@ ${w_o}`;
 		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
+			// All those tests that were not covered by positive test cases
 			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
-			let negative_thoroughness_hints = await this.tryGetHintsFromMutantFailures(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output, Event.THOROUGHNESS_MUTANT);	
-			
-			// TODO: RIght now we do intersection. Rather, we want to do one more run, where we test our positive tests (ie zero out everything and get the positive tests there)
-			// Then subtract these!
-			// THIS IS WRONG I THINK
-			let get_positive_tests = await this.tryGetHintsFromMutantPasses(nullMutator.test_file_name, nullMutator.mutant, nullMutator.student_preds);
-			
-			const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
-			return intersection;
+
+			// Now we want 
+
+			// More conservative strategy: Intersection (aka thoroughness hints only from negative tests)
+
+
+			if (this.thoroughnessStrategy == "Partial") {
+
+				// All those tests that were not covered by negative test cases
+				let negative_thoroughness_hints = await this.tryGetHintsFromMutantFailures(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output, Event.THOROUGHNESS_MUTANT);	
+				
+
+				const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
+				return intersection;
+			}
+			else if (this.thoroughnessStrategy == "Full") {
+
+				// All those tests covered by negative test cases (and all positive tests)
+				let negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds);				
+				
+				// (in theory) all positive test cases. i think this isn't quite right.
+				let positive_test_hints = await this.tryGetHintsFromMutantPasses(nullMutator.test_file_name, nullMutator.mutant, nullMutator.student_preds);
+				let negative_covered_hints = negative_covered_hints_and_pos.filter(hint => !positive_test_hints.includes(hint));
+
+
+				let difference = thoroughness_hints.filter(hint => !negative_covered_hints.includes(hint));
+				return difference;
+
+			}
+			else {
+				const msg = "Something was wrong in the extension settings. toadusponens.thoroughnessFeedback must be 'Off', 'Partial' or 'Full'"
+				vscode.window.showErrorMessage(msg);
+				return [msg];
+			}
+
+	
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
