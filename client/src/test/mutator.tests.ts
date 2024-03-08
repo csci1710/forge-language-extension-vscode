@@ -862,7 +862,7 @@ pred isDirectedTree {
 
         const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
         mutator.mutateToPositiveTests();
-            console.log(mutator.mutant);
+
             
         const expected_mutant = `
         #lang forge
@@ -900,3 +900,54 @@ pred a2 {
 });
 
 
+describe('Mutator to Vaccuity', () => {
+    it(' : mutate to Vaccuity removes all predicate bodies', () => {
+
+        const source = `
+      
+        #lang forge
+
+        option run_sterling off
+
+        sig Node {edges: set Node}
+
+        pred isDirectedTree {
+            edges.~edges in iden
+            lone edges.Node - Node.edges 
+            no (^edges & iden)
+            lone Node or Node in edges.Node + Node.edges 
+        }
+
+
+        pred isDir [n : Node] {
+            n in Node
+        }
+
+        pred abc [n : Node, n2 : Node] 
+        {
+            n1 = n2
+        }
+
+      `;
+        const expectedMutant = `        #lang forge
+
+        option run_sterling off
+
+        sig Node {edges: set Node}
+
+        pred isDirectedTree {   }
+
+
+        pred isDir [n : Node] { }
+
+        pred abc [n : Node, n2 : Node] 
+        {
+        }
+`;
+
+
+        const mutator = new Mutator(source, "", "", "", "");
+        mutator.mutateToVaccuity();
+        assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(expectedMutant));
+    });
+});
