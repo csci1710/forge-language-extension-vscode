@@ -38,7 +38,7 @@ export class HalpRunner {
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
 
 	mutationStrategy : string;
-	thoroughnessEnabled : boolean;
+	thoroughnessStrategy : string;
 
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
@@ -47,7 +47,7 @@ export class HalpRunner {
 
 		let currentSettings = vscode.workspace.getConfiguration('forge');
 		this.mutationStrategy = String(currentSettings.get('feedbackStrategy'));
-		this.thoroughnessEnabled = Boolean(currentSettings.get('thoroughnessFeedbackEnabled'));
+		this.thoroughnessStrategy = String(currentSettings.get('thoroughnessFeedback'));
 	}
 
 
@@ -123,7 +123,7 @@ export class HalpRunner {
 
 		if (this.isConsistent(w_o)) {
 
-			if (this.thoroughnessEnabled == false) {
+			if (this.thoroughnessStrategy == "Off") {
 				return CONSISTENCY_MESSAGE;
 			}
 			else {
@@ -197,7 +197,7 @@ ${w_o}`;
 			this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
 			try {
-				var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, mutator.forge_output);
+				var hints = await this.tryGetHintsFromMutantFailures(testFileName, mutator.mutant, mutator.student_preds, mutator.forge_output);
 			}
 			catch (e) {
 				vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
@@ -229,7 +229,7 @@ ${w_o}`;
 
 			const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
 			lineMutator.mutateToStudentMisunderstanding();
-			var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
+			var hints = await this.tryGetHintsFromMutantFailures(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
 			per_test_hints[tn] = hints;
 
 
@@ -335,9 +335,6 @@ ${w_o}`;
 
 	private async getWheat(testFileName: string): Promise<string> {
 
-		// TODO: Need a timer here!
-
-
 		const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
 		const wheatURI = `${HalpRunner.WHEATSTORE}/${wheatName}`;
 		const wheat = await this.downloadFile(wheatURI);
@@ -364,7 +361,7 @@ ${w_o}`;
 	}
 
 
-	private async tryGetHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+	private async tryGetFailingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
 		if (ag_output == "") {
 			return [];
@@ -383,8 +380,10 @@ ${w_o}`;
 		return hint_candidates;
 	}
 
-	async tryGetHintsFromMutant(testFileName: string, mutant: string, student_preds: string, w_o: string): Promise<string[]> {
+	async tryGetHintsFromMutantFailures(testFileName: string, mutant: string, student_preds: string, w_o: string, event : Event = Event.CONCEPTUAL_MUTANT): Promise<string[]> {
 
+
+		// TODO: This isn't always for thoroughness!
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
@@ -392,15 +391,15 @@ ${w_o}`;
 			"test_failure_message": w_o,
 			"conceptual_mutant": mutant
 		}
-		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
+		this.logger.log_payload(payload, LogLevel.INFO, event)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
 		const ag_output = ag_meta.stderr;
-		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetFailingHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
-	private async tryGetThoroughnessFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+	private async tryGetPassingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
 		const failed_tests = getFailingTestNames(ag_output);
 		const hint_map = await this.getHintMap(testFileName);
@@ -411,7 +410,7 @@ ${w_o}`;
 		return hint_candidates;
 	}
 
-	async tryGetThoroughnessFromMutant(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
+	async tryGetHintsFromMutantPasses(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
 
 
 		const payload = {
@@ -425,26 +424,79 @@ ${w_o}`;
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
 		const ag_output = ag_meta.stderr;
-		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetPassingHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
 		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
-
-		// Flush the output
 		this.forgeOutput.show();
 
-		mutator.mutateToStudentUnderstanding();
-		let skipped_tests = mutator.error_messages.join("\n");
+		/*
+			- For each test-suite, identify the predicate being tested.
+			- For each test in the suite.
+				- Produce a predicate that characterizes the test.
+				- Exclude these predicates from the predicate under test.
+		*/
+
+	
+		var positiveMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
+		var negativeMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
+		var nullMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
+		
+
+		positiveMutator.mutateToPositiveTests();
+		negativeMutator.mutateToNegativeTests();
+		nullMutator.mutateToVaccuity();
+
+		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
+
+		let tests_analyzed = positiveMutator.num_mutations + negativeMutator.num_mutations;
+
 		// There should be one mutation per considered, consistent test
-		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${mutator.num_mutations} tests in mind. ⌛\n`);
+		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
-			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(mutator.test_file_name, mutator.mutant, mutator.student_preds);
-			return thoroughness_hints;
+			// All those tests that were not covered by positive test cases
+			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
+
+			// Now we want 
+
+			// More conservative strategy: Intersection (aka thoroughness hints only from negative tests)
+
+
+			if (this.thoroughnessStrategy == "Partial") {
+
+				// All those tests that were not covered by negative test cases
+				let negative_thoroughness_hints = await this.tryGetHintsFromMutantFailures(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output, Event.THOROUGHNESS_MUTANT);	
+				
+
+				const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
+				return intersection;
+			}
+			else if (this.thoroughnessStrategy == "Full") {
+
+				// All those tests covered by negative test cases (and all positive tests)
+				let negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds);				
+				
+				// (in theory) all positive test cases. i think this isn't quite right.
+				let positive_test_hints = await this.tryGetHintsFromMutantPasses(nullMutator.test_file_name, nullMutator.mutant, nullMutator.student_preds);
+				let negative_covered_hints = negative_covered_hints_and_pos.filter(hint => !positive_test_hints.includes(hint));
+
+
+				let difference = thoroughness_hints.filter(hint => !negative_covered_hints.includes(hint));
+				return difference;
+
+			}
+			else {
+				const msg = "Something was wrong in the extension settings. toadusponens.thoroughnessFeedback must be 'Off', 'Partial' or 'Full'"
+				vscode.window.showErrorMessage(msg);
+				return [msg];
+			}
+
+	
 		}
 		catch (e) {
 			vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
