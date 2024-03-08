@@ -197,7 +197,7 @@ ${w_o}`;
 			this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
 			try {
-				var hints = await this.tryGetHintsFromMutant(testFileName, mutator.mutant, mutator.student_preds, mutator.forge_output);
+				var hints = await this.tryGetHintsFromMutantFailures(testFileName, mutator.mutant, mutator.student_preds, mutator.forge_output);
 			}
 			catch (e) {
 				vscode.window.showErrorMessage(this.SOMETHING_WENT_WRONG);
@@ -229,7 +229,7 @@ ${w_o}`;
 
 			const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
 			lineMutator.mutateToStudentMisunderstanding();
-			var hints = await this.tryGetHintsFromMutant(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
+			var hints = await this.tryGetHintsFromMutantFailures(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
 			per_test_hints[tn] = hints;
 
 
@@ -335,9 +335,6 @@ ${w_o}`;
 
 	private async getWheat(testFileName: string): Promise<string> {
 
-		// TODO: Need a timer here!
-
-
 		const wheatName = path.parse(testFileName.replace('.test.frg', '.wheat')).base;
 		const wheatURI = `${HalpRunner.WHEATSTORE}/${wheatName}`;
 		const wheat = await this.downloadFile(wheatURI);
@@ -364,7 +361,7 @@ ${w_o}`;
 	}
 
 
-	private async tryGetHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+	private async tryGetFailingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
 		if (ag_output == "") {
 			return [];
@@ -383,8 +380,10 @@ ${w_o}`;
 		return hint_candidates;
 	}
 
-	async tryGetHintsFromMutant(testFileName: string, mutant: string, student_preds: string, w_o: string): Promise<string[]> {
+	async tryGetHintsFromMutantFailures(testFileName: string, mutant: string, student_preds: string, w_o: string, event : Event = Event.CONCEPTUAL_MUTANT): Promise<string[]> {
 
+
+		// TODO: This isn't always for thoroughness!
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
@@ -392,15 +391,15 @@ ${w_o}`;
 			"test_failure_message": w_o,
 			"conceptual_mutant": mutant
 		}
-		this.logger.log_payload(payload, LogLevel.INFO, Event.CONCEPTUAL_MUTANT)
+		this.logger.log_payload(payload, LogLevel.INFO, event)
 
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
 		const ag_output = ag_meta.stderr;
-		return await this.tryGetHintsFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetFailingHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
-	private async tryGetThoroughnessFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
+	private async tryGetPassingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
 		const failed_tests = getFailingTestNames(ag_output);
 		const hint_map = await this.getHintMap(testFileName);
@@ -411,7 +410,7 @@ ${w_o}`;
 		return hint_candidates;
 	}
 
-	async tryGetThoroughnessFromMutant(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
+	async tryGetHintsFromMutantPasses(testFileName: string, mutant: string, student_preds: string): Promise<string[]> {
 
 
 		const payload = {
@@ -425,7 +424,7 @@ ${w_o}`;
 		const autograderTests = await this.getAutograderTests(testFileName);
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);
 		const ag_output = ag_meta.stderr;
-		return await this.tryGetThoroughnessFromAutograderOutput(ag_output, testFileName);
+		return await this.tryGetPassingHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
@@ -444,11 +443,12 @@ ${w_o}`;
 	
 		var positiveMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
 		var negativeMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
+		var nullMutator = new Mutator(mutator.wheat, mutator.student_tests, mutator.forge_output, mutator.test_file_name, mutator.source_text);
 		
 
 		positiveMutator.mutateToPositiveTests();
 		negativeMutator.mutateToNegativeTests();
-
+		nullMutator.mutateToVaccuity();
 
 		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
@@ -459,8 +459,14 @@ ${w_o}`;
 		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
-			let thoroughness_hints = await this.tryGetThoroughnessFromMutant(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
-			let negative_thoroughness_hints = await this.tryGetHintsFromMutant(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output);	
+			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
+			let negative_thoroughness_hints = await this.tryGetHintsFromMutantFailures(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output, Event.THOROUGHNESS_MUTANT);	
+			
+			// TODO: RIght now we do intersection. Rather, we want to do one more run, where we test our positive tests (ie zero out everything and get the positive tests there)
+			// Then subtract these!
+			// THIS IS WRONG I THINK
+			let get_positive_tests = await this.tryGetHintsFromMutantPasses(nullMutator.test_file_name, nullMutator.mutant, nullMutator.student_preds);
+			
 			const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
 			return intersection;
 		}

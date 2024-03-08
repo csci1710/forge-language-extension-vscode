@@ -1,5 +1,5 @@
 import { info } from 'console';
-import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, emptyOutPredicate } from './forge-utilities';
+import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, emptyOutPredicate, emptyOutAllPredicates } from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
 
 
@@ -564,6 +564,12 @@ export class Mutator {
 				this.mutant = this.constrainPredicateByExclusion(this.mutant, e['predicate_under_test'], e['expression']);
 			}
 		}
+	}
+
+
+
+	mutateToVaccuity() {
+		this.mutant = emptyOutAllPredicates(this.mutant);
 	}
 }
 

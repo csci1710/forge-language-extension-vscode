@@ -712,3 +712,26 @@ export function emptyOutPredicate(wheat : string, predicateName: string) {
 
 	return outputText;
 }
+
+
+
+export function emptyOutAllPredicates(code : string) {
+	const predicates = findForgePredicates( code);
+	let outputText =  code;
+
+	predicates.forEach(predicate => {
+		// Match the predicate up to the first opening brace '{'
+		const predicateStartRegex = predicate.match(/(pred\s+[a-zA-Z_][a-zA-Z0-9_]*\s*(\[(.*?)\])?[\s\S]*)\{/);
+		if (predicateStartRegex) {
+			const predicateStart = predicateStartRegex[0];
+			const predicateBodyStartIndex = predicate.indexOf(predicateStart) + predicateStart.length;
+			const predicateBodyEndIndex = predicate.lastIndexOf('}');
+			// Construct the new predicate with an empty body
+			const newPredicate = `${predicate.substring(0, predicateBodyStartIndex)}}${predicate.substring(predicateBodyEndIndex + 1)}`;
+			// Replace the original predicate in the output text
+			outputText = outputText.replace(predicate, newPredicate);
+		}
+	});
+
+	return outputText;
+}
