@@ -48,28 +48,40 @@ function removeInlineComments(inputText: string): string {
 // Need to test this, but hopefully works.
 function findForgePredicates(inputText : string) : [string] {
 	const withoutComments = removeForgeComments(inputText);
+
+
     const lines = withoutComments.split('\n');
+
+
     let inPredicate = false;
     let braceLevel = 0;
     let currentPredicate = '';
     let predicates : [string] = [''];
 
+
+
     for (let line of lines) {
+
         if (inPredicate) {
             currentPredicate += line + '\n';
             braceLevel += (line.match(/\{/g) || []).length;
             braceLevel -= (line.match(/\}/g) || []).length;
 
-            if (braceLevel === 0) {
+            if (braceLevel == 0) {
+
                 predicates.push(currentPredicate.trim());
                 currentPredicate = '';
                 inPredicate = false;
             }
         } else {
-            const match = line.match(/\bpred\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(\[(.*?)\])?\s*\{/);
+
+			const match =  line.match(predicatePattern);
+
+			
+
             if (match) {
                 inPredicate = true;
-                braceLevel = 1;
+                braceLevel = (line.match(/\{/g) || []).length;;
                 currentPredicate = line + '\n';
             }
         }
@@ -103,7 +115,7 @@ export function findForgeExamples(inputText) {
             const match = line.match(/\bexample\s+([a-zA-Z_][a-zA-Z0-9_]*)\s+is\s+(.*?)\s+for\s*\{/);
             if (match) {
                 inExample = true;
-                braceLevel = 1;
+                braceLevel = 1;  
                 currentExample = line + '\n';
             }
         }
@@ -118,7 +130,7 @@ export const assertion_regex = /Theorem Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
 export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
 
-
+const predicatePattern =  /pred\s+([^]*?)({|\n|$)/;
 
 export function getSigList(s : string) : string[] {
 	const pattern = /\bsig\s+(\w+)/g;
@@ -222,9 +234,6 @@ export function findAllQuantifiedAssertions(fileContent : string) {
     }
     return assertions;
 }
-
-
-
 
 
 export function findExampleByName(fileContent : string, exampleName: string) {
@@ -544,8 +553,6 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 			}
 		}
 		const remaining = input.substring(suiteEnd);
-		console.log(remaining);
-
 		return indices;
 	}
 	  
@@ -677,4 +684,70 @@ export function combineTestsWithModel(wheatText: string, tests: string): string 
 
 	return combined;
 
+}
+
+
+
+export function emptyOutPredicate(wheat : string, predicateName: string) {
+	const predicates = findForgePredicates( wheat);
+	let outputText =  wheat;
+
+
+	if (predicateName.includes('[')) {
+		predicateName = predicateName.substring(0, predicateName.indexOf('['));
+	}
+	predicateName = predicateName.trim();
+
+	predicates.forEach(predicate => {
+		// Match the predicate up to the first opening brace '{'
+		const predicateStartRegex = predicate.match(predicatePattern);
+		if (predicateStartRegex) {
+			const predicateStart = predicateStartRegex[0];
+			const predicateBodyStartIndex = predicate.indexOf(predicateStart) + predicateStart.length;
+			const predicateBodyEndIndex = predicate.lastIndexOf('}');
+
+			const predDecl = new RegExp(`pred\\s+\\b${predicateName}\\b`);
+			if (predicate.match(predDecl)) {
+				// Construct the new predicate with an empty body
+
+				const predicate_beginning = predicate.substring(0, predicateBodyStartIndex);
+				let predicate_body = predicateStart.includes('{') ? '}' : ' { }';
+				const newPredicate = `${predicate_beginning}${predicate_body}${predicate.substring(predicateBodyEndIndex + 1)}`;
+				// Replace the original predicate in the output text
+				outputText = outputText.replace(predicate, newPredicate);
+			}
+
+		}
+	});
+
+	return outputText;
+}
+
+
+
+
+
+export function emptyOutAllPredicates(code : string) {
+	const predicates = findForgePredicates( code);
+	let outputText =  code;
+
+	predicates.forEach(predicate => {
+
+
+		// Match the predicate up to the first opening brace '{'
+		const predicateStartRegex = predicate.match(predicatePattern);
+		if (predicateStartRegex) {
+			const predicateStart = predicateStartRegex[0];
+			const predicateBodyStartIndex = predicate.indexOf(predicateStart) + predicateStart.length;
+			const predicateBodyEndIndex = predicate.lastIndexOf('}');
+			// Construct the new predicate with an empty body
+			const predicate_beginning = predicate.substring(0, predicateBodyStartIndex);
+			let predicate_body = predicateStart.includes('{') ? '}' : ' { }';
+			const newPredicate = `${predicate_beginning}${predicate_body}${predicate.substring(predicateBodyEndIndex + 1)}`;
+			// Replace the original predicate in the output text
+			outputText = outputText.replace(predicate, newPredicate);
+		}
+	});
+
+	return outputText;
 }
