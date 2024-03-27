@@ -430,7 +430,7 @@ ${w_o}`;
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
-		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
+		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
 		this.forgeOutput.show();
 
 		/*
@@ -465,7 +465,7 @@ ${w_o}`;
 			// Now we want 
 
 			// More conservative strategy: Intersection (aka thoroughness hints only from negative tests)
-
+			this.thoroughnessStrategy = "Full"
 
 			if (this.thoroughnessStrategy == "Partial") {
 

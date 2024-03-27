@@ -19,7 +19,7 @@ function extractSubstring(text: string, startRow: number, startColumn: number, s
 	if (startRow < 1 || startRow > rows.length) {
 		throw new Error("Something went wrong while I was reading Forge output.");
 	}
-	if (startColumn > rows[startRow - 1].length + 1) {
+	if (startColumn > rows[startRow].length + 1) {
 		throw new Error("Something went wrong while I was reading Forge output.");
 	}
 
