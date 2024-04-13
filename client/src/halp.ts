@@ -382,7 +382,6 @@ ${w_o}`;
 
 	async tryGetHintsFromMutantFailures(testFileName: string, mutant: string, student_preds: string, w_o: string, event : Event = Event.CONCEPTUAL_MUTANT): Promise<string[]> {
 
-
 		// TODO: This isn't always for thoroughness!
 		const payload = {
 			"testFileName": testFileName,
@@ -430,7 +429,9 @@ ${w_o}`;
 	async generateThoroughnessFeedback(mutator : Mutator) : Promise<string[]> {
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
+
 		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite. I will ignore ANY tests that are not in 'test-suite's`);
+
 		this.forgeOutput.show();
 
 		/*
@@ -461,6 +462,7 @@ ${w_o}`;
 		try {
 			// All those tests that were not covered by positive test cases
 			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
+
 
 
 			if (this.thoroughnessStrategy == "Partial") {

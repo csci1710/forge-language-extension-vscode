@@ -92,8 +92,10 @@
 						"Partial",
 						"Full"
 					],
+
 					"default": "Full",
 					"description": "Determines the level of thoroughness feedback given by Toadus Ponens."
+
 				}
 			}
 		},
