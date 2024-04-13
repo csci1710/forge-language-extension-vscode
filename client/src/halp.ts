@@ -462,10 +462,6 @@ ${w_o}`;
 			// All those tests that were not covered by positive test cases
 			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
 
-			// Now we want 
-
-			// More conservative strategy: Intersection (aka thoroughness hints only from negative tests)
-			this.thoroughnessStrategy = "Full"
 
 			if (this.thoroughnessStrategy == "Partial") {
 
