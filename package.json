@@ -92,8 +92,10 @@
 						"Partial",
 						"Full"
 					],
-					"default": "Partial",
-					"description": "Determines the level of thoroughness feedback given by Toadus Ponens. Full offers more accurate thoroughness feedback, but is experimental and may be buggy."
+
+					"default": "Full",
+					"description": "Determines the level of thoroughness feedback given by Toadus Ponens."
+
 				}
 			}
 		},
