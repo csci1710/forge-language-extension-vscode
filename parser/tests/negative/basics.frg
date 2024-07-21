@@ -1,0 +1,3 @@
+#lang bad-input
+
+laksjflkajslkdfj

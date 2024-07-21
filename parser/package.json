@@ -1,0 +1,22 @@
+{
+  "name": "parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --silent=false",
+    "build:parser": "node build-parser.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/jest": "^29.5.12",
+    "jison": "^0.4.18",
+    "ts-jest": "^29.2.2",
+    "typescript": "^5.5.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
