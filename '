@@ -1,0 +1,26 @@
+%{
+/* Definitions and imports go here */
+%}
+
+%%
+\s+                         /* Ignore whitespace */
+[\n]+                       /* Ignore newlines */
+
+"#lang"               return 'LANG';
+"forge/temporal"      return 'FORGE_TEMPORAL';
+"forge/bsl"           return 'FORGE_FROGLET';
+"forge"               return 'FORGE';
+
+"--".*           { console.log('Ignoring comment: ' + yytext); }
+"//".*            { console.log('Ignoring comment: ' + yytext); }
+"/\\*([^*]|\\*+[^*/])*\\*+/"  { console.log('Ignoring comment: ' + yytext); }
+
+"open"                 return 'OPEN_TOK';
+"as"                   return 'AS_TOK';
+"["                    return 'LEFT_SQUARE_TOK';
+"]"                    return 'RIGHT_SQUARE_TOK';
+[a-zA-Z_][a-zA-Z0-9_]* return 'ID';
+\"[^\"]*\"             return 'FILE_PATH_TOK'; // Match file path tokens
+.                           throw 'Illegal character';
+<<EOF>>                     return 'EOF';
+
