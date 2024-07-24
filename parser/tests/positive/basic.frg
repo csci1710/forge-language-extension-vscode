@@ -5,17 +5,25 @@ open this.utils as utils
 
 option verbose 5
 
-sig Person {
-  name: String,
-  age: Int
+abstract sig Position {}
+one sig Near extends Position {}
+one sig Far extends Position {}
+
+abstract sig Person { 
+    time: one Int,
+    shore: func State -> Position
 }
 
-abstract sig Animal {
-  name: String
-}
+one sig A extends Person {}
+one sig B extends Person {}
+one sig C extends Person {}
+one sig D extends Person {}
 
-sig Dog extends Animal {
-  breed: String
+
+sig State {
+    next: lone State,
+    torch: one Position,
+    spent: one Int
 }
 
 

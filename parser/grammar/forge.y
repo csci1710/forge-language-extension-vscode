@@ -4,7 +4,8 @@ const yy = {};
 %}
 
 /* Associativity and precedence */
-
+%left 'OR' 'AND' 'IFF' 'AMPERSAND' 'PLUS' 'MINUS' 'DOT'
+%right 'IMPLIES' 
 
 %lex
 %ebnf
@@ -46,13 +47,16 @@ import
     ;
 
 option
-    : OPTION qual_name (qual_name | FILE_PATH | '-'? NUMBER)
+    : OPTION qual_name (qual_name | FILE_PATH | '-'? INT)
       { $$ = { type: 'option', key: $2, value: $3 }; }
     ;
 
 paragraphs
     : sig_decl
-    | pred_decl
+    ;
+    
+dummy
+    : pred_decl
     | fun_decl
     | assert_decl
     | cmd_decl
@@ -127,12 +131,12 @@ qual_namelist
 
 /* ******* DECLARATION GRAMMAR ******* */
 pred_decl
-    : PRED name para_decls? block
+    : PRED qual_name para_decls? block
         { $$ = { type: 'predicate', name: $2, parameters: $3, body: $4 }; }
     ;
 
 fun_decl
-    : FUN name para_decls? COLON helper_mult? expr block
+    : FUN qual_name para_decls? ':' helper_mult? expr block
         { $$ = { type: 'function', name: $2, parameters: $3, return_type: $5, body: $6 }; }
     ;
 
@@ -156,6 +160,66 @@ helper_mult
     | ONE
     | FUNC
     | PFUNC
+    ;
+
+/* ******* TESTING GRAMMAR ******* */
+assert_decl
+    : ASSERT qual_name? block
+        { $$ = { type: 'assertion', name: $2, body: $3 }; }
+    ;
+
+cmd_decl
+    : (qual_name ':' )? (RUN | CHECK) (qual_name | block)? scope? (FOR bounds)?
+        { $$ = { type: 'command', name: $1, action: $3, scope: $5, bounds: $7 }; }
+    ;
+
+test_decl
+    : (qual_name ':' )? (qual_name | block) scope? (FOR bounds)? IS (SAT | UNSAT | UNKNOWN | THEOREM | FORGE_ERROR)
+        { $$ = { type: 'test', name: $1, body: $3, scope: $4, bounds: $6, result: $8 }; }
+    ;
+
+test_expect_decl
+    : TEST? EXPECT qual_name? test_block
+        { $$ = { type: 'test_expect', name: $3, body: $4 }; }
+    ;
+
+test_block
+    : '{' test_decl* '}'
+        { $$ = $2; }
+    ;
+
+scope
+    : FOR NUMBER (BUT typescope_list)?
+    | FOR typescope_list
+    ;
+
+typescope
+    : EXACTLY? NUMBER qual_name
+    ;
+
+property_decl
+    : ASSERT qual_name IS (SUFFICIENT | NECESSARY) FOR qual_name scope? (FOR bounds)?
+        { $$ = { type: 'property', name: $2, condition: $4, subject: $6, scope: $7, bounds: $9 }; }
+    ;
+
+test_suite_decl
+    : TEST SUITE FOR qual_name '{' test_construct* '}'
+        { $$ = { type: 'test_suite', name: $4, body: $6 }; }
+    ;
+
+test_construct
+    : example_decl
+    | test_expect_decl
+    | property_decl
+    | quantified_property_decl
+    ;
+
+example_decl
+    : 
+    ;
+
+quantified_property_decl
+    : 
     ;
 
 
@@ -231,10 +295,12 @@ block
     : '{' expr* '}'
     ;
 
-const 
+
+const
     : NONE
-    | MINUS? INT
+    | UNIV
     | IDEN
+    | '-'? NUMBER
     ;
 
 %%

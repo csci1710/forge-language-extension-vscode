@@ -66,7 +66,23 @@
 "once"              return 'ONCE';
 "historically"      return 'HISTORICALLY';
 
-
+"assert"            return 'ASSERT';
+"check"             return 'CHECK';
+"run"               return 'RUN';
+"expect"            return 'EXPECT';
+"test"              return 'TEST';
+"is"                return 'IS';
+"sat"               return 'SAT';
+"unsat"             return 'UNSAT';
+"unknown"           return 'UNKNOWN';
+"theorem"           return 'THEOREM';
+"forge_error"       return 'FORGE_ERROR';
+"sufficient"        return 'SUFFICIENT';
+"necessary"         return 'NECESSARY';
+"suite"             return 'SUITE';
+"for"               return 'FOR';
+"but"               return 'BUT';
+"exactly"           return 'EXACTLY';
 
 "="                    return 'EQUALS';
 "!="                   return 'NOT_EQUALS';
@@ -75,6 +91,7 @@
 ">"                    return 'GREATER_THAN';
 ">="                   return 'GEQ';
 
+/* No need to parser these? */
 "["                    return '[';
 "]"                    return ']';
 "{"                    return '{';
