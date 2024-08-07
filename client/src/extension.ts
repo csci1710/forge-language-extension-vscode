@@ -3,8 +3,9 @@ import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
 import { HalpRunner } from './halp';
 import { ensureForgeVersion } from './forge-utilities';
-
-
+import { ForgeDefinitionProvider } from './utils/goToDefinitions';
+import { astCache, parseAndCacheDocument } from './utils/astHelper';
+import { completionItemProvider } from './utils/completionItemProvider';
 
 import {
 	LanguageClient,
@@ -14,15 +15,15 @@ import {
 } from 'vscode-languageclient/node';
 
 import { Logger, LogLevel, Event } from "./logger";
-import {RacketProcess} from './racketprocess';
+import { RacketProcess } from './racketprocess';
 
-var os = require("os");
+const os = require("os");
 import { v4 as uuidv4 } from 'uuid';
 
 let client: LanguageClient;
 
-let forgeOutput = vscode.window.createOutputChannel('Forge Output');
-let halpOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
+const forgeOutput = vscode.window.createOutputChannel('Forge Output');
+const halpOutput = vscode.window.createOutputChannel('Toadus Ponens Output');
 
 
 const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
@@ -30,7 +31,7 @@ const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge 
 
 async function getUserId(context) {
 	const UID_KEY = "FORGE_UID";
-	
+
 	try
 	{
 		var uid = await context.secrets.get(UID_KEY).toString();
@@ -43,7 +44,7 @@ async function getUserId(context) {
 	return uid;
 }
 
-let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
+const racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
 
 
 function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnostics: vscode.DiagnosticCollection): void {
@@ -81,9 +82,51 @@ function textDocumentToLog(d, focusedDoc) {
 export async function activate(context: ExtensionContext) {
 
 
-	let currentSettings = vscode.workspace.getConfiguration('forge');
-	let minSupportedVersion = String(currentSettings.get<string>('minVersion'));
-	await ensureForgeVersion(minSupportedVersion, (s : string) => vscode.window.showErrorMessage(s));
+	const currentSettings = vscode.workspace.getConfiguration('forge');
+	const minSupportedVersion = String(currentSettings.get<string>('minVersion'));
+	await ensureForgeVersion(minSupportedVersion, (s: string) => vscode.window.showErrorMessage(s));
+
+
+	// Go to definition functionality
+	context.subscriptions.push(
+		vscode.languages.registerDefinitionProvider({ language: 'forge' }, new ForgeDefinitionProvider())
+	);
+
+	// Parse when document is changed
+	context.subscriptions.push(
+		vscode.workspace.onDidChangeTextDocument(event => {
+			if (event.document.languageId === 'forge') {
+				console.log(`Document changed: ${event.document.uri.toString()}`);
+				console.log(`Change event: ${JSON.stringify(event.contentChanges)}`);
+				parseAndCacheDocument(event.document.uri.toString(), event.document.getText(), event.document.version);
+			}
+		})
+	);
+
+	// Set up a listener for document opens
+	context.subscriptions.push(
+		vscode.workspace.onDidOpenTextDocument(document => {
+			if (document.languageId === 'forge') {
+				parseAndCacheDocument(document.uri.toString(), document.getText(), document.version);
+			}
+		})
+	);
+
+	// Register the completion item provider
+	// const completionProvider = vscode.languages.registerCompletionItemProvider(
+	// 	{ scheme: 'file', language: 'forge' },
+	// 	new completionItemProvider() // can add a trigger
+	// );
+
+
+	// Delete the cache on document closing
+	context.subscriptions.push(
+		vscode.workspace.onDidCloseTextDocument(document => {
+			if (document.languageId === 'forge') {
+				astCache.delete(document.uri.toString());
+			}
+		})
+	);
 
 
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
@@ -136,23 +179,23 @@ export async function activate(context: ExtensionContext) {
 	vscode.commands.executeCommand('setContext', 'forge.isLoggingEnabled', true);
 
 	const userid = await getUserId(context);
-	var logger = new Logger(userid);
+	const logger = new Logger(userid);
 
 
-	let forgeDocs = vscode.commands.registerCommand('forge.openDocumentation', async() => {
-        
+	const forgeDocs = vscode.commands.registerCommand('forge.openDocumentation', async () => {
+
 		const DOCS_URL = 'https://csci1710.github.io/forge-documentation/home.html';
 		vscode.env.openExternal(vscode.Uri.parse(DOCS_URL))
-		.then((success) => {
-			if (!success) {
-				vscode.window.showErrorMessage(`Could not open Forge documentation from VS Code. It is available at ${DOCS_URL}`);
-			}
-		});
-    });
+			.then((success) => {
+				if (!success) {
+					vscode.window.showErrorMessage(`Could not open Forge documentation from VS Code. It is available at ${DOCS_URL}`);
+				}
+			});
+	});
 
 	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
 
-		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
+		const isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 		const editor = vscode.window.activeTextEditor;
 
 
@@ -169,8 +212,7 @@ export async function activate(context: ExtensionContext) {
 		forgeOutput.show();
 
 		// always auto-save before any run
-		if (!editor?.document.save())
-		{
+		if (!editor?.document.save()) {
 			console.error(`Could not save ${filepath}`);
 			vscode.window.showErrorMessage(`Could not save ${filepath}`);
 			return null;
@@ -184,7 +226,7 @@ export async function activate(context: ExtensionContext) {
 		}
 
 		forgeOutput.appendLine(`Running file "${filepath}" ...`);
-		let racketProcess = racket.runFile(filepath);
+		const racketProcess = racket.runFile(filepath);
 
 		if (!racketProcess) {
 
@@ -233,10 +275,10 @@ export async function activate(context: ExtensionContext) {
 
 
 			// Output *may* have user file path in it. Do we want this?
-			var payload = {
-				"output-errors" : myStderr,
-				"runId" : runId 
-			}
+			const payload = {
+				"output-errors": myStderr,
+				"runId": runId
+			};
 			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
 		});
 
@@ -244,12 +286,12 @@ export async function activate(context: ExtensionContext) {
 
 
 		if (isLoggingEnabled && editor) {
-				 
+
 			const documentData = vscode.workspace.textDocuments.map((d) => {
 				const focusedDoc = (d === editor.document);
 				return textDocumentToLog(d, focusedDoc);
 			}).filter((data) => Object.keys(data).length > 0);
-			
+
 
 			documentData['runId'] = runId;
 
@@ -262,7 +304,7 @@ export async function activate(context: ExtensionContext) {
 	});
 
 	const continueRun = vscode.commands.registerCommand('forge.continueRun', () => {
-		if (!racket.continueEval()){
+		if (!racket.continueEval()) {
 			vscode.window.showErrorMessage('No active Forge process to continue.');
 		}
 	});
@@ -282,7 +324,7 @@ export async function activate(context: ExtensionContext) {
 	const halp = vscode.commands.registerCommand('forge.halp', () => {
 		halpOutput.clear();
 		halpOutput.show();
-		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
+		const isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 
 
 
@@ -291,8 +333,8 @@ export async function activate(context: ExtensionContext) {
 			return;
 		}
 
-		
-		
+
+
 
 		const editor = vscode.window.activeTextEditor;
 
@@ -303,14 +345,14 @@ export async function activate(context: ExtensionContext) {
 		const document = editor.document;
 		const content = document.getText();
 		const fileName = document.fileName;
-		
+
 		if (fileName.endsWith('.test.frg')) {
-			var h = new HalpRunner(logger, halpOutput);
+			const h = new HalpRunner(logger, halpOutput);
 			h.runHalp(content, fileName)
 				.then((result) => {
-					
+
 					try {
-						var documentData = textDocumentToLog(document, true);
+						const documentData = textDocumentToLog(document, true);
 						documentData['halp_output'] = result;
 						logger.log_payload(documentData, LogLevel.INFO, Event.HALP_RESULT);
 
@@ -321,7 +363,7 @@ export async function activate(context: ExtensionContext) {
 					finally {
 						halpOutput.appendLine('🐸 Toadus Ponens run ended 🐸');
 					}
-					
+
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');
@@ -329,7 +371,7 @@ export async function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
-								 forgeOutput, halpOutput,forgeDocs);
+		forgeOutput, halpOutput, forgeDocs);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 
@@ -375,10 +417,20 @@ export async function activate(context: ExtensionContext) {
 	console.log('Client and Server launched');
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export function deactivate(context: vscode.ExtensionContext): Thenable<void> | undefined {
 	if (!client) {
 		return undefined;
 	}
+
+	// Delete the ast cache
+	context.subscriptions.push(
+		vscode.workspace.onDidCloseTextDocument(document => {
+			if (document.languageId === 'forge') {
+				astCache.delete(document.uri.toString());
+			}
+		})
+	);
+
 	// kill racket process
 	racket.kill(false);
 	return client.stop();

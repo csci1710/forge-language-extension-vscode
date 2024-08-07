@@ -20,6 +20,9 @@ describe('Forge Parser', () => {
         parser = new Parser();
     });
 
+    const demoTestFilesDir = path.join(__dirname, 'tests', 'demo');
+    const demoTestFiles = getTestFiles(demoTestFilesDir);
+
     const posTestFilesDir = path.join(__dirname, 'tests', 'positive');
     const posTestFiles = getTestFiles(posTestFilesDir);
 
@@ -27,8 +30,10 @@ describe('Forge Parser', () => {
         posTestFiles.forEach(file => {
             test(`should parse ${file}`, () => {
                 const input = readInput(path.join(posTestFilesDir, file));
+                console.log(parser.parse(input));
                 expect(() => parser.parse(input)).not.toThrow();
             });
+
         });
     });
 

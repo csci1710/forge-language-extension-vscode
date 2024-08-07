@@ -6,7 +6,7 @@ const grammarFile = path.join(__dirname, 'grammar', 'forge.y');
 const lexFile = path.join(__dirname, 'grammar', 'forge.l');
 
 // Command to generate the parser
-const command = `jison ${grammarFile} ${lexFile}`;
+const command = `jison -p lalr ${grammarFile} ${lexFile}`;
 
 exec(command, (error, stdout, stderr) => {
     if (error) {

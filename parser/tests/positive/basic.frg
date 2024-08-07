@@ -1,18 +1,14 @@
 #lang forge
 
-open "some/path/file.forge" as fileAlias
-open this.utils as utils
-
-option verbose 5
-
 abstract sig Position {}
-one sig Near extends Position {}
-one sig Far extends Position {}
 
 abstract sig Person { 
     time: one Int,
     shore: func State -> Position
 }
+
+one sig Near extends Position {}
+one sig Far extends Position {}
 
 one sig A extends Person {}
 one sig B extends Person {}
@@ -26,4 +22,9 @@ sig State {
     spent: one Int
 }
 
+one sig Ollie {}
+
+pred heon[ziao: Int] {
+    some Ollie | ziao
+}
 

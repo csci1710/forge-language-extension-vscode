@@ -6,15 +6,23 @@
 \s+                         /* Ignore whitespace */
 [\n]+                       /* Ignore newlines */
 
+"--".*           /* Ignore comment */
+"//".*           /* Ignore comment */
+"/\\*".*"\\*/"   /* Ignore comment */
+"/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/"  { /* Ignore multiline comments  DOESNT WORK*/ }
+
 "#lang"               return 'LANG';
 "forge/temporal"      return 'FORGE_TEMPORAL';
 "forge/bsl"           return 'FORGE_FROGLET';
 "forge"               return 'FORGE';
 
-"--".*           /* Ignore comment */
-"//".*           /* Ignore comment */
-"/\\*".*"\\*/"   /* Ignore comment */
-"/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/"  { /* Ignore multiline comments */ }
+
+"="                    return 'EQUALS';
+"!="                   return 'NOT_EQUALS';
+"<"                    return 'LESS_THAN';
+"<="                   return 'LEQ';
+">"                    return 'GREATER_THAN';
+">="                   return 'GEQ';
 
 "open"                 return 'OPEN';
 "as"                   return 'AS';
@@ -31,6 +39,7 @@
 "pfunc"             return 'PFUNC';
 "func"              return 'FUNC';
 "disj"              return 'DISJ';
+"pred" return 'PRED';
 
 "and"               return 'AND';
 "or"                return 'OR';
@@ -42,9 +51,11 @@
 "until"             return 'UNTIL';
 "release"           return 'RELEASE';
 "since"             return 'SINCE';
-"triggered"           return 'TRIGGERED'; /* WHAT IS THIS? */
+"triggered"           return 'TRIGGERED';
 "&"                 return 'AMPERSAND';
 "`"                 return 'BACKTICK';
+"->"                   return '->';
+"|" return '|';
 
 "+"		 return 'PLUS';
 "-"		 return 'MINUS';
@@ -84,12 +95,6 @@
 "but"               return 'BUT';
 "exactly"           return 'EXACTLY';
 
-"="                    return 'EQUALS';
-"!="                   return 'NOT_EQUALS';
-"<"                    return 'LESS_THAN';
-"<="                   return 'LEQ';
-">"                    return 'GREATER_THAN';
-">="                   return 'GEQ';
 
 /* No need to parser these? */
 "["                    return '[';
@@ -101,13 +106,11 @@
 "."                    return '.';
 ","                    return ',';
 ":"                    return ':';
-"->"                   return '->';
 
 
-
-[a-zA-Z_][a-zA-Z0-9_]* return 'IDEN';
+[0-9]+                 return 'NUMBER';
+[a-zA-Z0-9_]+ return 'IDEN';
 /* [0-9]+("."[0-9]+)?\b  return 'DECIMAL'; */
-[0-9]+                 return 'INT';
 \"[^\"]*\"             return 'FILE_PATH';
 
 .                      { console.log('Unmatched text: ' + yytext); }

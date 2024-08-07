@@ -1,191 +1,379 @@
+/* Forge parser in jison */
+
 %{
 /* Definitions and imports go here */
-const yy = {};
-%}
 
-/* Associativity and precedence */
-%left 'OR' 'AND' 'IFF' 'AMPERSAND' 'PLUS' 'MINUS' 'DOT'
-%right 'IMPLIES' 
+const yy = {};
+
+const parserActions = {
+    createIdentifier: function(name, location) {
+        return {
+            type: 'identifier',
+            name: name,
+            location: location
+        };
+    },
+
+    createReference: function(identifier, location) {
+        return {
+            type: 'reference',
+            name: identifier.name,
+            location: location
+        };
+    },
+
+    createSigDecl: function(modifiers, multiplicity, name, ext, fields, location) {
+        return {
+            type: 'sig_decl',
+            name: name, 
+            modifiers: modifiers,
+            multiplicity: multiplicity,
+            extends: ext,
+            fields: fields,
+            location: location
+        };
+    },
+
+    createPredDecl: function(name, params, body, location) {
+        return {
+            type: 'pred_decl',
+            name: name, 
+            params: params,
+            body: body,
+            location: location
+        };
+    },
+
+    createQualifiedName: function(parts, location) {
+        return {
+            type: 'qualified_name',
+            name: parts.map(p => p.name).join('.'),
+            parts: parts,
+            location: location
+        };
+    },
+
+    createFieldDecl: function(isVar, names, multiplicity, expr, location) {
+        return {
+            type: 'field_decl',
+            isVar: isVar,
+            names: names.map(n => n.name),
+            multiplicity: multiplicity,
+            expr: expr,
+            location: location
+        };
+    },
+
+    createForgeModule: function(langDecl, imports, options, paragraphs, location) {
+        return {
+            type: 'forge_module',
+            langDeclaration: langDecl,
+            imports: imports,
+            options: options,
+            paragraphs: paragraphs,
+            location: location
+        };
+    },
+
+    createImportStatement: function(file, alias, location) {
+        return {
+            type: 'import_statement',
+            file: file,
+            alias: alias,
+            location: location
+        };
+    },
+
+    createOptionStatement: function(name, value, location) {
+        return {
+            type: 'option_statement',
+            name: name,
+            value: value,
+            location: location
+        };
+    },
+
+    createExpr: function(type, args, location) {
+        return {
+            type: type,
+            ...args,
+            location: location
+        };
+    },
+
+    createParamDecl: function(name, type, location) {
+        return {
+            type: 'param_decl',
+            name: name,
+            paramType: type,
+            location: location
+        };
+    }
+};
+%}
 
 %lex
 %ebnf
+
+/* Operator associations and precedence */
+// TODO
+
 %start forge_specification
 
 %% /* language grammar */
 
 forge_specification
     : forge_module EOF
-    | eval_module EOF
+        { return $1; }
+    | EOF
+    /* | eval_module EOF */
     ;
 
 eval_module: /* Don't understand this yet */
        ;
 
 forge_module
-    : lang_declaration import* option* paragraphs*
-	{ console.log("Valid forge module declaration with imports:", $1, $2, $3); return { module: $1, imports: $2, options: $3 }; }
+    : lang_declaration imports options paragraphs
+        { $$ = parserActions.createForgeModule($1, $2, $3, $4, @$); }
     ;
 
 lang_declaration
-    : LANG module
+    : LANG forge_lang 
         { $$ = $2; }
     ;
 
-module
-    : FORGE
-        { $$ = 'forge'; }
-    | FORGE_FROGLET
-        { $$ = 'forge/bsl'; }
-    | FORGE_TEMPORAL
-        { $$ = 'forge/temporal'; }
+forge_lang
+    : FORGE | FORGE_FROGLET | FORGE_TEMPORAL
     ;
 
-import 
-    : OPEN qual_name ('[' qual_namelist ']' )? (AS IDEN)?
-    | OPEN FILE_PATH (AS IDEN)?
-      //  { $$ = { type: 'import', path: $2, alias: $4 }; }
+imports
+    : import_statement*
+        { $$ = $1; }
     ;
 
-option
-    : OPTION qual_name (qual_name | FILE_PATH | '-'? INT)
-      { $$ = { type: 'option', key: $2, value: $3 }; }
+import_statement
+    : OPEN import_file import_as?
+        { $$ = parserActions.createImportStatement($2, $3, @$); }
+    ;
+
+import_file
+    : FILEPATH | qualified_name
+    ;
+
+import_as
+    : AS IDEN
+        { $$ = $2; }
+    ;
+
+options
+    : option_statement*
+        { $$ = $1; }
+    ;
+
+option_statement
+    : OPTION qualified_name option_value
+        { $$ = parserActions.createOptionStatement($2, $3); }
+    ;
+
+option_value
+    : qualified_name
+    | NUMBER 
+    | '-' NUMBER
+        { $$ = -$2; }
     ;
 
 paragraphs
-    : sig_decl
-    ;
-    
-dummy
-    : pred_decl
-    | fun_decl
-    | assert_decl
-    | cmd_decl
-    | test_expect_decl
-    | sexpr_decl
-    | query_decl
-    | eval_rel_decl
-    | option_decl
-    | inst_decl
-    | example_decl
-    | property_decl
-    | quantified_property_decl
-    | test_suite_decl
+    : paragraph*
+        { $$ = $1; }
     ;
 
+paragraph
+    : sig_decl
+    | pred_decl
+    ;
+
+    
 /* ******* SIG GRAMMAR ******* */
 sig_decl
-    : VAR? ABSTRACT? mult? SIG name_list sig_ext? '{' field_list? '}' 
-        { $$ = { type: 'sig', name: $4, ext: $5, fields: $7, constraints: $9 }; }
+    : sig_modifiers? sig_multiplicity? SIG IDEN sig_ext? '{' field_decls? '}'
+        { $$ = parserActions.createSigDecl($1 || [], $2 || [], parserActions.createIdentifier($4, @4), $5, $7); }
+    ;
+
+sig_multiplicity
+    : TWO | ONE | LONE | SOME
+        { $$ = $1; }
+    ;
+
+sig_modifiers
+    : VAR
+        { $$ = ['var']; }
+    | ABSTRACT
+        { $$ = ['abstract']; }
+    | VAR ABSTRACT
+        { $$ = ['var', 'abstract']; }
+    | ABSTRACT VAR
+        { $$ = ['abstract', 'var']; }
     ;
 
 sig_ext
-    : EXTENDS qual_name
-    | IN qual_name ('+' qual_name)*
+    : EXTENDS qualified_name
+        { $$ = $2; }
     ;
 
-
-field_list
-    : field
-    | field ',' field_list
+field_decls
+    : field_decl (',' field_decl)*
+        { $$ = [$1].concat($2.map(d => d[1])); }
     ;
 
-field
-    : VAR? name_list ':' relation_mult relation_expr
-    ;
-
-mult
-    : LONE
-    | SOME
-    | ONE
-    | TWO
-    ;
-
-relation_mult
-    : LONE
-    | SET
-    | ONE
-    | TWO
-    | PFUNC
-    | FUNC
-    ;
-
-relation_expr
-    : qual_name
-    | qual_name '->' relation_expr
+field_decl
+    : VAR name_list ':' relation_mult relation_expr
+        { $$ = parserActions.createFieldDecl(true, $2, $4, $5, @$); }
+    | name_list ':' relation_mult relation_expr
+        { $$ = parserActions.createFieldDecl(false, $1, $3, $4, @$); }
+    /* | name_list ':' relation_mult relation_expr */
     ;
 
 name_list
     : IDEN
-    | IDEN ',' name_list
+        { $$ = [parserActions.createIdentifier($1, this._$)]; }
+    | name_list ',' IDEN
+        { $$ = $1.concat([parserActions.createIdentifier($3, this._$)]); }
     ;
 
-qual_name
-    : IDEN ('.' IDEN)*
-      { $$ = $1 + ($2 ? $2.join('') : ''); }
+relation_mult
+    : LONE | SET | ONE | TWO | FUNC | PFUNC
+        { $$ = $1; }
     ;
 
-qual_namelist
-    : qual_name (',' qual_name)*
-      { $$ = [$1].concat($2); }
+relation_expr
+    : qualified_name
+    | qualified_name '->' relation_expr
+        { $$ = parserActions.createExpr('->', {left: $1, right: $3}, @$); }
     ;
 
-/* ******* DECLARATION GRAMMAR ******* */
+qualified_name
+    : IDEN
+        { $$ = parserActions.createQualifiedName([parserActions.createIdentifier($1, this._$)], this._$); }
+    | qualified_name '.' IDEN
+        { $$ = parserActions.createQualifiedName($1.parts.concat([parserActions.createIdentifier($3, this._$)]), this._$); }
+    ;
+
+/* ******* PRED DECLARATIONS ******* */
 pred_decl
-    : PRED qual_name para_decls? block
-        { $$ = { type: 'predicate', name: $2, parameters: $3, body: $4 }; }
+    : PRED IDEN param_decls? block
+        { $$ = parserActions.createPredDecl(parserActions.createIdentifier($2, @2), $3 || [], $4, @$); }
     ;
 
-fun_decl
-    : FUN qual_name para_decls? ':' helper_mult? expr block
-        { $$ = { type: 'function', name: $2, parameters: $3, return_type: $5, body: $6 }; }
+param_decls
+    : '[' param_decl ']'
+        { $$ = [$2]; }
+    | '[' param_decl (',' param_decl)+ ']'
+        { $$ = [$2].concat($3.map(p => p[1])); }
     ;
 
-para_decls
-    : '(' para_decl_list? ')'
-    | '[' para_decl_list? ']'
+param_decl
+    : IDEN ':' expr
+        { $$ = parserActions.createParamDecl($1, $3, @$); }
     ;
 
-para_decl_list
-    : para_decl
-    | para_decl ',' para_decl_list
+expr
+    : quantified_expr
+    | atom
     ;
 
-para_decl
-    : DISJ? name_list ':' helper_mult? expr
+quantified_expr
+    : quantifier var_decls quantified_expr_body?
     ;
 
-helper_mult
-    : LONE
-    | SET
+quantified_expr_body
+    : '|' expr
+    ;
+
+quantifier
+    : ALL
+    | SOME
+    | NO
+    | LONE
     | ONE
-    | FUNC
-    | PFUNC
     ;
 
-/* ******* TESTING GRAMMAR ******* */
+var_decls
+    : IDEN
+        { $$ = [parserActions.createIdentifier($1, this._$)]; }
+    | IDEN ':' expr
+        { $$ = [{ name: parserActions.createIdentifier($1, this._$), type: $3 }]; }
+    | var_decls ',' IDEN ':' expr
+        { $$ = $1.concat([{ name: parserActions.createIdentifier($3, this._$), type: $5 }]); }
+    ;
+
+binary_expr
+    : expr AND expr
+    | expr OR expr
+    | expr IMPLIES expr
+    | expr IFF expr
+    | expr '+' expr
+    | expr '-' expr
+    | expr '*' expr
+    | expr '/' expr
+    | expr '=' expr
+    | expr '!=' expr
+    | expr IN expr
+    | expr NOT IN expr
+    | expr '<' expr
+    | expr '>' expr
+    | expr '<=' expr
+    | expr '>=' expr
+    ;
+
+unary_expr
+    : NOT expr
+    | NO expr
+    | SOME expr
+    | ONE expr
+    | LONE expr
+    | '~' expr
+    | '^' expr
+    | '*' expr
+    ;
+
+atom
+    : IDEN
+    | NUMBER
+    | qualified_name
+    | function_call
+    ;
+
+function_call
+    : qualified_name '[' expr_list ']'
+    ;
+
+expr_list
+    : expr (',' expr)*
+    ;
+
+
 assert_decl
-    : ASSERT qual_name? block
-        { $$ = { type: 'assertion', name: $2, body: $3 }; }
+    : ASSERT IDEN? block
     ;
 
 cmd_decl
-    : (qual_name ':' )? (RUN | CHECK) (qual_name | block)? scope? (FOR bounds)?
-        { $$ = { type: 'command', name: $1, action: $3, scope: $5, bounds: $7 }; }
+    : (RUN | CHECK) (IDEN | block) scope?
     ;
 
 test_decl
-    : (qual_name ':' )? (qual_name | block) scope? (FOR bounds)? IS (SAT | UNSAT | UNKNOWN | THEOREM | FORGE_ERROR)
-        { $$ = { type: 'test', name: $1, body: $3, scope: $4, bounds: $6, result: $8 }; }
+    : TEST EXPECT IDEN? '{' test_case* '}'
     ;
 
-test_expect_decl
-    : TEST? EXPECT qual_name? test_block
-        { $$ = { type: 'test_expect', name: $3, body: $4 }; }
+test_case
+    : IDEN ':' (qualified_name | block) scope? IS (SAT | UNSAT | UNKNOWN | THEOREM | FORGE_ERROR)
     ;
 
-test_block
-    : '{' test_decl* '}'
-        { $$ = $2; }
+example_decl
+    : EXAMPLE IDEN IS expr FOR bounds
+    ;
+
+property_decl
+    : ASSERT IDEN IS (SUFFICIENT | NECESSARY) FOR IDEN scope? (FOR bounds)?
     ;
 
 scope
@@ -193,114 +381,26 @@ scope
     | FOR typescope_list
     ;
 
+typescope_list
+    : typescope (',' typescope)*
+    ;
+
 typescope
-    : EXACTLY? NUMBER qual_name
+    : NUMBER qualified_name
     ;
 
-property_decl
-    : ASSERT qual_name IS (SUFFICIENT | NECESSARY) FOR qual_name scope? (FOR bounds)?
-        { $$ = { type: 'property', name: $2, condition: $4, subject: $6, scope: $7, bounds: $9 }; }
+bounds
+    : '{' bound_statement* '}'
+        { $$ = $2; }
     ;
 
-test_suite_decl
-    : TEST SUITE FOR qual_name '{' test_construct* '}'
-        { $$ = { type: 'test_suite', name: $4, body: $6 }; }
-    ;
-
-test_construct
-    : example_decl
-    | test_expect_decl
-    | property_decl
-    | quantified_property_decl
-    ;
-
-example_decl
-    : 
-    ;
-
-quantified_property_decl
-    : 
-    ;
-
-
-/* ******* EXPRESSOIN GRAMMAR ******* */
-expr_list
-    : expr
-    | expr ',' expr_list
-    ;
-
-expr
-    : prefix_expr
-    | infix_expr
-    | postfix_expr
-    | basic_expr
-    ;
-
-prefix_expr
-    : prefix_operator expr
-    ;
-
-infix_expr
-    : expr infix_operator Expr
-    ;
-
-postfix_expr
-    : expr postfix_operator
-    ;
-
-prefix_operator
-    : NOT
-    | ALWAYS
-    | EVENTUALLY
-    | AFTER
-    | BEFORE
-    | ONCE
-    | HISTORICALLY
-    | BACKTICK
-    | PRIME
-    | TILDE
-    | CARET
-    | STAR
-    ;
-
-infix_operator
-    : OR
-    | AND
-    | IFF
-    | IMPLIES
-    | XOR
-    | UNTIL
-    | RELEASE
-    | SINCE
-    | TRIGGERED
-    | PLUS
-    | MINUS
-    | AMPERSAND /* PPLUS, SUBT, SUPT */
-    | '.'
-    | '->'
-    ;
-
-postfix_operator
-    : '[' expr_list ']'
-    ;
-
-basic_expr
-    : const
-    | block
-    | qual_name
-    | '(' expr ')'
+bound_statement
+    : qualified_name '=' expr
+        { $$ = { type: $1, value: $3 }; }
     ;
 
 block
-    : '{' expr* '}'
-    ;
-
-
-const
-    : NONE
-    | UNIV
-    | IDEN
-    | '-'? NUMBER
+    : '{' expr '}'
     ;
 
 %%

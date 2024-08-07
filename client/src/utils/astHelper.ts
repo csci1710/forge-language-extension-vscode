@@ -55,18 +55,32 @@ export function parseAndCacheDocument(uri: string, text: string, version: number
 }
 
 export function collectDefinitions(ast: any): any[] {
-	// Dummy traversal for now
-	const definitions = [];
+    const definitions: any[] = [];
 
-	function traverse(node) {
-		if (node.type === 'definition') { // Need to change this accordingly
-			definitions.push(node);
-		}
-		for (const child of node.children || []) {
-			traverse(child);
-		}
-	}
+    function traverse(node: any) {
+        if (!node || typeof node !== 'object') {
+            return;
+        }
 
-	traverse(ast);
-	return definitions;
+        if (node.type === 'sig_decl' || node.type === 'pred_decl') {
+            definitions.push({
+                name: node.name.name,
+                kind: node.type === 'sig_decl' ? 'sig' : 'pred',
+                location: node.name.location
+            });
+        }
+
+        if (Array.isArray(node)) {
+            node.forEach(traverse);
+        } else {
+            for (const key in node) {
+                if (Object.prototype.hasOwnProperty.call(node, key)) {
+                    traverse(node[key]);
+                }
+            }
+        }
+    }
+
+    traverse(ast);
+    return definitions;
 }
