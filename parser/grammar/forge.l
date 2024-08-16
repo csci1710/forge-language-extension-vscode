@@ -17,12 +17,12 @@
 "forge"               return 'FORGE';
 
 
-"="                    return 'EQUALS';
-"!="                   return 'NOT_EQUALS';
-"<"                    return 'LESS_THAN';
-"<="                   return 'LEQ';
-">"                    return 'GREATER_THAN';
-">="                   return 'GEQ';
+"="                    return '=';
+"!="                   return '!=';
+"<"                    return '<';
+"<="                   return '<=';
+">"                    return '>';
+">="                   return '>=';
 
 "open"                 return 'OPEN';
 "as"                   return 'AS';
@@ -40,11 +40,13 @@
 "func"              return 'FUNC';
 "disj"              return 'DISJ';
 "pred" return 'PRED';
+"let" return 'LET';
 
 "and"               return 'AND';
 "or"                return 'OR';
 "xor"               return 'XOR';
 "implies"           return 'IMPLIES';
+"else" return 'ELSE';
 "=>"                return 'IMPLIES';
 "iff"               return 'IFF';
 "<=>"               return 'IFF';
@@ -52,17 +54,17 @@
 "release"           return 'RELEASE';
 "since"             return 'SINCE';
 "triggered"           return 'TRIGGERED';
-"&"                 return 'AMPERSAND';
-"`"                 return 'BACKTICK';
+"&"                 return '&';
+"`"                 return '`';
 "->"                   return '->';
 "|" return '|';
 
-"+"		 return 'PLUS';
-"-"		 return 'MINUS';
-"*"		 return 'STAR';
+"+"		 return '+';
+"-"		 return '-';
+"*"		 return '*';
 "'"		 return 'PRIME';
-"~"		 return 'TILDE';
-"^"		 return 'CARET';
+"~"		 return '~';
+"^"		 return '^';
 
 "all"               return 'ALL';
 "some"              return 'SOME';
@@ -81,6 +83,7 @@
 "check"             return 'CHECK';
 "run"               return 'RUN';
 "expect"            return 'EXPECT';
+"inst" 				return 'INST';
 "test"              return 'TEST';
 "is"                return 'IS';
 "sat"               return 'SAT';
@@ -96,7 +99,6 @@
 "exactly"           return 'EXACTLY';
 
 
-/* No need to parser these? */
 "["                    return '[';
 "]"                    return ']';
 "{"                    return '{';
@@ -111,7 +113,7 @@
 [0-9]+                 return 'NUMBER';
 [a-zA-Z0-9_]+ return 'IDEN';
 /* [0-9]+("."[0-9]+)?\b  return 'DECIMAL'; */
-\"[^\"]*\"             return 'FILE_PATH';
+\"[^\"]*\"             return 'FILEPATH';
 
 .                      { console.log('Unmatched text: ' + yytext); }
 <<EOF>>                return 'EOF';

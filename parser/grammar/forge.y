@@ -3,7 +3,9 @@
 %{
 /* Definitions and imports go here */
 
-const yy = {};
+const yy = {
+
+};
 
 const parserActions = {
     createIdentifier: function(name, location) {
@@ -64,6 +66,19 @@ const parserActions = {
         };
     },
 
+    createFunDecl: function(qualifier, name, params, returnMult, returnExpr, body, location) {
+        return {
+            type: 'fun_decl',
+            qualifier: qualifier,
+            name: name,
+            params: params,
+            returnMultiplicity: returnMult,
+            returnExpr: returnExpr,
+            body: body,
+            location: location
+        };
+    },
+
     createForgeModule: function(langDecl, imports, options, paragraphs, location) {
         return {
             type: 'forge_module',
@@ -93,6 +108,14 @@ const parserActions = {
         };
     },
 
+    createBlock: function(exprs, location) {
+        return {
+            type: 'block',
+            expressions: exprs,
+            location: location
+        }
+    },
+
     createExpr: function(type, args, location) {
         return {
             type: type,
@@ -115,8 +138,24 @@ const parserActions = {
 %lex
 %ebnf
 
-/* Operator associations and precedence */
-// TODO
+/* Operator precedence declarations */
+%right 'LET'
+%left 'OR'
+%left 'XOR'
+%left 'IFF'
+%right 'IMPLIES' 'ELSE'
+%left 'AND'
+%nonassoc 'UNTIL' 'RELEASE' 'SINCE' 'TRIGGERED'
+%right 'NOT' 'ALWAYS' 'EVENTUALLY' 'AFTER' 'BEFORE' 'ONCE' 'HISTORICALLY'
+%left '=' '!=' 'IN' '<' '>' '<=' '>='
+%left 'NO' 'SOME' 'LONE' 'ONE' 'TWO' 'SET'
+%left '+' '-'
+%left '&'
+%right '->'
+%left '['
+%left '.'
+%left 'PRIME'
+%right '~' '^' '*'
 
 %start forge_specification
 
@@ -157,7 +196,7 @@ import_statement
     ;
 
 import_file
-    : FILEPATH | qualified_name
+    : FILEPATH 
     ;
 
 import_as
@@ -171,12 +210,13 @@ options
     ;
 
 option_statement
-    : OPTION qualified_name option_value
+    : OPTION IDEN option_value
         { $$ = parserActions.createOptionStatement($2, $3); }
     ;
 
 option_value
-    : qualified_name
+    : IDEN
+    | FILEPATH
     | NUMBER 
     | '-' NUMBER
         { $$ = -$2; }
@@ -192,11 +232,20 @@ paragraph
     | pred_decl
     ;
 
+dummy
+    :
+    | assert_decl
+    | cmd_decl
+    | test_decl
+    | expect_decl
+    | inst_decl
+    ;
+
     
 /* ******* SIG GRAMMAR ******* */
 sig_decl
     : sig_modifiers? sig_multiplicity? SIG IDEN sig_ext? '{' field_decls? '}'
-        { $$ = parserActions.createSigDecl($1 || [], $2 || [], parserActions.createIdentifier($4, @4), $5, $7); }
+        { $$ = parserActions.createSigDecl($1 || [], $2 || [], parserActions.createIdentifier($4, @4), $5, $7, @$); }
     ;
 
 sig_multiplicity
@@ -235,9 +284,9 @@ field_decl
 
 name_list
     : IDEN
-        { $$ = [parserActions.createIdentifier($1, this._$)]; }
+        { $$ = [parserActions.createIdentifier($1, @1)]; }
     | name_list ',' IDEN
-        { $$ = $1.concat([parserActions.createIdentifier($3, this._$)]); }
+        { $$ = $1.concat([parserActions.createIdentifier($3, @3)]); }
     ;
 
 relation_mult
@@ -251,23 +300,14 @@ relation_expr
         { $$ = parserActions.createExpr('->', {left: $1, right: $3}, @$); }
     ;
 
-qualified_name
-    : IDEN
-        { $$ = parserActions.createQualifiedName([parserActions.createIdentifier($1, this._$)], this._$); }
-    | qualified_name '.' IDEN
-        { $$ = parserActions.createQualifiedName($1.parts.concat([parserActions.createIdentifier($3, this._$)]), this._$); }
-    ;
-
-/* ******* PRED DECLARATIONS ******* */
+/* ******* PREDICATE GRAMMAR ******* */
 pred_decl
     : PRED IDEN param_decls? block
         { $$ = parserActions.createPredDecl(parserActions.createIdentifier($2, @2), $3 || [], $4, @$); }
     ;
 
 param_decls
-    : '[' param_decl ']'
-        { $$ = [$2]; }
-    | '[' param_decl (',' param_decl)+ ']'
+    : '[' param_decl (',' param_decl)* ']'
         { $$ = [$2].concat($3.map(p => p[1])); }
     ;
 
@@ -276,96 +316,185 @@ param_decl
         { $$ = parserActions.createParamDecl($1, $3, @$); }
     ;
 
+block
+    : '{' expr* '}'
+        { $$ = parserActions.createBlock($2, @$); }
+    ;
+
+fun_decl
+    : (FUNC | PFUNC) qualifier? IDEN param_decls? ':' helper_mult? expr '{' expr '}'
+        { $$ = parserActions.createFunDecl($2, $3, $4, $6, $7, $9, @$); }
+    ;
+
+helper_mult
+    : LONE | SET | ONE | TWO
+    ;
+    
+/* ******* EXPRESSION GRAMMAR ******* */
 expr
-    : quantified_expr
-    | atom
+    : atom
+    | qualified_expr
+    | quantified_expr
+    | logical_expr
+    /* | binary_expr */
+    | unary_expr
+    | let_expr
+    | '(' expr ')'
+        { $$ = $2; }
+    | block
     ;
 
-quantified_expr
-    : quantifier var_decls quantified_expr_body?
-    ;
-
-quantified_expr_body
-    : '|' expr
-    ;
-
-quantifier
-    : ALL
-    | SOME
-    | NO
-    | LONE
-    | ONE
-    ;
-
-var_decls
-    : IDEN
-        { $$ = [parserActions.createIdentifier($1, this._$)]; }
-    | IDEN ':' expr
-        { $$ = [{ name: parserActions.createIdentifier($1, this._$), type: $3 }]; }
-    | var_decls ',' IDEN ':' expr
-        { $$ = $1.concat([{ name: parserActions.createIdentifier($3, this._$), type: $5 }]); }
-    ;
-
-binary_expr
-    : expr AND expr
-    | expr OR expr
-    | expr IMPLIES expr
+logical_expr
+    : expr OR expr
+        { $$ = parserActions.createExpr('binary', {op: 'OR', left: $1, right: $3}, @$); }
+    | expr XOR expr
+    | expr AND expr
     | expr IFF expr
-    | expr '+' expr
-    | expr '-' expr
-    | expr '*' expr
-    | expr '/' expr
-    | expr '=' expr
-    | expr '!=' expr
-    | expr IN expr
-    | expr NOT IN expr
-    | expr '<' expr
-    | expr '>' expr
-    | expr '<=' expr
-    | expr '>=' expr
+    | expr IMPLIES expr
+    | expr IMPLIES expr ELSE expr
     ;
 
 unary_expr
-    : NOT expr
-    | NO expr
-    | SOME expr
-    | ONE expr
-    | LONE expr
-    | '~' expr
-    | '^' expr
-    | '*' expr
+    : unary_op expr
+        { $$ = parserActions.createExpr($1, {operand: $2}, @$); }
     ;
 
-atom
-    : IDEN
-    | NUMBER
-    | qualified_name
-    | function_call
+binary_expr
+    : expr binary_op expr
+    ;
+
+implies_else_expr
+    : expr IMPLIES expr ELSE expr
+        { $$ = parserActions.createExpr('implies_else', {condition: $1, consequent: $3, alternative: $5}, @$); }
+    ;
+
+quantified_expr
+    : quantifer DISJ? var_decls block_or_bar 
+        { $$ = parserActions.createExpr('quantified', {quantifier: $1, disj: $2, declarations: $3, body: $4}, @$); }
+    ;
+
+let_expr
+    : LET let_decl_list block_or_bar
+        { $$ = parserActions.createExpr('let', {declarations: $2, body: $3}, @$); }
     ;
 
 function_call
-    : qualified_name '[' expr_list ']'
+    : qualified_expr '[' expr_list ']'
+        { $$ = parserActions.createExpr('function_call', {base: $1, args: $3}, @$); }
     ;
+
+qualified_expr
+    : IDEN '.' IDEN
+        { $$ = parserActions.createExpr('qualified_expr', {base: $1, name: $3}, @$); }
+    | qualified_expr '.' IDEN
+        { $$ = parserActions.createExpr('qualified_expr', {base: $1, name: $3}, @$); }
+    ;
+
+atom
+    : NUMBER
+        { $$ = parserActions.createExpr('number', {value: $1}, @$); }
+    | '-' NUMBER
+        { $$ = parserActions.createExpr('number', {value: -$2}, @$); }
+    | IDEN
+    | '@' IDEN
+        { $$ = parserActions.createExpr('at', {name: $2}, @$); }
+    | '`' IDEN
+        { $$ = parserActions.createExpr('backquote', {name: $2}, @$); }
+    ;
+
+let_decl_list
+    : let_decl (',' let_decl)*
+        { $$ = [$1].concat($2.map(d => d[1])); }
+    ;
+
+let_decl
+    : IDEN '=' expr
+        { $$ = {name: $1, value: $3}; }
+    ;
+
+block_or_bar
+    : block
+    | '|' expr
+        { $$ = $2; }
+    ;
+
+
+quantifier
+    : ALL | SOME | NO | LONE | ONE
+    ;
+
+var_decls
+    : var_decl_item (',' var_decl_item)*
+        { $$ = [$1].concat($2.map(d => d[1])); }
+    ;
+
+var_decl_item
+    : IDEN_list ':' expr
+        { $$ = {names: $1, type: $3}; }
+    ;
+
+IDEN_list
+    : IDEN
+        { $$ = [$1]; }
+    | IDEN_list ',' IDEN
+        { $$ = $1.concat([$3]); }
+    ;
+
+
+binary_op
+    : UNTIL | RELEASE | SINCE | TRIGGERED
+    | '=' | '!=' | IN | NOT IN | '<' | '>' | '<=' | '>='
+    | '+' | '-' | '&' | '->' | '.'
+    ;
+
+
+unary_op
+    : NOT | ALWAYS | EVENTUALLY | AFTER | BEFORE | ONCE | HISTORICALLY
+    | '~' | '^' | '*' 
+    | NO | SOME | LONE | ONE | TWO | SET
+    ;
+
 
 expr_list
     : expr (',' expr)*
+        { $$ = [$1].concat($2.map(e => e[1])); }
     ;
 
+qualified_name
+    : qualified_expr
+    ;
 
+/* ******* TESTING GRAMMAR ******* */
 assert_decl
     : ASSERT IDEN? block
     ;
 
 cmd_decl
-    : (RUN | CHECK) (IDEN | block) scope?
+    : (RUN | CHECK) (IDEN | block) scope? 
+    ;
+
+expect_decl
+    : EXPECT IDEN? test_block
     ;
 
 test_decl
-    : TEST EXPECT IDEN? '{' test_case* '}'
+    : TEST EXPECT IDEN? test_block
+    ;
+
+test_block
+    : '{' test_case* '}'
     ;
 
 test_case
-    : IDEN ':' (qualified_name | block) scope? IS (SAT | UNSAT | UNKNOWN | THEOREM | FORGE_ERROR)
+    : test_case_label? test_case_body
+    ;
+
+test_case_label
+    : IDEN ':'
+    ;
+
+test_case_body
+    : (qualified_name | block) scope? IS (SAT | UNSAT | UNKNOWN | THEOREM | FORGE_ERROR)
     ;
 
 example_decl
@@ -374,6 +503,10 @@ example_decl
 
 property_decl
     : ASSERT IDEN IS (SUFFICIENT | NECESSARY) FOR IDEN scope? (FOR bounds)?
+    ;
+
+inst_decl
+    : INST IDEN bounds scope?
     ;
 
 scope
@@ -386,7 +519,7 @@ typescope_list
     ;
 
 typescope
-    : NUMBER qualified_name
+    : EXACTLY? NUMBER qualified_name
     ;
 
 bounds
@@ -397,10 +530,6 @@ bounds
 bound_statement
     : qualified_name '=' expr
         { $$ = { type: $1, value: $3 }; }
-    ;
-
-block
-    : '{' expr '}'
     ;
 
 %%
