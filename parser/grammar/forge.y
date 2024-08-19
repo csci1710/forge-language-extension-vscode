@@ -139,6 +139,11 @@ const parserActions = {
 %ebnf
 
 /* Operator precedence declarations */
+
+
+%right unary_op
+%left binary_op
+
 %right 'LET'
 %left 'OR'
 %left 'XOR'
