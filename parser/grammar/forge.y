@@ -140,8 +140,11 @@ const parserActions = {
 
 /* Operator precedence declarations */
 
+%precedence 
+
 %right unary_op
 %left binary_op
+
 
 %left '|'
 %right 'LET'
@@ -155,8 +158,8 @@ const parserActions = {
 /* %right 'NOT' */
 %right 'ALWAYS' 'EVENTUALLY' 'AFTER' 'BEFORE' 'ONCE' 'HISTORICALLY'
 %left '=' '!=' 
-%left'IN' 
 %left 'NOT'
+%left 'IN' 
 %left '<' '>' '<=' '>='
 %left 'NO' 'SOME' 'LONE' 'ONE' 'TWO' 'SET'
 %left '+' '-'
@@ -166,6 +169,7 @@ const parserActions = {
 %left '.'
 %left 'PRIME'
 %right '~' '^' '*'
+
 
 %start forge_specification
 
@@ -379,7 +383,7 @@ implies_else_expr
     ;
 
 quantified_expr
-    : quantifer DISJ? var_decls block_or_bar 
+    : quantifier DISJ? var_decls block_or_bar 
         { $$ = parserActions.createExpr('quantified', {quantifier: $1, disj: $2, declarations: $3, body: $4}, @$); }
     ;
 
