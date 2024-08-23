@@ -139,15 +139,25 @@ const parserActions = {
 %ebnf
 
 /* Operator precedence declarations */
+
+%right unary_op
+%left binary_op
+
+%left '|'
 %right 'LET'
 %left 'OR'
 %left 'XOR'
-%left 'IFF'
-%right 'IMPLIES' 'ELSE'
 %left 'AND'
+%left 'IFF'
+%right 'IMPLIES'
+%right 'ELSE'
 %nonassoc 'UNTIL' 'RELEASE' 'SINCE' 'TRIGGERED'
-%right 'NOT' 'ALWAYS' 'EVENTUALLY' 'AFTER' 'BEFORE' 'ONCE' 'HISTORICALLY'
-%left '=' '!=' 'IN' '<' '>' '<=' '>='
+/* %right 'NOT' */
+%right 'ALWAYS' 'EVENTUALLY' 'AFTER' 'BEFORE' 'ONCE' 'HISTORICALLY'
+%left '=' '!=' 
+%left'IN' 
+%left 'NOT'
+%left '<' '>' '<=' '>='
 %left 'NO' 'SOME' 'LONE' 'ONE' 'TWO' 'SET'
 %left '+' '-'
 %left '&'
@@ -265,7 +275,7 @@ sig_modifiers
     ;
 
 sig_ext
-    : EXTENDS qualified_name
+    : EXTENDS IDEN /* does this need to have . support */
         { $$ = $2; }
     ;
 
@@ -413,11 +423,13 @@ let_decl
     ;
 
 block_or_bar
-    : block
-    | '|' expr
-        { $$ = $2; }
+    : block | bar
     ;
 
+bar
+    : '|' expr
+        { $$ = $2; }
+    ;
 
 quantifier
     : ALL | SOME | NO | LONE | ONE
@@ -443,8 +455,11 @@ IDEN_list
 
 binary_op
     : UNTIL | RELEASE | SINCE | TRIGGERED
-    | '=' | '!=' | IN | NOT IN | '<' | '>' | '<=' | '>='
-    | '+' | '-' | '&' | '->' | '.'
+    | '=' | '!=' | IN | NOT IN 
+    | '<' | '>' | '<=' | '>='
+    | '+' | '-' | '&' 
+    | '->' 
+    | '.' /* do i need to include this */
     ;
 
 
@@ -461,7 +476,8 @@ expr_list
     ;
 
 qualified_name
-    : qualified_expr
+    : IDEN
+    /* HERE CHECK AGAIN */
     ;
 
 /* ******* TESTING GRAMMAR ******* */
