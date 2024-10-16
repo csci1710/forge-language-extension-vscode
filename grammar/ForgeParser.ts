@@ -1,4 +1,4 @@
-// Generated from grammar/ForgeParser.g4 by ANTLR 4.9.0-SNAPSHOT
+// Generated from grammar/Forge.g4 by ANTLR 4.9.0-SNAPSHOT
 
 
 import { ATN } from "antlr4ts/atn/ATN";
@@ -23,11 +23,11 @@ import { VocabularyImpl } from "antlr4ts/VocabularyImpl";
 
 import * as Utils from "antlr4ts/misc/Utils";
 
-import { ForgeParserListener } from "./ForgeParserListener";
-import { ForgeParserVisitor } from "./ForgeParserVisitor";
+import { ForgeListener } from "./ForgeListener";
+import { ForgeVisitor } from "./ForgeVisitor";
 
 
-export class ForgeParserParser extends Parser {
+export class ForgeParser extends Parser {
 	public static readonly OPEN_TOK = 1;
 	public static readonly LEFT_SQUARE_TOK = 2;
 	public static readonly RIGHT_SQUARE_TOK = 3;
@@ -268,23 +268,23 @@ export class ForgeParserParser extends Parser {
 		"SUM_TOK", "INT_TOK", "OPTION_TOK", "COMMA_TOK", "SLASH_TOK", "NUM_CONST_TOK", 
 		"IDENTIFIER_TOK", "WS", "CCOMMENT", "COMMENT", "MULTCOMMENT",
 	];
-	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(ForgeParserParser._LITERAL_NAMES, ForgeParserParser._SYMBOLIC_NAMES, []);
+	public static readonly VOCABULARY: Vocabulary = new VocabularyImpl(ForgeParser._LITERAL_NAMES, ForgeParser._SYMBOLIC_NAMES, []);
 
 	// @Override
 	// @NotNull
 	public get vocabulary(): Vocabulary {
-		return ForgeParserParser.VOCABULARY;
+		return ForgeParser.VOCABULARY;
 	}
 	// tslint:enable:no-trailing-whitespace
 
 	// @Override
-	public get grammarFileName(): string { return "ForgeParser.g4"; }
+	public get grammarFileName(): string { return "Forge.g4"; }
 
 	// @Override
-	public get ruleNames(): string[] { return ForgeParserParser.ruleNames; }
+	public get ruleNames(): string[] { return ForgeParser.ruleNames; }
 
 	// @Override
-	public get serializedATN(): string { return ForgeParserParser._serializedATN; }
+	public get serializedATN(): string { return ForgeParser._serializedATN; }
 
 	protected createFailedPredicateException(predicate?: string, message?: string): FailedPredicateException {
 		return new FailedPredicateException(this, predicate, message);
@@ -292,12 +292,12 @@ export class ForgeParserParser extends Parser {
 
 	constructor(input: TokenStream) {
 		super(input);
-		this._interp = new ParserATNSimulator(ForgeParserParser._ATN, this);
+		this._interp = new ParserATNSimulator(ForgeParser._ATN, this);
 	}
 	// @RuleVersion(0)
 	public alloyModule(): AlloyModuleContext {
 		let _localctx: AlloyModuleContext = new AlloyModuleContext(this._ctx, this.state);
-		this.enterRule(_localctx, 0, ForgeParserParser.RULE_alloyModule);
+		this.enterRule(_localctx, 0, ForgeParser.RULE_alloyModule);
 		let _la: number;
 		try {
 			this.state = 184;
@@ -309,7 +309,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 169;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === ForgeParserParser.OPEN_TOK) {
+				while (_la === ForgeParser.OPEN_TOK) {
 					{
 					{
 					this.state = 166;
@@ -323,7 +323,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 175;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.VAR_TOK) | (1 << ForgeParserParser.ABSTRACT_TOK) | (1 << ForgeParserParser.SIG_TOK) | (1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.SOME_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.TWO_TOK) | (1 << ForgeParserParser.PRED_TOK) | (1 << ForgeParserParser.FUN_TOK) | (1 << ForgeParserParser.ASSERT_TOK) | (1 << ForgeParserParser.RUN_TOK) | (1 << ForgeParserParser.CHECK_TOK))) !== 0) || _la === ForgeParserParser.TEST_TOK || _la === ForgeParserParser.EXPECT_TOK || ((((_la - 82)) & ~0x1F) === 0 && ((1 << (_la - 82)) & ((1 << (ForgeParserParser.SEXPR_TOK - 82)) | (1 << (ForgeParserParser.INST_TOK - 82)) | (1 << (ForgeParserParser.EXAMPLE_TOK - 82)) | (1 << (ForgeParserParser.OPTION_TOK - 82)) | (1 << (ForgeParserParser.IDENTIFIER_TOK - 82)))) !== 0)) {
+				while ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.VAR_TOK) | (1 << ForgeParser.ABSTRACT_TOK) | (1 << ForgeParser.SIG_TOK) | (1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.SOME_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.TWO_TOK) | (1 << ForgeParser.PRED_TOK) | (1 << ForgeParser.FUN_TOK) | (1 << ForgeParser.ASSERT_TOK) | (1 << ForgeParser.RUN_TOK) | (1 << ForgeParser.CHECK_TOK))) !== 0) || _la === ForgeParser.TEST_TOK || _la === ForgeParser.EXPECT_TOK || ((((_la - 82)) & ~0x1F) === 0 && ((1 << (_la - 82)) & ((1 << (ForgeParser.SEXPR_TOK - 82)) | (1 << (ForgeParser.INST_TOK - 82)) | (1 << (ForgeParser.EXAMPLE_TOK - 82)) | (1 << (ForgeParser.OPTION_TOK - 82)) | (1 << (ForgeParser.IDENTIFIER_TOK - 82)))) !== 0)) {
 					{
 					{
 					this.state = 172;
@@ -343,7 +343,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 181;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === ForgeParserParser.EVAL_TOK) {
+				while (_la === ForgeParser.EVAL_TOK) {
 					{
 					{
 					this.state = 178;
@@ -375,7 +375,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public importDecl(): ImportDeclContext {
 		let _localctx: ImportDeclContext = new ImportDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 2, ForgeParserParser.RULE_importDecl);
+		this.enterRule(_localctx, 2, ForgeParser.RULE_importDecl);
 		let _la: number;
 		try {
 			this.state = 204;
@@ -385,30 +385,30 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 186;
-				this.match(ForgeParserParser.OPEN_TOK);
+				this.match(ForgeParser.OPEN_TOK);
 				this.state = 187;
 				this.qualName();
 				this.state = 192;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.LEFT_SQUARE_TOK) {
+				if (_la === ForgeParser.LEFT_SQUARE_TOK) {
 					{
 					this.state = 188;
-					this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+					this.match(ForgeParser.LEFT_SQUARE_TOK);
 					this.state = 189;
 					this.qualNameList();
 					this.state = 190;
-					this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+					this.match(ForgeParser.RIGHT_SQUARE_TOK);
 					}
 				}
 
 				this.state = 196;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.AS_TOK) {
+				if (_la === ForgeParser.AS_TOK) {
 					{
 					this.state = 194;
-					this.match(ForgeParserParser.AS_TOK);
+					this.match(ForgeParser.AS_TOK);
 					this.state = 195;
 					this.name();
 					}
@@ -421,16 +421,16 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 198;
-				this.match(ForgeParserParser.OPEN_TOK);
+				this.match(ForgeParser.OPEN_TOK);
 				this.state = 199;
-				this.match(ForgeParserParser.FILE_PATH_TOK);
+				this.match(ForgeParser.FILE_PATH_TOK);
 				this.state = 202;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.AS_TOK) {
+				if (_la === ForgeParser.AS_TOK) {
 					{
 					this.state = 200;
-					this.match(ForgeParserParser.AS_TOK);
+					this.match(ForgeParser.AS_TOK);
 					this.state = 201;
 					this.name();
 					}
@@ -457,7 +457,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public paragraph(): ParagraphContext {
 		let _localctx: ParagraphContext = new ParagraphContext(this._ctx, this.state);
-		this.enterRule(_localctx, 4, ForgeParserParser.RULE_paragraph);
+		this.enterRule(_localctx, 4, ForgeParser.RULE_paragraph);
 		try {
 			this.state = 222;
 			this._errHandler.sync(this);
@@ -608,7 +608,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public sigDecl(): SigDeclContext {
 		let _localctx: SigDeclContext = new SigDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 6, ForgeParserParser.RULE_sigDecl);
+		this.enterRule(_localctx, 6, ForgeParser.RULE_sigDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -616,27 +616,27 @@ export class ForgeParserParser extends Parser {
 			this.state = 225;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.VAR_TOK) {
+			if (_la === ForgeParser.VAR_TOK) {
 				{
 				this.state = 224;
-				this.match(ForgeParserParser.VAR_TOK);
+				this.match(ForgeParser.VAR_TOK);
 				}
 			}
 
 			this.state = 228;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.ABSTRACT_TOK) {
+			if (_la === ForgeParser.ABSTRACT_TOK) {
 				{
 				this.state = 227;
-				this.match(ForgeParserParser.ABSTRACT_TOK);
+				this.match(ForgeParser.ABSTRACT_TOK);
 				}
 			}
 
 			this.state = 231;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.SOME_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.TWO_TOK))) !== 0)) {
+			if ((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.SOME_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.TWO_TOK))) !== 0)) {
 				{
 				this.state = 230;
 				this.mult();
@@ -644,13 +644,13 @@ export class ForgeParserParser extends Parser {
 			}
 
 			this.state = 233;
-			this.match(ForgeParserParser.SIG_TOK);
+			this.match(ForgeParser.SIG_TOK);
 			this.state = 234;
 			this.nameList();
 			this.state = 236;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.EXTENDS_TOK || _la === ForgeParserParser.IN_TOK) {
+			if (_la === ForgeParser.EXTENDS_TOK || _la === ForgeParser.IN_TOK) {
 				{
 				this.state = 235;
 				this.sigExt();
@@ -658,11 +658,11 @@ export class ForgeParserParser extends Parser {
 			}
 
 			this.state = 238;
-			this.match(ForgeParserParser.LEFT_CURLY_TOK);
+			this.match(ForgeParser.LEFT_CURLY_TOK);
 			this.state = 240;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.VAR_TOK || _la === ForgeParserParser.IDENTIFIER_TOK) {
+			if (_la === ForgeParser.VAR_TOK || _la === ForgeParser.IDENTIFIER_TOK) {
 				{
 				this.state = 239;
 				this.arrowDeclList();
@@ -670,11 +670,11 @@ export class ForgeParserParser extends Parser {
 			}
 
 			this.state = 242;
-			this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+			this.match(ForgeParser.RIGHT_CURLY_TOK);
 			this.state = 244;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.LEFT_CURLY_TOK) {
+			if (_la === ForgeParser.LEFT_CURLY_TOK) {
 				{
 				this.state = 243;
 				this.block();
@@ -700,36 +700,36 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public sigExt(): SigExtContext {
 		let _localctx: SigExtContext = new SigExtContext(this._ctx, this.state);
-		this.enterRule(_localctx, 8, ForgeParserParser.RULE_sigExt);
+		this.enterRule(_localctx, 8, ForgeParser.RULE_sigExt);
 		let _la: number;
 		try {
 			this.state = 257;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.EXTENDS_TOK:
+			case ForgeParser.EXTENDS_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 246;
-				this.match(ForgeParserParser.EXTENDS_TOK);
+				this.match(ForgeParser.EXTENDS_TOK);
 				this.state = 247;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.IN_TOK:
+			case ForgeParser.IN_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 248;
-				this.match(ForgeParserParser.IN_TOK);
+				this.match(ForgeParser.IN_TOK);
 				this.state = 249;
 				this.qualName();
 				this.state = 254;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === ForgeParserParser.PLUS_TOK) {
+				while (_la === ForgeParser.PLUS_TOK) {
 					{
 					{
 					this.state = 250;
-					this.match(ForgeParserParser.PLUS_TOK);
+					this.match(ForgeParser.PLUS_TOK);
 					this.state = 251;
 					this.qualName();
 					}
@@ -761,14 +761,14 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public mult(): MultContext {
 		let _localctx: MultContext = new MultContext(this._ctx, this.state);
-		this.enterRule(_localctx, 10, ForgeParserParser.RULE_mult);
+		this.enterRule(_localctx, 10, ForgeParser.RULE_mult);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 259;
 			_la = this._input.LA(1);
-			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.SOME_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.TWO_TOK))) !== 0))) {
+			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.SOME_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.TWO_TOK))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -797,14 +797,14 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public arrowMult(): ArrowMultContext {
 		let _localctx: ArrowMultContext = new ArrowMultContext(this._ctx, this.state);
-		this.enterRule(_localctx, 12, ForgeParserParser.RULE_arrowMult);
+		this.enterRule(_localctx, 12, ForgeParser.RULE_arrowMult);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 261;
 			_la = this._input.LA(1);
-			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.TWO_TOK) | (1 << ForgeParserParser.SET_TOK) | (1 << ForgeParserParser.FUNC_TOK) | (1 << ForgeParserParser.PFUNC_TOK))) !== 0))) {
+			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.TWO_TOK) | (1 << ForgeParser.SET_TOK) | (1 << ForgeParser.FUNC_TOK) | (1 << ForgeParser.PFUNC_TOK))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -833,14 +833,14 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public helperMult(): HelperMultContext {
 		let _localctx: HelperMultContext = new HelperMultContext(this._ctx, this.state);
-		this.enterRule(_localctx, 14, ForgeParserParser.RULE_helperMult);
+		this.enterRule(_localctx, 14, ForgeParser.RULE_helperMult);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 263;
 			_la = this._input.LA(1);
-			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.SET_TOK) | (1 << ForgeParserParser.FUNC_TOK) | (1 << ForgeParserParser.PFUNC_TOK))) !== 0))) {
+			if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.SET_TOK) | (1 << ForgeParser.FUNC_TOK) | (1 << ForgeParser.PFUNC_TOK))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -869,7 +869,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public paraDecl(): ParaDeclContext {
 		let _localctx: ParaDeclContext = new ParaDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 16, ForgeParserParser.RULE_paraDecl);
+		this.enterRule(_localctx, 16, ForgeParser.RULE_paraDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -877,17 +877,17 @@ export class ForgeParserParser extends Parser {
 			this.state = 266;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.DISJ_TOK) {
+			if (_la === ForgeParser.DISJ_TOK) {
 				{
 				this.state = 265;
-				this.match(ForgeParserParser.DISJ_TOK);
+				this.match(ForgeParser.DISJ_TOK);
 				}
 			}
 
 			this.state = 268;
 			this.nameList();
 			this.state = 269;
-			this.match(ForgeParserParser.COLON_TOK);
+			this.match(ForgeParser.COLON_TOK);
 			this.state = 271;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 18, this._ctx) ) {
@@ -919,7 +919,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public quantDecl(): QuantDeclContext {
 		let _localctx: QuantDeclContext = new QuantDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 18, ForgeParserParser.RULE_quantDecl);
+		this.enterRule(_localctx, 18, ForgeParser.RULE_quantDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -927,24 +927,24 @@ export class ForgeParserParser extends Parser {
 			this.state = 276;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.DISJ_TOK) {
+			if (_la === ForgeParser.DISJ_TOK) {
 				{
 				this.state = 275;
-				this.match(ForgeParserParser.DISJ_TOK);
+				this.match(ForgeParser.DISJ_TOK);
 				}
 			}
 
 			this.state = 278;
 			this.nameList();
 			this.state = 279;
-			this.match(ForgeParserParser.COLON_TOK);
+			this.match(ForgeParser.COLON_TOK);
 			this.state = 281;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 20, this._ctx) ) {
 			case 1:
 				{
 				this.state = 280;
-				this.match(ForgeParserParser.SET_TOK);
+				this.match(ForgeParser.SET_TOK);
 				}
 				break;
 			}
@@ -969,7 +969,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public arrowDecl(): ArrowDeclContext {
 		let _localctx: ArrowDeclContext = new ArrowDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 20, ForgeParserParser.RULE_arrowDecl);
+		this.enterRule(_localctx, 20, ForgeParser.RULE_arrowDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -977,17 +977,17 @@ export class ForgeParserParser extends Parser {
 			this.state = 286;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.VAR_TOK) {
+			if (_la === ForgeParser.VAR_TOK) {
 				{
 				this.state = 285;
-				this.match(ForgeParserParser.VAR_TOK);
+				this.match(ForgeParser.VAR_TOK);
 				}
 			}
 
 			this.state = 288;
 			this.nameList();
 			this.state = 289;
-			this.match(ForgeParserParser.COLON_TOK);
+			this.match(ForgeParser.COLON_TOK);
 			this.state = 290;
 			this.arrowMult();
 			this.state = 291;
@@ -1011,12 +1011,12 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public predType(): PredTypeContext {
 		let _localctx: PredTypeContext = new PredTypeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 22, ForgeParserParser.RULE_predType);
+		this.enterRule(_localctx, 22, ForgeParser.RULE_predType);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 293;
-			this.match(ForgeParserParser.WHEAT_TOK);
+			this.match(ForgeParser.WHEAT_TOK);
 			}
 		}
 		catch (re) {
@@ -1036,17 +1036,17 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public predDecl(): PredDeclContext {
 		let _localctx: PredDeclContext = new PredDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 24, ForgeParserParser.RULE_predDecl);
+		this.enterRule(_localctx, 24, ForgeParser.RULE_predDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 295;
-			this.match(ForgeParserParser.PRED_TOK);
+			this.match(ForgeParser.PRED_TOK);
 			this.state = 297;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.WHEAT_TOK) {
+			if (_la === ForgeParser.WHEAT_TOK) {
 				{
 				this.state = 296;
 				this.predType();
@@ -1061,7 +1061,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 299;
 				this.qualName();
 				this.state = 300;
-				this.match(ForgeParserParser.DOT_TOK);
+				this.match(ForgeParser.DOT_TOK);
 				}
 				break;
 			}
@@ -1070,7 +1070,7 @@ export class ForgeParserParser extends Parser {
 			this.state = 306;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.LEFT_SQUARE_TOK || _la === ForgeParserParser.LEFT_PAREN_TOK) {
+			if (_la === ForgeParser.LEFT_SQUARE_TOK || _la === ForgeParser.LEFT_PAREN_TOK) {
 				{
 				this.state = 305;
 				this.paraDecls();
@@ -1098,13 +1098,13 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public funDecl(): FunDeclContext {
 		let _localctx: FunDeclContext = new FunDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 26, ForgeParserParser.RULE_funDecl);
+		this.enterRule(_localctx, 26, ForgeParser.RULE_funDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 310;
-			this.match(ForgeParserParser.FUN_TOK);
+			this.match(ForgeParser.FUN_TOK);
 			this.state = 314;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 25, this._ctx) ) {
@@ -1113,7 +1113,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 311;
 				this.qualName();
 				this.state = 312;
-				this.match(ForgeParserParser.DOT_TOK);
+				this.match(ForgeParser.DOT_TOK);
 				}
 				break;
 			}
@@ -1122,7 +1122,7 @@ export class ForgeParserParser extends Parser {
 			this.state = 318;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.LEFT_SQUARE_TOK || _la === ForgeParserParser.LEFT_PAREN_TOK) {
+			if (_la === ForgeParser.LEFT_SQUARE_TOK || _la === ForgeParser.LEFT_PAREN_TOK) {
 				{
 				this.state = 317;
 				this.paraDecls();
@@ -1130,7 +1130,7 @@ export class ForgeParserParser extends Parser {
 			}
 
 			this.state = 320;
-			this.match(ForgeParserParser.COLON_TOK);
+			this.match(ForgeParser.COLON_TOK);
 			this.state = 322;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 27, this._ctx) ) {
@@ -1144,11 +1144,11 @@ export class ForgeParserParser extends Parser {
 			this.state = 324;
 			this.expr();
 			this.state = 325;
-			this.match(ForgeParserParser.LEFT_CURLY_TOK);
+			this.match(ForgeParser.LEFT_CURLY_TOK);
 			this.state = 326;
 			this.expr();
 			this.state = 327;
-			this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+			this.match(ForgeParser.RIGHT_CURLY_TOK);
 			}
 		}
 		catch (re) {
@@ -1168,21 +1168,21 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public paraDecls(): ParaDeclsContext {
 		let _localctx: ParaDeclsContext = new ParaDeclsContext(this._ctx, this.state);
-		this.enterRule(_localctx, 28, ForgeParserParser.RULE_paraDecls);
+		this.enterRule(_localctx, 28, ForgeParser.RULE_paraDecls);
 		let _la: number;
 		try {
 			this.state = 339;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_PAREN_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 329;
-				this.match(ForgeParserParser.LEFT_PAREN_TOK);
+				this.match(ForgeParser.LEFT_PAREN_TOK);
 				this.state = 331;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.DISJ_TOK || _la === ForgeParserParser.IDENTIFIER_TOK) {
+				if (_la === ForgeParser.DISJ_TOK || _la === ForgeParser.IDENTIFIER_TOK) {
 					{
 					this.state = 330;
 					this.paraDeclList();
@@ -1190,18 +1190,18 @@ export class ForgeParserParser extends Parser {
 				}
 
 				this.state = 333;
-				this.match(ForgeParserParser.RIGHT_PAREN_TOK);
+				this.match(ForgeParser.RIGHT_PAREN_TOK);
 				}
 				break;
-			case ForgeParserParser.LEFT_SQUARE_TOK:
+			case ForgeParser.LEFT_SQUARE_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 334;
-				this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+				this.match(ForgeParser.LEFT_SQUARE_TOK);
 				this.state = 336;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.DISJ_TOK || _la === ForgeParserParser.IDENTIFIER_TOK) {
+				if (_la === ForgeParser.DISJ_TOK || _la === ForgeParser.IDENTIFIER_TOK) {
 					{
 					this.state = 335;
 					this.paraDeclList();
@@ -1209,7 +1209,7 @@ export class ForgeParserParser extends Parser {
 				}
 
 				this.state = 338;
-				this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+				this.match(ForgeParser.RIGHT_SQUARE_TOK);
 				}
 				break;
 			default:
@@ -1233,17 +1233,17 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public assertDecl(): AssertDeclContext {
 		let _localctx: AssertDeclContext = new AssertDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 30, ForgeParserParser.RULE_assertDecl);
+		this.enterRule(_localctx, 30, ForgeParser.RULE_assertDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 341;
-			this.match(ForgeParserParser.ASSERT_TOK);
+			this.match(ForgeParser.ASSERT_TOK);
 			this.state = 343;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.IDENTIFIER_TOK) {
+			if (_la === ForgeParser.IDENTIFIER_TOK) {
 				{
 				this.state = 342;
 				this.name();
@@ -1271,7 +1271,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public cmdDecl(): CmdDeclContext {
 		let _localctx: CmdDeclContext = new CmdDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 32, ForgeParserParser.RULE_cmdDecl);
+		this.enterRule(_localctx, 32, ForgeParser.RULE_cmdDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -1279,18 +1279,18 @@ export class ForgeParserParser extends Parser {
 			this.state = 350;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.IDENTIFIER_TOK) {
+			if (_la === ForgeParser.IDENTIFIER_TOK) {
 				{
 				this.state = 347;
 				this.name();
 				this.state = 348;
-				this.match(ForgeParserParser.COLON_TOK);
+				this.match(ForgeParser.COLON_TOK);
 				}
 			}
 
 			this.state = 352;
 			_la = this._input.LA(1);
-			if (!(_la === ForgeParserParser.RUN_TOK || _la === ForgeParserParser.CHECK_TOK)) {
+			if (!(_la === ForgeParser.RUN_TOK || _la === ForgeParser.CHECK_TOK)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1330,10 +1330,10 @@ export class ForgeParserParser extends Parser {
 			this.state = 362;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 360;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 361;
 				this.bounds();
 				}
@@ -1358,7 +1358,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public testDecl(): TestDeclContext {
 		let _localctx: TestDeclContext = new TestDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 34, ForgeParserParser.RULE_testDecl);
+		this.enterRule(_localctx, 34, ForgeParser.RULE_testDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -1371,23 +1371,23 @@ export class ForgeParserParser extends Parser {
 				this.state = 364;
 				this.name();
 				this.state = 365;
-				this.match(ForgeParserParser.COLON_TOK);
+				this.match(ForgeParser.COLON_TOK);
 				}
 				break;
 			}
 			this.state = 371;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				{
 				this.state = 369;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
 				{
 				this.state = 370;
 				this.block();
@@ -1409,20 +1409,20 @@ export class ForgeParserParser extends Parser {
 			this.state = 378;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 376;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 377;
 				this.bounds();
 				}
 			}
 
 			this.state = 380;
-			this.match(ForgeParserParser.IS_TOK);
+			this.match(ForgeParser.IS_TOK);
 			this.state = 381;
 			_la = this._input.LA(1);
-			if (!(((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & ((1 << (ForgeParserParser.SAT_TOK - 40)) | (1 << (ForgeParserParser.UNSAT_TOK - 40)) | (1 << (ForgeParserParser.THEOREM_TOK - 40)) | (1 << (ForgeParserParser.FORGE_ERROR_TOK - 40)))) !== 0))) {
+			if (!(((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & ((1 << (ForgeParser.SAT_TOK - 40)) | (1 << (ForgeParser.UNSAT_TOK - 40)) | (1 << (ForgeParser.THEOREM_TOK - 40)) | (1 << (ForgeParser.FORGE_ERROR_TOK - 40)))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1451,7 +1451,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public testExpectDecl(): TestExpectDeclContext {
 		let _localctx: TestExpectDeclContext = new TestExpectDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 36, ForgeParserParser.RULE_testExpectDecl);
+		this.enterRule(_localctx, 36, ForgeParser.RULE_testExpectDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -1459,19 +1459,19 @@ export class ForgeParserParser extends Parser {
 			this.state = 384;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.TEST_TOK) {
+			if (_la === ForgeParser.TEST_TOK) {
 				{
 				this.state = 383;
-				this.match(ForgeParserParser.TEST_TOK);
+				this.match(ForgeParser.TEST_TOK);
 				}
 			}
 
 			this.state = 386;
-			this.match(ForgeParserParser.EXPECT_TOK);
+			this.match(ForgeParser.EXPECT_TOK);
 			this.state = 388;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.IDENTIFIER_TOK) {
+			if (_la === ForgeParser.IDENTIFIER_TOK) {
 				{
 				this.state = 387;
 				this.name();
@@ -1499,17 +1499,17 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public testBlock(): TestBlockContext {
 		let _localctx: TestBlockContext = new TestBlockContext(this._ctx, this.state);
-		this.enterRule(_localctx, 38, ForgeParserParser.RULE_testBlock);
+		this.enterRule(_localctx, 38, ForgeParser.RULE_testBlock);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 392;
-			this.match(ForgeParserParser.LEFT_CURLY_TOK);
+			this.match(ForgeParser.LEFT_CURLY_TOK);
 			this.state = 396;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (_la === ForgeParserParser.LEFT_CURLY_TOK || ((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (ForgeParserParser.THIS_TOK - 81)) | (1 << (ForgeParserParser.SUM_TOK - 81)) | (1 << (ForgeParserParser.INT_TOK - 81)) | (1 << (ForgeParserParser.IDENTIFIER_TOK - 81)))) !== 0)) {
+			while (_la === ForgeParser.LEFT_CURLY_TOK || ((((_la - 81)) & ~0x1F) === 0 && ((1 << (_la - 81)) & ((1 << (ForgeParser.THIS_TOK - 81)) | (1 << (ForgeParser.SUM_TOK - 81)) | (1 << (ForgeParser.INT_TOK - 81)) | (1 << (ForgeParser.IDENTIFIER_TOK - 81)))) !== 0)) {
 				{
 				{
 				this.state = 393;
@@ -1521,7 +1521,7 @@ export class ForgeParserParser extends Parser {
 				_la = this._input.LA(1);
 			}
 			this.state = 399;
-			this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+			this.match(ForgeParser.RIGHT_CURLY_TOK);
 			}
 		}
 		catch (re) {
@@ -1541,7 +1541,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public scope(): ScopeContext {
 		let _localctx: ScopeContext = new ScopeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 40, ForgeParserParser.RULE_scope);
+		this.enterRule(_localctx, 40, ForgeParser.RULE_scope);
 		let _la: number;
 		try {
 			this.state = 409;
@@ -1551,16 +1551,16 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 401;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 402;
 				this.number();
 				this.state = 405;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.BUT_TOK) {
+				if (_la === ForgeParser.BUT_TOK) {
 					{
 					this.state = 403;
-					this.match(ForgeParserParser.BUT_TOK);
+					this.match(ForgeParser.BUT_TOK);
 					this.state = 404;
 					this.typescopeList();
 					}
@@ -1573,7 +1573,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 407;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 408;
 				this.typescopeList();
 				}
@@ -1597,7 +1597,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public typescope(): TypescopeContext {
 		let _localctx: TypescopeContext = new TypescopeContext(this._ctx, this.state);
-		this.enterRule(_localctx, 42, ForgeParserParser.RULE_typescope);
+		this.enterRule(_localctx, 42, ForgeParser.RULE_typescope);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
@@ -1605,10 +1605,10 @@ export class ForgeParserParser extends Parser {
 			this.state = 412;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.EXACTLY_TOK) {
+			if (_la === ForgeParser.EXACTLY_TOK) {
 				{
 				this.state = 411;
-				this.match(ForgeParserParser.EXACTLY_TOK);
+				this.match(ForgeParser.EXACTLY_TOK);
 				}
 			}
 
@@ -1635,44 +1635,44 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public const(): ConstContext {
 		let _localctx: ConstContext = new ConstContext(this._ctx, this.state);
-		this.enterRule(_localctx, 44, ForgeParserParser.RULE_const);
+		this.enterRule(_localctx, 44, ForgeParser.RULE_const);
 		let _la: number;
 		try {
 			this.state = 424;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.NONE_TOK:
+			case ForgeParser.NONE_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 417;
-				this.match(ForgeParserParser.NONE_TOK);
+				this.match(ForgeParser.NONE_TOK);
 				}
 				break;
-			case ForgeParserParser.UNIV_TOK:
+			case ForgeParser.UNIV_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 418;
-				this.match(ForgeParserParser.UNIV_TOK);
+				this.match(ForgeParser.UNIV_TOK);
 				}
 				break;
-			case ForgeParserParser.IDEN_TOK:
+			case ForgeParser.IDEN_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 419;
-				this.match(ForgeParserParser.IDEN_TOK);
+				this.match(ForgeParser.IDEN_TOK);
 				}
 				break;
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.NUM_CONST_TOK:
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 421;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.MINUS_TOK) {
+				if (_la === ForgeParser.MINUS_TOK) {
 					{
 					this.state = 420;
-					this.match(ForgeParserParser.MINUS_TOK);
+					this.match(ForgeParser.MINUS_TOK);
 					}
 				}
 
@@ -1701,20 +1701,20 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public satisfiabilityDecl(): SatisfiabilityDeclContext {
 		let _localctx: SatisfiabilityDeclContext = new SatisfiabilityDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 46, ForgeParserParser.RULE_satisfiabilityDecl);
+		this.enterRule(_localctx, 46, ForgeParser.RULE_satisfiabilityDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 426;
-			this.match(ForgeParserParser.ASSERT_TOK);
+			this.match(ForgeParser.ASSERT_TOK);
 			this.state = 427;
 			this.name();
 			this.state = 428;
-			this.match(ForgeParserParser.IS_TOK);
+			this.match(ForgeParser.IS_TOK);
 			this.state = 429;
 			_la = this._input.LA(1);
-			if (!(((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & ((1 << (ForgeParserParser.SAT_TOK - 40)) | (1 << (ForgeParserParser.UNSAT_TOK - 40)) | (1 << (ForgeParserParser.FORGE_ERROR_TOK - 40)))) !== 0))) {
+			if (!(((((_la - 40)) & ~0x1F) === 0 && ((1 << (_la - 40)) & ((1 << (ForgeParser.SAT_TOK - 40)) | (1 << (ForgeParser.UNSAT_TOK - 40)) | (1 << (ForgeParser.FORGE_ERROR_TOK - 40)))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1737,10 +1737,10 @@ export class ForgeParserParser extends Parser {
 			this.state = 435;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 433;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 434;
 				this.bounds();
 				}
@@ -1765,20 +1765,20 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public propertyDecl(): PropertyDeclContext {
 		let _localctx: PropertyDeclContext = new PropertyDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 48, ForgeParserParser.RULE_propertyDecl);
+		this.enterRule(_localctx, 48, ForgeParser.RULE_propertyDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 437;
-			this.match(ForgeParserParser.ASSERT_TOK);
+			this.match(ForgeParser.ASSERT_TOK);
 			this.state = 438;
 			this.name();
 			this.state = 439;
-			this.match(ForgeParserParser.IS_TOK);
+			this.match(ForgeParser.IS_TOK);
 			this.state = 440;
 			_la = this._input.LA(1);
-			if (!(_la === ForgeParserParser.SUFFICIENT_TOK || _la === ForgeParserParser.NECESSARY_TOK)) {
+			if (!(_la === ForgeParser.SUFFICIENT_TOK || _la === ForgeParser.NECESSARY_TOK)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1789,7 +1789,7 @@ export class ForgeParserParser extends Parser {
 				this.consume();
 			}
 			this.state = 441;
-			this.match(ForgeParserParser.FOR_TOK);
+			this.match(ForgeParser.FOR_TOK);
 			this.state = 442;
 			this.name();
 			this.state = 444;
@@ -1805,10 +1805,10 @@ export class ForgeParserParser extends Parser {
 			this.state = 448;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 446;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 447;
 				this.bounds();
 				}
@@ -1833,50 +1833,50 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public quantifiedPropertyDecl(): QuantifiedPropertyDeclContext {
 		let _localctx: QuantifiedPropertyDeclContext = new QuantifiedPropertyDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 50, ForgeParserParser.RULE_quantifiedPropertyDecl);
+		this.enterRule(_localctx, 50, ForgeParser.RULE_quantifiedPropertyDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 450;
-			this.match(ForgeParserParser.ASSERT_TOK);
+			this.match(ForgeParser.ASSERT_TOK);
 			this.state = 451;
-			this.match(ForgeParserParser.ALL_TOK);
+			this.match(ForgeParser.ALL_TOK);
 			this.state = 453;
 			this._errHandler.sync(this);
 			switch ( this.interpreter.adaptivePredict(this._input, 52, this._ctx) ) {
 			case 1:
 				{
 				this.state = 452;
-				this.match(ForgeParserParser.DISJ_TOK);
+				this.match(ForgeParser.DISJ_TOK);
 				}
 				break;
 			}
 			this.state = 455;
 			this.quantDeclList();
 			this.state = 456;
-			this.match(ForgeParserParser.BAR_TOK);
+			this.match(ForgeParser.BAR_TOK);
 			this.state = 457;
 			this.name();
 			this.state = 462;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.LEFT_SQUARE_TOK) {
+			if (_la === ForgeParser.LEFT_SQUARE_TOK) {
 				{
 				this.state = 458;
-				this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+				this.match(ForgeParser.LEFT_SQUARE_TOK);
 				this.state = 459;
 				this.exprList();
 				this.state = 460;
-				this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+				this.match(ForgeParser.RIGHT_SQUARE_TOK);
 				}
 			}
 
 			this.state = 464;
-			this.match(ForgeParserParser.IS_TOK);
+			this.match(ForgeParser.IS_TOK);
 			this.state = 465;
 			_la = this._input.LA(1);
-			if (!(_la === ForgeParserParser.SUFFICIENT_TOK || _la === ForgeParserParser.NECESSARY_TOK)) {
+			if (!(_la === ForgeParser.SUFFICIENT_TOK || _la === ForgeParser.NECESSARY_TOK)) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -1887,20 +1887,20 @@ export class ForgeParserParser extends Parser {
 				this.consume();
 			}
 			this.state = 466;
-			this.match(ForgeParserParser.FOR_TOK);
+			this.match(ForgeParser.FOR_TOK);
 			this.state = 467;
 			this.name();
 			this.state = 472;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.LEFT_SQUARE_TOK) {
+			if (_la === ForgeParser.LEFT_SQUARE_TOK) {
 				{
 				this.state = 468;
-				this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+				this.match(ForgeParser.LEFT_SQUARE_TOK);
 				this.state = 469;
 				this.exprList();
 				this.state = 470;
-				this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+				this.match(ForgeParser.RIGHT_SQUARE_TOK);
 				}
 			}
 
@@ -1917,10 +1917,10 @@ export class ForgeParserParser extends Parser {
 			this.state = 479;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 477;
-				this.match(ForgeParserParser.FOR_TOK);
+				this.match(ForgeParser.FOR_TOK);
 				this.state = 478;
 				this.bounds();
 				}
@@ -1945,25 +1945,25 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public testSuiteDecl(): TestSuiteDeclContext {
 		let _localctx: TestSuiteDeclContext = new TestSuiteDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 52, ForgeParserParser.RULE_testSuiteDecl);
+		this.enterRule(_localctx, 52, ForgeParser.RULE_testSuiteDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 481;
-			this.match(ForgeParserParser.TEST_TOK);
+			this.match(ForgeParser.TEST_TOK);
 			this.state = 482;
-			this.match(ForgeParserParser.SUITE_TOK);
+			this.match(ForgeParser.SUITE_TOK);
 			this.state = 483;
-			this.match(ForgeParserParser.FOR_TOK);
+			this.match(ForgeParser.FOR_TOK);
 			this.state = 484;
 			this.name();
 			this.state = 485;
-			this.match(ForgeParserParser.LEFT_CURLY_TOK);
+			this.match(ForgeParser.LEFT_CURLY_TOK);
 			this.state = 489;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (((((_la - 29)) & ~0x1F) === 0 && ((1 << (_la - 29)) & ((1 << (ForgeParserParser.ASSERT_TOK - 29)) | (1 << (ForgeParserParser.TEST_TOK - 29)) | (1 << (ForgeParserParser.EXPECT_TOK - 29)))) !== 0) || _la === ForgeParserParser.EXAMPLE_TOK) {
+			while (((((_la - 29)) & ~0x1F) === 0 && ((1 << (_la - 29)) & ((1 << (ForgeParser.ASSERT_TOK - 29)) | (1 << (ForgeParser.TEST_TOK - 29)) | (1 << (ForgeParser.EXPECT_TOK - 29)))) !== 0) || _la === ForgeParser.EXAMPLE_TOK) {
 				{
 				{
 				this.state = 486;
@@ -1975,7 +1975,7 @@ export class ForgeParserParser extends Parser {
 				_la = this._input.LA(1);
 			}
 			this.state = 492;
-			this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+			this.match(ForgeParser.RIGHT_CURLY_TOK);
 			}
 		}
 		catch (re) {
@@ -1995,7 +1995,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public testConstruct(): TestConstructContext {
 		let _localctx: TestConstructContext = new TestConstructContext(this._ctx, this.state);
-		this.enterRule(_localctx, 54, ForgeParserParser.RULE_testConstruct);
+		this.enterRule(_localctx, 54, ForgeParser.RULE_testConstruct);
 		try {
 			this.state = 499;
 			this._errHandler.sync(this);
@@ -2058,70 +2058,70 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public arrowOp(): ArrowOpContext {
 		let _localctx: ArrowOpContext = new ArrowOpContext(this._ctx, this.state);
-		this.enterRule(_localctx, 56, ForgeParserParser.RULE_arrowOp);
+		this.enterRule(_localctx, 56, ForgeParser.RULE_arrowOp);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 503;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LONE_TOK:
-			case ForgeParserParser.SOME_TOK:
-			case ForgeParserParser.ONE_TOK:
-			case ForgeParserParser.TWO_TOK:
+			case ForgeParser.LONE_TOK:
+			case ForgeParser.SOME_TOK:
+			case ForgeParser.ONE_TOK:
+			case ForgeParser.TWO_TOK:
 				{
 				this.state = 501;
 				this.mult();
 				}
 				break;
-			case ForgeParserParser.SET_TOK:
+			case ForgeParser.SET_TOK:
 				{
 				this.state = 502;
-				this.match(ForgeParserParser.SET_TOK);
+				this.match(ForgeParser.SET_TOK);
 				}
 				break;
-			case ForgeParserParser.ARROW_TOK:
+			case ForgeParser.ARROW_TOK:
 				break;
 			default:
 				break;
 			}
 			this.state = 505;
-			this.match(ForgeParserParser.ARROW_TOK);
+			this.match(ForgeParser.ARROW_TOK);
 			this.state = 508;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LONE_TOK:
-			case ForgeParserParser.SOME_TOK:
-			case ForgeParserParser.ONE_TOK:
-			case ForgeParserParser.TWO_TOK:
+			case ForgeParser.LONE_TOK:
+			case ForgeParser.SOME_TOK:
+			case ForgeParser.ONE_TOK:
+			case ForgeParser.TWO_TOK:
 				{
 				this.state = 506;
 				this.mult();
 				}
 				break;
-			case ForgeParserParser.SET_TOK:
+			case ForgeParser.SET_TOK:
 				{
 				this.state = 507;
-				this.match(ForgeParserParser.SET_TOK);
+				this.match(ForgeParser.SET_TOK);
 				}
 				break;
-			case ForgeParserParser.LEFT_CURLY_TOK:
-			case ForgeParserParser.LEFT_PAREN_TOK:
-			case ForgeParserParser.NONE_TOK:
-			case ForgeParserParser.UNIV_TOK:
-			case ForgeParserParser.IDEN_TOK:
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.TILDE_TOK:
-			case ForgeParserParser.EXP_TOK:
-			case ForgeParserParser.STAR_TOK:
-			case ForgeParserParser.AT_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SEXPR_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
+			case ForgeParser.NONE_TOK:
+			case ForgeParser.UNIV_TOK:
+			case ForgeParser.IDEN_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.TILDE_TOK:
+			case ForgeParser.EXP_TOK:
+			case ForgeParser.STAR_TOK:
+			case ForgeParser.AT_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SEXPR_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.NUM_CONST_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				break;
 			default:
 				break;
@@ -2145,14 +2145,14 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public compareOp(): CompareOpContext {
 		let _localctx: CompareOpContext = new CompareOpContext(this._ctx, this.state);
-		this.enterRule(_localctx, 58, ForgeParserParser.RULE_compareOp);
+		this.enterRule(_localctx, 58, ForgeParser.RULE_compareOp);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 510;
 			_la = this._input.LA(1);
-			if (!(_la === ForgeParserParser.IN_TOK || _la === ForgeParserParser.IS_TOK || ((((_la - 87)) & ~0x1F) === 0 && ((1 << (_la - 87)) & ((1 << (ForgeParserParser.EQ_TOK - 87)) | (1 << (ForgeParserParser.LT_TOK - 87)) | (1 << (ForgeParserParser.GT_TOK - 87)) | (1 << (ForgeParserParser.LEQ_TOK - 87)) | (1 << (ForgeParserParser.GEQ_TOK - 87)) | (1 << (ForgeParserParser.NI_TOK - 87)))) !== 0))) {
+			if (!(_la === ForgeParser.IN_TOK || _la === ForgeParser.IS_TOK || ((((_la - 87)) & ~0x1F) === 0 && ((1 << (_la - 87)) & ((1 << (ForgeParser.EQ_TOK - 87)) | (1 << (ForgeParser.LT_TOK - 87)) | (1 << (ForgeParser.GT_TOK - 87)) | (1 << (ForgeParser.LEQ_TOK - 87)) | (1 << (ForgeParser.GEQ_TOK - 87)) | (1 << (ForgeParser.NI_TOK - 87)))) !== 0))) {
 			this._errHandler.recoverInline(this);
 			} else {
 				if (this._input.LA(1) === Token.EOF) {
@@ -2181,14 +2181,14 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public letDecl(): LetDeclContext {
 		let _localctx: LetDeclContext = new LetDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 60, ForgeParserParser.RULE_letDecl);
+		this.enterRule(_localctx, 60, ForgeParser.RULE_letDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 512;
 			this.name();
 			this.state = 513;
-			this.match(ForgeParserParser.EQ_TOK);
+			this.match(ForgeParser.EQ_TOK);
 			this.state = 514;
 			this.expr();
 			}
@@ -2210,17 +2210,17 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public block(): BlockContext {
 		let _localctx: BlockContext = new BlockContext(this._ctx, this.state);
-		this.enterRule(_localctx, 62, ForgeParserParser.RULE_block);
+		this.enterRule(_localctx, 62, ForgeParser.RULE_block);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 516;
-			this.match(ForgeParserParser.LEFT_CURLY_TOK);
+			this.match(ForgeParser.LEFT_CURLY_TOK);
 			this.state = 520;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			while (((((_la - 9)) & ~0x1F) === 0 && ((1 << (_la - 9)) & ((1 << (ForgeParserParser.LEFT_CURLY_TOK - 9)) | (1 << (ForgeParserParser.LONE_TOK - 9)) | (1 << (ForgeParserParser.SOME_TOK - 9)) | (1 << (ForgeParserParser.ONE_TOK - 9)) | (1 << (ForgeParserParser.TWO_TOK - 9)) | (1 << (ForgeParserParser.SET_TOK - 9)) | (1 << (ForgeParserParser.LEFT_PAREN_TOK - 9)) | (1 << (ForgeParserParser.NONE_TOK - 9)) | (1 << (ForgeParserParser.UNIV_TOK - 9)) | (1 << (ForgeParserParser.IDEN_TOK - 9)) | (1 << (ForgeParserParser.MINUS_TOK - 9)))) !== 0) || ((((_la - 48)) & ~0x1F) === 0 && ((1 << (_la - 48)) & ((1 << (ForgeParserParser.ALL_TOK - 48)) | (1 << (ForgeParserParser.LET_TOK - 48)) | (1 << (ForgeParserParser.BIND_TOK - 48)) | (1 << (ForgeParserParser.NEG_TOK - 48)) | (1 << (ForgeParserParser.ALWAYS_TOK - 48)) | (1 << (ForgeParserParser.EVENTUALLY_TOK - 48)) | (1 << (ForgeParserParser.AFTER_TOK - 48)) | (1 << (ForgeParserParser.BEFORE_TOK - 48)) | (1 << (ForgeParserParser.ONCE_TOK - 48)) | (1 << (ForgeParserParser.HISTORICALLY_TOK - 48)) | (1 << (ForgeParserParser.CARD_TOK - 48)) | (1 << (ForgeParserParser.TILDE_TOK - 48)) | (1 << (ForgeParserParser.EXP_TOK - 48)) | (1 << (ForgeParserParser.STAR_TOK - 48)) | (1 << (ForgeParserParser.AT_TOK - 48)))) !== 0) || ((((_la - 80)) & ~0x1F) === 0 && ((1 << (_la - 80)) & ((1 << (ForgeParserParser.BACKQUOTE_TOK - 80)) | (1 << (ForgeParserParser.THIS_TOK - 80)) | (1 << (ForgeParserParser.SEXPR_TOK - 80)) | (1 << (ForgeParserParser.NO_TOK - 80)) | (1 << (ForgeParserParser.SUM_TOK - 80)) | (1 << (ForgeParserParser.INT_TOK - 80)) | (1 << (ForgeParserParser.NUM_CONST_TOK - 80)) | (1 << (ForgeParserParser.IDENTIFIER_TOK - 80)))) !== 0)) {
+			while (((((_la - 9)) & ~0x1F) === 0 && ((1 << (_la - 9)) & ((1 << (ForgeParser.LEFT_CURLY_TOK - 9)) | (1 << (ForgeParser.LONE_TOK - 9)) | (1 << (ForgeParser.SOME_TOK - 9)) | (1 << (ForgeParser.ONE_TOK - 9)) | (1 << (ForgeParser.TWO_TOK - 9)) | (1 << (ForgeParser.SET_TOK - 9)) | (1 << (ForgeParser.LEFT_PAREN_TOK - 9)) | (1 << (ForgeParser.NONE_TOK - 9)) | (1 << (ForgeParser.UNIV_TOK - 9)) | (1 << (ForgeParser.IDEN_TOK - 9)) | (1 << (ForgeParser.MINUS_TOK - 9)))) !== 0) || ((((_la - 48)) & ~0x1F) === 0 && ((1 << (_la - 48)) & ((1 << (ForgeParser.ALL_TOK - 48)) | (1 << (ForgeParser.LET_TOK - 48)) | (1 << (ForgeParser.BIND_TOK - 48)) | (1 << (ForgeParser.NEG_TOK - 48)) | (1 << (ForgeParser.ALWAYS_TOK - 48)) | (1 << (ForgeParser.EVENTUALLY_TOK - 48)) | (1 << (ForgeParser.AFTER_TOK - 48)) | (1 << (ForgeParser.BEFORE_TOK - 48)) | (1 << (ForgeParser.ONCE_TOK - 48)) | (1 << (ForgeParser.HISTORICALLY_TOK - 48)) | (1 << (ForgeParser.CARD_TOK - 48)) | (1 << (ForgeParser.TILDE_TOK - 48)) | (1 << (ForgeParser.EXP_TOK - 48)) | (1 << (ForgeParser.STAR_TOK - 48)) | (1 << (ForgeParser.AT_TOK - 48)))) !== 0) || ((((_la - 80)) & ~0x1F) === 0 && ((1 << (_la - 80)) & ((1 << (ForgeParser.BACKQUOTE_TOK - 80)) | (1 << (ForgeParser.THIS_TOK - 80)) | (1 << (ForgeParser.SEXPR_TOK - 80)) | (1 << (ForgeParser.NO_TOK - 80)) | (1 << (ForgeParser.SUM_TOK - 80)) | (1 << (ForgeParser.INT_TOK - 80)) | (1 << (ForgeParser.NUM_CONST_TOK - 80)) | (1 << (ForgeParser.IDENTIFIER_TOK - 80)))) !== 0)) {
 				{
 				{
 				this.state = 517;
@@ -2232,7 +2232,7 @@ export class ForgeParserParser extends Parser {
 				_la = this._input.LA(1);
 			}
 			this.state = 523;
-			this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+			this.match(ForgeParser.RIGHT_CURLY_TOK);
 			}
 		}
 		catch (re) {
@@ -2252,23 +2252,23 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public blockOrBar(): BlockOrBarContext {
 		let _localctx: BlockOrBarContext = new BlockOrBarContext(this._ctx, this.state);
-		this.enterRule(_localctx, 64, ForgeParserParser.RULE_blockOrBar);
+		this.enterRule(_localctx, 64, ForgeParser.RULE_blockOrBar);
 		try {
 			this.state = 528;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 525;
 				this.block();
 				}
 				break;
-			case ForgeParserParser.BAR_TOK:
+			case ForgeParser.BAR_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 526;
-				this.match(ForgeParserParser.BAR_TOK);
+				this.match(ForgeParser.BAR_TOK);
 				this.state = 527;
 				this.expr();
 				}
@@ -2294,36 +2294,36 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public quant(): QuantContext {
 		let _localctx: QuantContext = new QuantContext(this._ctx, this.state);
-		this.enterRule(_localctx, 66, ForgeParserParser.RULE_quant);
+		this.enterRule(_localctx, 66, ForgeParser.RULE_quant);
 		try {
 			this.state = 534;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.ALL_TOK:
+			case ForgeParser.ALL_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 530;
-				this.match(ForgeParserParser.ALL_TOK);
+				this.match(ForgeParser.ALL_TOK);
 				}
 				break;
-			case ForgeParserParser.NO_TOK:
+			case ForgeParser.NO_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 531;
-				this.match(ForgeParserParser.NO_TOK);
+				this.match(ForgeParser.NO_TOK);
 				}
 				break;
-			case ForgeParserParser.SUM_TOK:
+			case ForgeParser.SUM_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 532;
-				this.match(ForgeParserParser.SUM_TOK);
+				this.match(ForgeParser.SUM_TOK);
 				}
 				break;
-			case ForgeParserParser.LONE_TOK:
-			case ForgeParserParser.SOME_TOK:
-			case ForgeParserParser.ONE_TOK:
-			case ForgeParserParser.TWO_TOK:
+			case ForgeParser.LONE_TOK:
+			case ForgeParser.SOME_TOK:
+			case ForgeParser.ONE_TOK:
+			case ForgeParser.TWO_TOK:
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 533;
@@ -2351,26 +2351,26 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public qualName(): QualNameContext {
 		let _localctx: QualNameContext = new QualNameContext(this._ctx, this.state);
-		this.enterRule(_localctx, 68, ForgeParserParser.RULE_qualName);
+		this.enterRule(_localctx, 68, ForgeParser.RULE_qualName);
 		let _la: number;
 		try {
 			let _alt: number;
 			this.state = 551;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 538;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.THIS_TOK) {
+				if (_la === ForgeParser.THIS_TOK) {
 					{
 					this.state = 536;
-					this.match(ForgeParserParser.THIS_TOK);
+					this.match(ForgeParser.THIS_TOK);
 					this.state = 537;
-					this.match(ForgeParserParser.SLASH_TOK);
+					this.match(ForgeParser.SLASH_TOK);
 					}
 				}
 
@@ -2384,7 +2384,7 @@ export class ForgeParserParser extends Parser {
 						this.state = 540;
 						this.name();
 						this.state = 541;
-						this.match(ForgeParserParser.SLASH_TOK);
+						this.match(ForgeParser.SLASH_TOK);
 						}
 						}
 					}
@@ -2396,18 +2396,18 @@ export class ForgeParserParser extends Parser {
 				this.name();
 				}
 				break;
-			case ForgeParserParser.INT_TOK:
+			case ForgeParser.INT_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 549;
-				this.match(ForgeParserParser.INT_TOK);
+				this.match(ForgeParser.INT_TOK);
 				}
 				break;
-			case ForgeParserParser.SUM_TOK:
+			case ForgeParser.SUM_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 550;
-				this.match(ForgeParserParser.SUM_TOK);
+				this.match(ForgeParser.SUM_TOK);
 				}
 				break;
 			default:
@@ -2431,43 +2431,43 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public optionDecl(): OptionDeclContext {
 		let _localctx: OptionDeclContext = new OptionDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 70, ForgeParserParser.RULE_optionDecl);
+		this.enterRule(_localctx, 70, ForgeParser.RULE_optionDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 553;
-			this.match(ForgeParserParser.OPTION_TOK);
+			this.match(ForgeParser.OPTION_TOK);
 			this.state = 554;
 			this.qualName();
 			this.state = 561;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				{
 				this.state = 555;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.FILE_PATH_TOK:
+			case ForgeParser.FILE_PATH_TOK:
 				{
 				this.state = 556;
-				this.match(ForgeParserParser.FILE_PATH_TOK);
+				this.match(ForgeParser.FILE_PATH_TOK);
 				}
 				break;
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.NUM_CONST_TOK:
 				{
 				this.state = 558;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.MINUS_TOK) {
+				if (_la === ForgeParser.MINUS_TOK) {
 					{
 					this.state = 557;
-					this.match(ForgeParserParser.MINUS_TOK);
+					this.match(ForgeParser.MINUS_TOK);
 					}
 				}
 
@@ -2497,12 +2497,12 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public name(): NameContext {
 		let _localctx: NameContext = new NameContext(this._ctx, this.state);
-		this.enterRule(_localctx, 72, ForgeParserParser.RULE_name);
+		this.enterRule(_localctx, 72, ForgeParser.RULE_name);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 563;
-			this.match(ForgeParserParser.IDENTIFIER_TOK);
+			this.match(ForgeParser.IDENTIFIER_TOK);
 			}
 		}
 		catch (re) {
@@ -2522,7 +2522,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public nameList(): NameListContext {
 		let _localctx: NameListContext = new NameListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 74, ForgeParserParser.RULE_nameList);
+		this.enterRule(_localctx, 74, ForgeParser.RULE_nameList);
 		try {
 			this.state = 570;
 			this._errHandler.sync(this);
@@ -2541,7 +2541,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 566;
 				this.name();
 				this.state = 567;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 568;
 				this.nameList();
 				}
@@ -2565,7 +2565,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public qualNameList(): QualNameListContext {
 		let _localctx: QualNameListContext = new QualNameListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 76, ForgeParserParser.RULE_qualNameList);
+		this.enterRule(_localctx, 76, ForgeParser.RULE_qualNameList);
 		try {
 			this.state = 577;
 			this._errHandler.sync(this);
@@ -2584,7 +2584,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 573;
 				this.qualName();
 				this.state = 574;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 575;
 				this.qualNameList();
 				}
@@ -2608,7 +2608,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public paraDeclList(): ParaDeclListContext {
 		let _localctx: ParaDeclListContext = new ParaDeclListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 78, ForgeParserParser.RULE_paraDeclList);
+		this.enterRule(_localctx, 78, ForgeParser.RULE_paraDeclList);
 		try {
 			this.state = 584;
 			this._errHandler.sync(this);
@@ -2627,7 +2627,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 580;
 				this.paraDecl();
 				this.state = 581;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 582;
 				this.paraDeclList();
 				}
@@ -2651,7 +2651,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public quantDeclList(): QuantDeclListContext {
 		let _localctx: QuantDeclListContext = new QuantDeclListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 80, ForgeParserParser.RULE_quantDeclList);
+		this.enterRule(_localctx, 80, ForgeParser.RULE_quantDeclList);
 		try {
 			this.state = 591;
 			this._errHandler.sync(this);
@@ -2670,7 +2670,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 587;
 				this.quantDecl();
 				this.state = 588;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 589;
 				this.quantDeclList();
 				}
@@ -2694,7 +2694,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public arrowDeclList(): ArrowDeclListContext {
 		let _localctx: ArrowDeclListContext = new ArrowDeclListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 82, ForgeParserParser.RULE_arrowDeclList);
+		this.enterRule(_localctx, 82, ForgeParser.RULE_arrowDeclList);
 		try {
 			this.state = 598;
 			this._errHandler.sync(this);
@@ -2713,7 +2713,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 594;
 				this.arrowDecl();
 				this.state = 595;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 596;
 				this.arrowDeclList();
 				}
@@ -2737,7 +2737,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public letDeclList(): LetDeclListContext {
 		let _localctx: LetDeclListContext = new LetDeclListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 84, ForgeParserParser.RULE_letDeclList);
+		this.enterRule(_localctx, 84, ForgeParser.RULE_letDeclList);
 		try {
 			this.state = 605;
 			this._errHandler.sync(this);
@@ -2756,7 +2756,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 601;
 				this.letDecl();
 				this.state = 602;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 603;
 				this.letDeclList();
 				}
@@ -2780,7 +2780,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public typescopeList(): TypescopeListContext {
 		let _localctx: TypescopeListContext = new TypescopeListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 86, ForgeParserParser.RULE_typescopeList);
+		this.enterRule(_localctx, 86, ForgeParser.RULE_typescopeList);
 		try {
 			this.state = 612;
 			this._errHandler.sync(this);
@@ -2799,7 +2799,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 608;
 				this.typescope();
 				this.state = 609;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 610;
 				this.typescopeList();
 				}
@@ -2823,7 +2823,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public exprList(): ExprListContext {
 		let _localctx: ExprListContext = new ExprListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 88, ForgeParserParser.RULE_exprList);
+		this.enterRule(_localctx, 88, ForgeParser.RULE_exprList);
 		try {
 			this.state = 619;
 			this._errHandler.sync(this);
@@ -2842,7 +2842,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 615;
 				this.expr();
 				this.state = 616;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 617;
 				this.exprList();
 				}
@@ -2866,7 +2866,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr(): ExprContext {
 		let _localctx: ExprContext = new ExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 90, ForgeParserParser.RULE_expr);
+		this.enterRule(_localctx, 90, ForgeParser.RULE_expr);
 		try {
 			this.state = 637;
 			this._errHandler.sync(this);
@@ -2883,7 +2883,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 622;
-				this.match(ForgeParserParser.LET_TOK);
+				this.match(ForgeParser.LET_TOK);
 				this.state = 623;
 				this.letDeclList();
 				this.state = 624;
@@ -2895,7 +2895,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 626;
-				this.match(ForgeParserParser.BIND_TOK);
+				this.match(ForgeParser.BIND_TOK);
 				this.state = 627;
 				this.letDeclList();
 				this.state = 628;
@@ -2914,7 +2914,7 @@ export class ForgeParserParser extends Parser {
 				case 1:
 					{
 					this.state = 631;
-					this.match(ForgeParserParser.DISJ_TOK);
+					this.match(ForgeParser.DISJ_TOK);
 					}
 					break;
 				}
@@ -2954,7 +2954,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr1Context = new Expr1Context(this._ctx, _parentState);
 		let _prevctx: Expr1Context = _localctx;
 		let _startState: number = 92;
-		this.enterRecursionRule(_localctx, 92, ForgeParserParser.RULE_expr1, _p);
+		this.enterRecursionRule(_localctx, 92, ForgeParser.RULE_expr1, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -2976,13 +2976,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr1Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr1);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr1);
 					this.state = 642;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 643;
-					this.match(ForgeParserParser.OR_TOK);
+					this.match(ForgeParser.OR_TOK);
 					this.state = 644;
 					this.expr1_5(0);
 					}
@@ -3022,7 +3022,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr1_5Context = new Expr1_5Context(this._ctx, _parentState);
 		let _prevctx: Expr1_5Context = _localctx;
 		let _startState: number = 94;
-		this.enterRecursionRule(_localctx, 94, ForgeParserParser.RULE_expr1_5, _p);
+		this.enterRecursionRule(_localctx, 94, ForgeParser.RULE_expr1_5, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3044,13 +3044,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr1_5Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr1_5);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr1_5);
 					this.state = 653;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 654;
-					this.match(ForgeParserParser.XOR_TOK);
+					this.match(ForgeParser.XOR_TOK);
 					this.state = 655;
 					this.expr2(0);
 					}
@@ -3090,7 +3090,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr2Context = new Expr2Context(this._ctx, _parentState);
 		let _prevctx: Expr2Context = _localctx;
 		let _startState: number = 96;
-		this.enterRecursionRule(_localctx, 96, ForgeParserParser.RULE_expr2, _p);
+		this.enterRecursionRule(_localctx, 96, ForgeParser.RULE_expr2, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3112,13 +3112,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr2Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr2);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr2);
 					this.state = 664;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 665;
-					this.match(ForgeParserParser.IFF_TOK);
+					this.match(ForgeParser.IFF_TOK);
 					this.state = 666;
 					this.expr3();
 					}
@@ -3147,7 +3147,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr3(): Expr3Context {
 		let _localctx: Expr3Context = new Expr3Context(this._ctx, this.state);
-		this.enterRule(_localctx, 98, ForgeParserParser.RULE_expr3);
+		this.enterRule(_localctx, 98, ForgeParser.RULE_expr3);
 		try {
 			this.state = 680;
 			this._errHandler.sync(this);
@@ -3166,7 +3166,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 673;
 				this.expr4(0);
 				this.state = 674;
-				this.match(ForgeParserParser.IMP_TOK);
+				this.match(ForgeParser.IMP_TOK);
 				this.state = 675;
 				this.expr3();
 				this.state = 678;
@@ -3175,7 +3175,7 @@ export class ForgeParserParser extends Parser {
 				case 1:
 					{
 					this.state = 676;
-					this.match(ForgeParserParser.ELSE_TOK);
+					this.match(ForgeParser.ELSE_TOK);
 					this.state = 677;
 					this.expr3();
 					}
@@ -3213,7 +3213,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr4Context = new Expr4Context(this._ctx, _parentState);
 		let _prevctx: Expr4Context = _localctx;
 		let _startState: number = 100;
-		this.enterRecursionRule(_localctx, 100, ForgeParserParser.RULE_expr4, _p);
+		this.enterRecursionRule(_localctx, 100, ForgeParser.RULE_expr4, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3235,13 +3235,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr4Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr4);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr4);
 					this.state = 685;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 686;
-					this.match(ForgeParserParser.AND_TOK);
+					this.match(ForgeParser.AND_TOK);
 					this.state = 687;
 					this.expr4_5();
 					}
@@ -3270,7 +3270,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr4_5(): Expr4_5Context {
 		let _localctx: Expr4_5Context = new Expr4_5Context(this._ctx, this.state);
-		this.enterRule(_localctx, 102, ForgeParserParser.RULE_expr4_5);
+		this.enterRule(_localctx, 102, ForgeParser.RULE_expr4_5);
 		try {
 			this.state = 710;
 			this._errHandler.sync(this);
@@ -3289,7 +3289,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 694;
 				this.expr5();
 				this.state = 695;
-				this.match(ForgeParserParser.UNTIL_TOK);
+				this.match(ForgeParser.UNTIL_TOK);
 				this.state = 696;
 				this.expr5();
 				}
@@ -3301,7 +3301,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 698;
 				this.expr5();
 				this.state = 699;
-				this.match(ForgeParserParser.RELEASE_TOK);
+				this.match(ForgeParser.RELEASE_TOK);
 				this.state = 700;
 				this.expr5();
 				}
@@ -3313,7 +3313,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 702;
 				this.expr5();
 				this.state = 703;
-				this.match(ForgeParserParser.SINCE_TOK);
+				this.match(ForgeParser.SINCE_TOK);
 				this.state = 704;
 				this.expr5();
 				}
@@ -3325,7 +3325,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 706;
 				this.expr5();
 				this.state = 707;
-				this.match(ForgeParserParser.TRIGGERED_TOK);
+				this.match(ForgeParser.TRIGGERED_TOK);
 				this.state = 708;
 				this.expr5();
 				}
@@ -3349,100 +3349,100 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr5(): Expr5Context {
 		let _localctx: Expr5Context = new Expr5Context(this._ctx, this.state);
-		this.enterRule(_localctx, 104, ForgeParserParser.RULE_expr5);
+		this.enterRule(_localctx, 104, ForgeParser.RULE_expr5);
 		try {
 			this.state = 727;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
-			case ForgeParserParser.LONE_TOK:
-			case ForgeParserParser.SOME_TOK:
-			case ForgeParserParser.ONE_TOK:
-			case ForgeParserParser.TWO_TOK:
-			case ForgeParserParser.SET_TOK:
-			case ForgeParserParser.LEFT_PAREN_TOK:
-			case ForgeParserParser.NONE_TOK:
-			case ForgeParserParser.UNIV_TOK:
-			case ForgeParserParser.IDEN_TOK:
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.CARD_TOK:
-			case ForgeParserParser.TILDE_TOK:
-			case ForgeParserParser.EXP_TOK:
-			case ForgeParserParser.STAR_TOK:
-			case ForgeParserParser.AT_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SEXPR_TOK:
-			case ForgeParserParser.NO_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
+			case ForgeParser.LONE_TOK:
+			case ForgeParser.SOME_TOK:
+			case ForgeParser.ONE_TOK:
+			case ForgeParser.TWO_TOK:
+			case ForgeParser.SET_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
+			case ForgeParser.NONE_TOK:
+			case ForgeParser.UNIV_TOK:
+			case ForgeParser.IDEN_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.CARD_TOK:
+			case ForgeParser.TILDE_TOK:
+			case ForgeParser.EXP_TOK:
+			case ForgeParser.STAR_TOK:
+			case ForgeParser.AT_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SEXPR_TOK:
+			case ForgeParser.NO_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.NUM_CONST_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 712;
 				this.expr6(0);
 				}
 				break;
-			case ForgeParserParser.NEG_TOK:
+			case ForgeParser.NEG_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 713;
-				this.match(ForgeParserParser.NEG_TOK);
+				this.match(ForgeParser.NEG_TOK);
 				this.state = 714;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.ALWAYS_TOK:
+			case ForgeParser.ALWAYS_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 715;
-				this.match(ForgeParserParser.ALWAYS_TOK);
+				this.match(ForgeParser.ALWAYS_TOK);
 				this.state = 716;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.EVENTUALLY_TOK:
+			case ForgeParser.EVENTUALLY_TOK:
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 717;
-				this.match(ForgeParserParser.EVENTUALLY_TOK);
+				this.match(ForgeParser.EVENTUALLY_TOK);
 				this.state = 718;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.AFTER_TOK:
+			case ForgeParser.AFTER_TOK:
 				this.enterOuterAlt(_localctx, 5);
 				{
 				this.state = 719;
-				this.match(ForgeParserParser.AFTER_TOK);
+				this.match(ForgeParser.AFTER_TOK);
 				this.state = 720;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.BEFORE_TOK:
+			case ForgeParser.BEFORE_TOK:
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 721;
-				this.match(ForgeParserParser.BEFORE_TOK);
+				this.match(ForgeParser.BEFORE_TOK);
 				this.state = 722;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.ONCE_TOK:
+			case ForgeParser.ONCE_TOK:
 				this.enterOuterAlt(_localctx, 7);
 				{
 				this.state = 723;
-				this.match(ForgeParserParser.ONCE_TOK);
+				this.match(ForgeParser.ONCE_TOK);
 				this.state = 724;
 				this.expr5();
 				}
 				break;
-			case ForgeParserParser.HISTORICALLY_TOK:
+			case ForgeParser.HISTORICALLY_TOK:
 				this.enterOuterAlt(_localctx, 8);
 				{
 				this.state = 725;
-				this.match(ForgeParserParser.HISTORICALLY_TOK);
+				this.match(ForgeParser.HISTORICALLY_TOK);
 				this.state = 726;
 				this.expr5();
 				}
@@ -3479,7 +3479,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr6Context = new Expr6Context(this._ctx, _parentState);
 		let _prevctx: Expr6Context = _localctx;
 		let _startState: number = 106;
-		this.enterRecursionRule(_localctx, 106, ForgeParserParser.RULE_expr6, _p);
+		this.enterRecursionRule(_localctx, 106, ForgeParser.RULE_expr6, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -3502,7 +3502,7 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr6Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr6);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr6);
 					this.state = 732;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
@@ -3510,10 +3510,10 @@ export class ForgeParserParser extends Parser {
 					this.state = 734;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-					if (_la === ForgeParserParser.NEG_TOK) {
+					if (_la === ForgeParser.NEG_TOK) {
 						{
 						this.state = 733;
-						this.match(ForgeParserParser.NEG_TOK);
+						this.match(ForgeParser.NEG_TOK);
 						}
 					}
 
@@ -3547,47 +3547,47 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr7(): Expr7Context {
 		let _localctx: Expr7Context = new Expr7Context(this._ctx, this.state);
-		this.enterRule(_localctx, 108, ForgeParserParser.RULE_expr7);
+		this.enterRule(_localctx, 108, ForgeParser.RULE_expr7);
 		let _la: number;
 		try {
 			this.state = 747;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
-			case ForgeParserParser.LEFT_PAREN_TOK:
-			case ForgeParserParser.NONE_TOK:
-			case ForgeParserParser.UNIV_TOK:
-			case ForgeParserParser.IDEN_TOK:
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.CARD_TOK:
-			case ForgeParserParser.TILDE_TOK:
-			case ForgeParserParser.EXP_TOK:
-			case ForgeParserParser.STAR_TOK:
-			case ForgeParserParser.AT_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SEXPR_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
+			case ForgeParser.NONE_TOK:
+			case ForgeParser.UNIV_TOK:
+			case ForgeParser.IDEN_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.CARD_TOK:
+			case ForgeParser.TILDE_TOK:
+			case ForgeParser.EXP_TOK:
+			case ForgeParser.STAR_TOK:
+			case ForgeParser.AT_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SEXPR_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.NUM_CONST_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 744;
 				this.expr8(0);
 				}
 				break;
-			case ForgeParserParser.LONE_TOK:
-			case ForgeParserParser.SOME_TOK:
-			case ForgeParserParser.ONE_TOK:
-			case ForgeParserParser.TWO_TOK:
-			case ForgeParserParser.SET_TOK:
-			case ForgeParserParser.NO_TOK:
+			case ForgeParser.LONE_TOK:
+			case ForgeParser.SOME_TOK:
+			case ForgeParser.ONE_TOK:
+			case ForgeParser.TWO_TOK:
+			case ForgeParser.SET_TOK:
+			case ForgeParser.NO_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 745;
 				_la = this._input.LA(1);
-				if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParserParser.LONE_TOK) | (1 << ForgeParserParser.SOME_TOK) | (1 << ForgeParserParser.ONE_TOK) | (1 << ForgeParserParser.TWO_TOK) | (1 << ForgeParserParser.SET_TOK))) !== 0) || _la === ForgeParserParser.NO_TOK)) {
+				if (!((((_la) & ~0x1F) === 0 && ((1 << _la) & ((1 << ForgeParser.LONE_TOK) | (1 << ForgeParser.SOME_TOK) | (1 << ForgeParser.ONE_TOK) | (1 << ForgeParser.TWO_TOK) | (1 << ForgeParser.SET_TOK))) !== 0) || _la === ForgeParser.NO_TOK)) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -3633,7 +3633,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr8Context = new Expr8Context(this._ctx, _parentState);
 		let _prevctx: Expr8Context = _localctx;
 		let _startState: number = 110;
-		this.enterRecursionRule(_localctx, 110, ForgeParserParser.RULE_expr8, _p);
+		this.enterRecursionRule(_localctx, 110, ForgeParser.RULE_expr8, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -3656,14 +3656,14 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr8Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr8);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr8);
 					this.state = 752;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 753;
 					_la = this._input.LA(1);
-					if (!(_la === ForgeParserParser.PLUS_TOK || _la === ForgeParserParser.MINUS_TOK)) {
+					if (!(_la === ForgeParser.PLUS_TOK || _la === ForgeParser.MINUS_TOK)) {
 					this._errHandler.recoverInline(this);
 					} else {
 						if (this._input.LA(1) === Token.EOF) {
@@ -3701,39 +3701,39 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr9(): Expr9Context {
 		let _localctx: Expr9Context = new Expr9Context(this._ctx, this.state);
-		this.enterRule(_localctx, 112, ForgeParserParser.RULE_expr9);
+		this.enterRule(_localctx, 112, ForgeParser.RULE_expr9);
 		try {
 			this.state = 763;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
-			case ForgeParserParser.LEFT_PAREN_TOK:
-			case ForgeParserParser.NONE_TOK:
-			case ForgeParserParser.UNIV_TOK:
-			case ForgeParserParser.IDEN_TOK:
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.TILDE_TOK:
-			case ForgeParserParser.EXP_TOK:
-			case ForgeParserParser.STAR_TOK:
-			case ForgeParserParser.AT_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SEXPR_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
+			case ForgeParser.NONE_TOK:
+			case ForgeParser.UNIV_TOK:
+			case ForgeParser.IDEN_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.TILDE_TOK:
+			case ForgeParser.EXP_TOK:
+			case ForgeParser.STAR_TOK:
+			case ForgeParser.AT_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SEXPR_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.NUM_CONST_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 760;
 				this.expr10(0);
 				}
 				break;
-			case ForgeParserParser.CARD_TOK:
+			case ForgeParser.CARD_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 761;
-				this.match(ForgeParserParser.CARD_TOK);
+				this.match(ForgeParser.CARD_TOK);
 				this.state = 762;
 				this.expr9();
 				}
@@ -3770,7 +3770,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr10Context = new Expr10Context(this._ctx, _parentState);
 		let _prevctx: Expr10Context = _localctx;
 		let _startState: number = 114;
-		this.enterRecursionRule(_localctx, 114, ForgeParserParser.RULE_expr10, _p);
+		this.enterRecursionRule(_localctx, 114, ForgeParser.RULE_expr10, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3792,13 +3792,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr10Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr10);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr10);
 					this.state = 768;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 769;
-					this.match(ForgeParserParser.PPLUS_TOK);
+					this.match(ForgeParser.PPLUS_TOK);
 					this.state = 770;
 					this.expr11(0);
 					}
@@ -3838,7 +3838,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr11Context = new Expr11Context(this._ctx, _parentState);
 		let _prevctx: Expr11Context = _localctx;
 		let _startState: number = 116;
-		this.enterRecursionRule(_localctx, 116, ForgeParserParser.RULE_expr11, _p);
+		this.enterRecursionRule(_localctx, 116, ForgeParser.RULE_expr11, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3860,13 +3860,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr11Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr11);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr11);
 					this.state = 779;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 780;
-					this.match(ForgeParserParser.AMP_TOK);
+					this.match(ForgeParser.AMP_TOK);
 					this.state = 781;
 					this.expr12(0);
 					}
@@ -3906,7 +3906,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr12Context = new Expr12Context(this._ctx, _parentState);
 		let _prevctx: Expr12Context = _localctx;
 		let _startState: number = 118;
-		this.enterRecursionRule(_localctx, 118, ForgeParserParser.RULE_expr12, _p);
+		this.enterRecursionRule(_localctx, 118, ForgeParser.RULE_expr12, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -3928,7 +3928,7 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr12Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr12);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr12);
 					this.state = 790;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
@@ -3974,7 +3974,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr13Context = new Expr13Context(this._ctx, _parentState);
 		let _prevctx: Expr13Context = _localctx;
 		let _startState: number = 120;
-		this.enterRecursionRule(_localctx, 120, ForgeParserParser.RULE_expr13, _p);
+		this.enterRecursionRule(_localctx, 120, ForgeParser.RULE_expr13, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -3997,14 +3997,14 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr13Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr13);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr13);
 					this.state = 802;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 803;
 					_la = this._input.LA(1);
-					if (!(_la === ForgeParserParser.SUBT_TOK || _la === ForgeParserParser.SUPT_TOK)) {
+					if (!(_la === ForgeParser.SUBT_TOK || _la === ForgeParser.SUPT_TOK)) {
 					this._errHandler.recoverInline(this);
 					} else {
 						if (this._input.LA(1) === Token.EOF) {
@@ -4053,7 +4053,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr14Context = new Expr14Context(this._ctx, _parentState);
 		let _prevctx: Expr14Context = _localctx;
 		let _startState: number = 122;
-		this.enterRecursionRule(_localctx, 122, ForgeParserParser.RULE_expr14, _p);
+		this.enterRecursionRule(_localctx, 122, ForgeParser.RULE_expr14, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -4075,17 +4075,17 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr14Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr14);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr14);
 					this.state = 813;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 814;
-					this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+					this.match(ForgeParser.LEFT_SQUARE_TOK);
 					this.state = 815;
 					this.exprList();
 					this.state = 816;
-					this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+					this.match(ForgeParser.RIGHT_SQUARE_TOK);
 					}
 					}
 				}
@@ -4123,7 +4123,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr15Context = new Expr15Context(this._ctx, _parentState);
 		let _prevctx: Expr15Context = _localctx;
 		let _startState: number = 124;
-		this.enterRecursionRule(_localctx, 124, ForgeParserParser.RULE_expr15, _p);
+		this.enterRecursionRule(_localctx, 124, ForgeParser.RULE_expr15, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -4143,11 +4143,11 @@ export class ForgeParserParser extends Parser {
 				this.state = 825;
 				this.name();
 				this.state = 826;
-				this.match(ForgeParserParser.LEFT_SQUARE_TOK);
+				this.match(ForgeParser.LEFT_SQUARE_TOK);
 				this.state = 827;
 				this.exprList();
 				this.state = 828;
-				this.match(ForgeParserParser.RIGHT_SQUARE_TOK);
+				this.match(ForgeParser.RIGHT_SQUARE_TOK);
 				}
 				break;
 			}
@@ -4164,13 +4164,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr15Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr15);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr15);
 					this.state = 832;
 					if (!(this.precpred(this._ctx, 2))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 					}
 					this.state = 833;
-					this.match(ForgeParserParser.DOT_TOK);
+					this.match(ForgeParser.DOT_TOK);
 					this.state = 834;
 					this.expr16(0);
 					}
@@ -4210,7 +4210,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: Expr16Context = new Expr16Context(this._ctx, _parentState);
 		let _prevctx: Expr16Context = _localctx;
 		let _startState: number = 126;
-		this.enterRecursionRule(_localctx, 126, ForgeParserParser.RULE_expr16, _p);
+		this.enterRecursionRule(_localctx, 126, ForgeParser.RULE_expr16, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -4232,13 +4232,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new Expr16Context(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_expr16);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_expr16);
 					this.state = 843;
 					if (!(this.precpred(this._ctx, 1))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 1)");
 					}
 					this.state = 844;
-					this.match(ForgeParserParser.PRIME_TOK);
+					this.match(ForgeParser.PRIME_TOK);
 					}
 					}
 				}
@@ -4265,40 +4265,40 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr17(): Expr17Context {
 		let _localctx: Expr17Context = new Expr17Context(this._ctx, this.state);
-		this.enterRule(_localctx, 128, ForgeParserParser.RULE_expr17);
+		this.enterRule(_localctx, 128, ForgeParser.RULE_expr17);
 		let _la: number;
 		try {
 			this.state = 853;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
-			case ForgeParserParser.LEFT_PAREN_TOK:
-			case ForgeParserParser.NONE_TOK:
-			case ForgeParserParser.UNIV_TOK:
-			case ForgeParserParser.IDEN_TOK:
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.AT_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SEXPR_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
+			case ForgeParser.NONE_TOK:
+			case ForgeParser.UNIV_TOK:
+			case ForgeParser.IDEN_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.AT_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SEXPR_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.NUM_CONST_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 850;
 				this.expr18();
 				}
 				break;
-			case ForgeParserParser.TILDE_TOK:
-			case ForgeParserParser.EXP_TOK:
-			case ForgeParserParser.STAR_TOK:
+			case ForgeParser.TILDE_TOK:
+			case ForgeParser.EXP_TOK:
+			case ForgeParser.STAR_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 851;
 				_la = this._input.LA(1);
-				if (!(((((_la - 76)) & ~0x1F) === 0 && ((1 << (_la - 76)) & ((1 << (ForgeParserParser.TILDE_TOK - 76)) | (1 << (ForgeParserParser.EXP_TOK - 76)) | (1 << (ForgeParserParser.STAR_TOK - 76)))) !== 0))) {
+				if (!(((((_la - 76)) & ~0x1F) === 0 && ((1 << (_la - 76)) & ((1 << (ForgeParser.TILDE_TOK - 76)) | (1 << (ForgeParser.EXP_TOK - 76)) | (1 << (ForgeParser.STAR_TOK - 76)))) !== 0))) {
 				this._errHandler.recoverInline(this);
 				} else {
 					if (this._input.LA(1) === Token.EOF) {
@@ -4333,7 +4333,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public expr18(): Expr18Context {
 		let _localctx: Expr18Context = new Expr18Context(this._ctx, this.state);
-		this.enterRule(_localctx, 130, ForgeParserParser.RULE_expr18);
+		this.enterRule(_localctx, 130, ForgeParser.RULE_expr18);
 		try {
 			this.state = 873;
 			this._errHandler.sync(this);
@@ -4358,7 +4358,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 857;
-				this.match(ForgeParserParser.AT_TOK);
+				this.match(ForgeParser.AT_TOK);
 				this.state = 858;
 				this.name();
 				}
@@ -4368,7 +4368,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 4);
 				{
 				this.state = 859;
-				this.match(ForgeParserParser.BACKQUOTE_TOK);
+				this.match(ForgeParser.BACKQUOTE_TOK);
 				this.state = 860;
 				this.name();
 				}
@@ -4378,7 +4378,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 5);
 				{
 				this.state = 861;
-				this.match(ForgeParserParser.THIS_TOK);
+				this.match(ForgeParser.THIS_TOK);
 				}
 				break;
 
@@ -4386,13 +4386,13 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 6);
 				{
 				this.state = 862;
-				this.match(ForgeParserParser.LEFT_CURLY_TOK);
+				this.match(ForgeParser.LEFT_CURLY_TOK);
 				this.state = 863;
 				this.quantDeclList();
 				this.state = 864;
 				this.blockOrBar();
 				this.state = 865;
-				this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+				this.match(ForgeParser.RIGHT_CURLY_TOK);
 				}
 				break;
 
@@ -4400,11 +4400,11 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 7);
 				{
 				this.state = 867;
-				this.match(ForgeParserParser.LEFT_PAREN_TOK);
+				this.match(ForgeParser.LEFT_PAREN_TOK);
 				this.state = 868;
 				this.expr();
 				this.state = 869;
-				this.match(ForgeParserParser.RIGHT_PAREN_TOK);
+				this.match(ForgeParser.RIGHT_PAREN_TOK);
 				}
 				break;
 
@@ -4442,7 +4442,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public arrowExpr(): ArrowExprContext {
 		let _localctx: ArrowExprContext = new ArrowExprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 132, ForgeParserParser.RULE_arrowExpr);
+		this.enterRule(_localctx, 132, ForgeParser.RULE_arrowExpr);
 		try {
 			this.state = 880;
 			this._errHandler.sync(this);
@@ -4461,7 +4461,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 876;
 				this.qualName();
 				this.state = 877;
-				this.match(ForgeParserParser.ARROW_TOK);
+				this.match(ForgeParser.ARROW_TOK);
 				this.state = 878;
 				this.arrowExpr();
 				}
@@ -4485,7 +4485,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public sexprDecl(): SexprDeclContext {
 		let _localctx: SexprDeclContext = new SexprDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 134, ForgeParserParser.RULE_sexprDecl);
+		this.enterRule(_localctx, 134, ForgeParser.RULE_sexprDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
@@ -4510,12 +4510,12 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public sexpr(): SexprContext {
 		let _localctx: SexprContext = new SexprContext(this._ctx, this.state);
-		this.enterRule(_localctx, 136, ForgeParserParser.RULE_sexpr);
+		this.enterRule(_localctx, 136, ForgeParser.RULE_sexpr);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 884;
-			this.match(ForgeParserParser.SEXPR_TOK);
+			this.match(ForgeParser.SEXPR_TOK);
 			}
 		}
 		catch (re) {
@@ -4535,13 +4535,13 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public instDecl(): InstDeclContext {
 		let _localctx: InstDeclContext = new InstDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 138, ForgeParserParser.RULE_instDecl);
+		this.enterRule(_localctx, 138, ForgeParser.RULE_instDecl);
 		let _la: number;
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 886;
-			this.match(ForgeParserParser.INST_TOK);
+			this.match(ForgeParser.INST_TOK);
 			this.state = 887;
 			this.name();
 			this.state = 888;
@@ -4549,7 +4549,7 @@ export class ForgeParserParser extends Parser {
 			this.state = 890;
 			this._errHandler.sync(this);
 			_la = this._input.LA(1);
-			if (_la === ForgeParserParser.FOR_TOK) {
+			if (_la === ForgeParser.FOR_TOK) {
 				{
 				this.state = 889;
 				this.scope();
@@ -4575,7 +4575,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public evalRelDecl(): EvalRelDeclContext {
 		let _localctx: EvalRelDeclContext = new EvalRelDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 140, ForgeParserParser.RULE_evalRelDecl);
+		this.enterRule(_localctx, 140, ForgeParser.RULE_evalRelDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
@@ -4600,12 +4600,12 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public evalDecl(): EvalDeclContext {
 		let _localctx: EvalDeclContext = new EvalDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 142, ForgeParserParser.RULE_evalDecl);
+		this.enterRule(_localctx, 142, ForgeParser.RULE_evalDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 894;
-			this.match(ForgeParserParser.EVAL_TOK);
+			this.match(ForgeParser.EVAL_TOK);
 			this.state = 895;
 			this.expr();
 			}
@@ -4627,20 +4627,20 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public exampleDecl(): ExampleDeclContext {
 		let _localctx: ExampleDeclContext = new ExampleDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 144, ForgeParserParser.RULE_exampleDecl);
+		this.enterRule(_localctx, 144, ForgeParser.RULE_exampleDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 897;
-			this.match(ForgeParserParser.EXAMPLE_TOK);
+			this.match(ForgeParser.EXAMPLE_TOK);
 			this.state = 898;
 			this.name();
 			this.state = 899;
-			this.match(ForgeParserParser.IS_TOK);
+			this.match(ForgeParser.IS_TOK);
 			this.state = 900;
 			this.expr();
 			this.state = 901;
-			this.match(ForgeParserParser.FOR_TOK);
+			this.match(ForgeParser.FOR_TOK);
 			this.state = 902;
 			this.bounds();
 			}
@@ -4662,18 +4662,18 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public queryDecl(): QueryDeclContext {
 		let _localctx: QueryDeclContext = new QueryDeclContext(this._ctx, this.state);
-		this.enterRule(_localctx, 146, ForgeParserParser.RULE_queryDecl);
+		this.enterRule(_localctx, 146, ForgeParser.RULE_queryDecl);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 904;
 			this.name();
 			this.state = 905;
-			this.match(ForgeParserParser.COLON_TOK);
+			this.match(ForgeParser.COLON_TOK);
 			this.state = 906;
 			this.arrowExpr();
 			this.state = 907;
-			this.match(ForgeParserParser.EQ_TOK);
+			this.match(ForgeParser.EQ_TOK);
 			this.state = 908;
 			this.expr();
 			}
@@ -4695,7 +4695,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public numberList(): NumberListContext {
 		let _localctx: NumberListContext = new NumberListContext(this._ctx, this.state);
-		this.enterRule(_localctx, 148, ForgeParserParser.RULE_numberList);
+		this.enterRule(_localctx, 148, ForgeParser.RULE_numberList);
 		try {
 			this.state = 915;
 			this._errHandler.sync(this);
@@ -4714,7 +4714,7 @@ export class ForgeParserParser extends Parser {
 				this.state = 911;
 				this.number();
 				this.state = 912;
-				this.match(ForgeParserParser.COMMA_TOK);
+				this.match(ForgeParser.COMMA_TOK);
 				this.state = 913;
 				this.numberList();
 				}
@@ -4738,12 +4738,12 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public number(): NumberContext {
 		let _localctx: NumberContext = new NumberContext(this._ctx, this.state);
-		this.enterRule(_localctx, 150, ForgeParserParser.RULE_number);
+		this.enterRule(_localctx, 150, ForgeParser.RULE_number);
 		try {
 			this.enterOuterAlt(_localctx, 1);
 			{
 			this.state = 917;
-			this.match(ForgeParserParser.NUM_CONST_TOK);
+			this.match(ForgeParser.NUM_CONST_TOK);
 			}
 		}
 		catch (re) {
@@ -4763,21 +4763,21 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public bounds(): BoundsContext {
 		let _localctx: BoundsContext = new BoundsContext(this._ctx, this.state);
-		this.enterRule(_localctx, 152, ForgeParserParser.RULE_bounds);
+		this.enterRule(_localctx, 152, ForgeParser.RULE_bounds);
 		let _la: number;
 		try {
 			this.state = 931;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.LEFT_CURLY_TOK:
+			case ForgeParser.LEFT_CURLY_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 919;
-				this.match(ForgeParserParser.LEFT_CURLY_TOK);
+				this.match(ForgeParser.LEFT_CURLY_TOK);
 				this.state = 923;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				while (_la === ForgeParserParser.MINUS_TOK || ((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & ((1 << (ForgeParserParser.CARD_TOK - 70)) | (1 << (ForgeParserParser.BACKQUOTE_TOK - 70)) | (1 << (ForgeParserParser.THIS_TOK - 70)) | (1 << (ForgeParserParser.NO_TOK - 70)) | (1 << (ForgeParserParser.SUM_TOK - 70)) | (1 << (ForgeParserParser.INT_TOK - 70)) | (1 << (ForgeParserParser.NUM_CONST_TOK - 70)) | (1 << (ForgeParserParser.IDENTIFIER_TOK - 70)))) !== 0)) {
+				while (_la === ForgeParser.MINUS_TOK || ((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & ((1 << (ForgeParser.CARD_TOK - 70)) | (1 << (ForgeParser.BACKQUOTE_TOK - 70)) | (1 << (ForgeParser.THIS_TOK - 70)) | (1 << (ForgeParser.NO_TOK - 70)) | (1 << (ForgeParser.SUM_TOK - 70)) | (1 << (ForgeParser.INT_TOK - 70)) | (1 << (ForgeParser.NUM_CONST_TOK - 70)) | (1 << (ForgeParser.IDENTIFIER_TOK - 70)))) !== 0)) {
 					{
 					{
 					this.state = 920;
@@ -4789,23 +4789,23 @@ export class ForgeParserParser extends Parser {
 					_la = this._input.LA(1);
 				}
 				this.state = 926;
-				this.match(ForgeParserParser.RIGHT_CURLY_TOK);
+				this.match(ForgeParser.RIGHT_CURLY_TOK);
 				}
 				break;
-			case ForgeParserParser.EXACTLY_TOK:
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.EXACTLY_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 928;
 				this._errHandler.sync(this);
 				_la = this._input.LA(1);
-				if (_la === ForgeParserParser.EXACTLY_TOK) {
+				if (_la === ForgeParser.EXACTLY_TOK) {
 					{
 					this.state = 927;
-					this.match(ForgeParserParser.EXACTLY_TOK);
+					this.match(ForgeParser.EXACTLY_TOK);
 					}
 				}
 
@@ -4834,32 +4834,32 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public atomNameOrNumber(): AtomNameOrNumberContext {
 		let _localctx: AtomNameOrNumberContext = new AtomNameOrNumberContext(this._ctx, this.state);
-		this.enterRule(_localctx, 154, ForgeParserParser.RULE_atomNameOrNumber);
+		this.enterRule(_localctx, 154, ForgeParser.RULE_atomNameOrNumber);
 		try {
 			this.state = 938;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.BACKQUOTE_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 933;
-				this.match(ForgeParserParser.BACKQUOTE_TOK);
+				this.match(ForgeParser.BACKQUOTE_TOK);
 				this.state = 934;
 				this.name();
 				}
 				break;
-			case ForgeParserParser.NUM_CONST_TOK:
+			case ForgeParser.NUM_CONST_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 935;
 				this.number();
 				}
 				break;
-			case ForgeParserParser.MINUS_TOK:
+			case ForgeParser.MINUS_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 936;
-				this.match(ForgeParserParser.MINUS_TOK);
+				this.match(ForgeParser.MINUS_TOK);
 				this.state = 937;
 				this.number();
 				}
@@ -4885,7 +4885,7 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public bound(): BoundContext {
 		let _localctx: BoundContext = new BoundContext(this._ctx, this.state);
-		this.enterRule(_localctx, 156, ForgeParserParser.RULE_bound);
+		this.enterRule(_localctx, 156, ForgeParser.RULE_bound);
 		try {
 			this.state = 947;
 			this._errHandler.sync(this);
@@ -4906,7 +4906,7 @@ export class ForgeParserParser extends Parser {
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 944;
-				this.match(ForgeParserParser.NO_TOK);
+				this.match(ForgeParser.NO_TOK);
 				this.state = 945;
 				this.boundLHS();
 				}
@@ -4938,34 +4938,34 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public boundLHS(): BoundLHSContext {
 		let _localctx: BoundLHSContext = new BoundLHSContext(this._ctx, this.state);
-		this.enterRule(_localctx, 158, ForgeParserParser.RULE_boundLHS);
+		this.enterRule(_localctx, 158, ForgeParser.RULE_boundLHS);
 		let _la: number;
 		try {
 			this.state = 959;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.CARD_TOK:
+			case ForgeParser.CARD_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 949;
-				this.match(ForgeParserParser.CARD_TOK);
+				this.match(ForgeParser.CARD_TOK);
 				this.state = 950;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 951;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.NUM_CONST_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 952;
@@ -4977,7 +4977,7 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					this.state = 953;
-					this.match(ForgeParserParser.DOT_TOK);
+					this.match(ForgeParser.DOT_TOK);
 					this.state = 954;
 					this.qualName();
 					}
@@ -4985,7 +4985,7 @@ export class ForgeParserParser extends Parser {
 					this.state = 957;
 					this._errHandler.sync(this);
 					_la = this._input.LA(1);
-				} while (_la === ForgeParserParser.DOT_TOK);
+				} while (_la === ForgeParser.DOT_TOK);
 				}
 				break;
 			default:
@@ -5020,7 +5020,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: BindRHSUnionContext = new BindRHSUnionContext(this._ctx, _parentState);
 		let _prevctx: BindRHSUnionContext = _localctx;
 		let _startState: number = 160;
-		this.enterRecursionRule(_localctx, 160, ForgeParserParser.RULE_bindRHSUnion, _p);
+		this.enterRecursionRule(_localctx, 160, ForgeParser.RULE_bindRHSUnion, _p);
 		try {
 			let _alt: number;
 			this.enterOuterAlt(_localctx, 1);
@@ -5038,11 +5038,11 @@ export class ForgeParserParser extends Parser {
 			case 2:
 				{
 				this.state = 963;
-				this.match(ForgeParserParser.LEFT_PAREN_TOK);
+				this.match(ForgeParser.LEFT_PAREN_TOK);
 				this.state = 964;
 				this.bindRHSUnion(0);
 				this.state = 965;
-				this.match(ForgeParserParser.RIGHT_PAREN_TOK);
+				this.match(ForgeParser.RIGHT_PAREN_TOK);
 				}
 				break;
 			}
@@ -5059,13 +5059,13 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new BindRHSUnionContext(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_bindRHSUnion);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_bindRHSUnion);
 					this.state = 969;
 					if (!(this.precpred(this._ctx, 2))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 					}
 					this.state = 970;
-					this.match(ForgeParserParser.PLUS_TOK);
+					this.match(ForgeParser.PLUS_TOK);
 					this.state = 971;
 					this.bindRHSProduct(0);
 					}
@@ -5105,7 +5105,7 @@ export class ForgeParserParser extends Parser {
 		let _localctx: BindRHSProductContext = new BindRHSProductContext(this._ctx, _parentState);
 		let _prevctx: BindRHSProductContext = _localctx;
 		let _startState: number = 162;
-		this.enterRecursionRule(_localctx, 162, ForgeParserParser.RULE_bindRHSProduct, _p);
+		this.enterRecursionRule(_localctx, 162, ForgeParser.RULE_bindRHSProduct, _p);
 		let _la: number;
 		try {
 			let _alt: number;
@@ -5117,11 +5117,11 @@ export class ForgeParserParser extends Parser {
 			case 1:
 				{
 				this.state = 978;
-				this.match(ForgeParserParser.LEFT_PAREN_TOK);
+				this.match(ForgeParser.LEFT_PAREN_TOK);
 				this.state = 979;
 				this.bindRHSProduct(0);
 				this.state = 980;
-				this.match(ForgeParserParser.RIGHT_PAREN_TOK);
+				this.match(ForgeParser.RIGHT_PAREN_TOK);
 				}
 				break;
 
@@ -5145,14 +5145,14 @@ export class ForgeParserParser extends Parser {
 					{
 					{
 					_localctx = new BindRHSProductContext(_parentctx, _parentState);
-					this.pushNewRecursionContext(_localctx, _startState, ForgeParserParser.RULE_bindRHSProduct);
+					this.pushNewRecursionContext(_localctx, _startState, ForgeParser.RULE_bindRHSProduct);
 					this.state = 985;
 					if (!(this.precpred(this._ctx, 2))) {
 						throw this.createFailedPredicateException("this.precpred(this._ctx, 2)");
 					}
 					this.state = 986;
 					_la = this._input.LA(1);
-					if (!(_la === ForgeParserParser.ARROW_TOK || _la === ForgeParserParser.COMMA_TOK)) {
+					if (!(_la === ForgeParser.ARROW_TOK || _la === ForgeParser.COMMA_TOK)) {
 					this._errHandler.recoverInline(this);
 					} else {
 						if (this._input.LA(1) === Token.EOF) {
@@ -5190,39 +5190,39 @@ export class ForgeParserParser extends Parser {
 	// @RuleVersion(0)
 	public bindRHSProductBase(): BindRHSProductBaseContext {
 		let _localctx: BindRHSProductBaseContext = new BindRHSProductBaseContext(this._ctx, this.state);
-		this.enterRule(_localctx, 164, ForgeParserParser.RULE_bindRHSProductBase);
+		this.enterRule(_localctx, 164, ForgeParser.RULE_bindRHSProductBase);
 		try {
 			this.state = 999;
 			this._errHandler.sync(this);
 			switch (this._input.LA(1)) {
-			case ForgeParserParser.MINUS_TOK:
-			case ForgeParserParser.BACKQUOTE_TOK:
-			case ForgeParserParser.NUM_CONST_TOK:
+			case ForgeParser.MINUS_TOK:
+			case ForgeParser.BACKQUOTE_TOK:
+			case ForgeParser.NUM_CONST_TOK:
 				this.enterOuterAlt(_localctx, 1);
 				{
 				this.state = 993;
 				this.atomNameOrNumber();
 				}
 				break;
-			case ForgeParserParser.THIS_TOK:
-			case ForgeParserParser.SUM_TOK:
-			case ForgeParserParser.INT_TOK:
-			case ForgeParserParser.IDENTIFIER_TOK:
+			case ForgeParser.THIS_TOK:
+			case ForgeParser.SUM_TOK:
+			case ForgeParser.INT_TOK:
+			case ForgeParser.IDENTIFIER_TOK:
 				this.enterOuterAlt(_localctx, 2);
 				{
 				this.state = 994;
 				this.qualName();
 				}
 				break;
-			case ForgeParserParser.LEFT_PAREN_TOK:
+			case ForgeParser.LEFT_PAREN_TOK:
 				this.enterOuterAlt(_localctx, 3);
 				{
 				this.state = 995;
-				this.match(ForgeParserParser.LEFT_PAREN_TOK);
+				this.match(ForgeParser.LEFT_PAREN_TOK);
 				this.state = 996;
 				this.bindRHSUnion(0);
 				this.state = 997;
-				this.match(ForgeParserParser.RIGHT_PAREN_TOK);
+				this.match(ForgeParser.RIGHT_PAREN_TOK);
 				}
 				break;
 			default:
@@ -5907,18 +5907,18 @@ export class ForgeParserParser extends Parser {
 		"\u03BF\u03C1\u03C9\u03D0\u03D9\u03E0\u03E9";
 	public static readonly _serializedATN: string = Utils.join(
 		[
-			ForgeParserParser._serializedATNSegment0,
-			ForgeParserParser._serializedATNSegment1,
+			ForgeParser._serializedATNSegment0,
+			ForgeParser._serializedATNSegment1,
 		],
 		"",
 	);
 	public static __ATN: ATN;
 	public static get _ATN(): ATN {
-		if (!ForgeParserParser.__ATN) {
-			ForgeParserParser.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(ForgeParserParser._serializedATN));
+		if (!ForgeParser.__ATN) {
+			ForgeParser.__ATN = new ATNDeserializer().deserialize(Utils.toCharArray(ForgeParser._serializedATN));
 		}
 
-		return ForgeParserParser.__ATN;
+		return ForgeParser.__ATN;
 	}
 
 }
@@ -5955,21 +5955,21 @@ export class AlloyModuleContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_alloyModule; }
+	public get ruleIndex(): number { return ForgeParser.RULE_alloyModule; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterAlloyModule) {
 			listener.enterAlloyModule(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitAlloyModule) {
 			listener.exitAlloyModule(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitAlloyModule) {
 			return visitor.visitAlloyModule(this);
 		} else {
@@ -5980,39 +5980,39 @@ export class AlloyModuleContext extends ParserRuleContext {
 
 
 export class ImportDeclContext extends ParserRuleContext {
-	public OPEN_TOK(): TerminalNode { return this.getToken(ForgeParserParser.OPEN_TOK, 0); }
+	public OPEN_TOK(): TerminalNode { return this.getToken(ForgeParser.OPEN_TOK, 0); }
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_SQUARE_TOK, 0); }
+	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_SQUARE_TOK, 0); }
 	public qualNameList(): QualNameListContext | undefined {
 		return this.tryGetRuleContext(0, QualNameListContext);
 	}
-	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_SQUARE_TOK, 0); }
-	public AS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.AS_TOK, 0); }
+	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_SQUARE_TOK, 0); }
+	public AS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.AS_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
-	public FILE_PATH_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FILE_PATH_TOK, 0); }
+	public FILE_PATH_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FILE_PATH_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_importDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_importDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterImportDecl) {
 			listener.enterImportDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitImportDecl) {
 			listener.exitImportDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitImportDecl) {
 			return visitor.visitImportDecl(this);
 		} else {
@@ -6075,21 +6075,21 @@ export class ParagraphContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_paragraph; }
+	public get ruleIndex(): number { return ForgeParser.RULE_paragraph; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterParagraph) {
 			listener.enterParagraph(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitParagraph) {
 			listener.exitParagraph(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitParagraph) {
 			return visitor.visitParagraph(this);
 		} else {
@@ -6100,14 +6100,14 @@ export class ParagraphContext extends ParserRuleContext {
 
 
 export class SigDeclContext extends ParserRuleContext {
-	public SIG_TOK(): TerminalNode { return this.getToken(ForgeParserParser.SIG_TOK, 0); }
+	public SIG_TOK(): TerminalNode { return this.getToken(ForgeParser.SIG_TOK, 0); }
 	public nameList(): NameListContext {
 		return this.getRuleContext(0, NameListContext);
 	}
-	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
-	public VAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.VAR_TOK, 0); }
-	public ABSTRACT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ABSTRACT_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
+	public VAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.VAR_TOK, 0); }
+	public ABSTRACT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ABSTRACT_TOK, 0); }
 	public mult(): MultContext | undefined {
 		return this.tryGetRuleContext(0, MultContext);
 	}
@@ -6124,21 +6124,21 @@ export class SigDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_sigDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_sigDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterSigDecl) {
 			listener.enterSigDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitSigDecl) {
 			listener.exitSigDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitSigDecl) {
 			return visitor.visitSigDecl(this);
 		} else {
@@ -6149,7 +6149,7 @@ export class SigDeclContext extends ParserRuleContext {
 
 
 export class SigExtContext extends ParserRuleContext {
-	public EXTENDS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EXTENDS_TOK, 0); }
+	public EXTENDS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EXTENDS_TOK, 0); }
 	public qualName(): QualNameContext[];
 	public qualName(i: number): QualNameContext;
 	public qualName(i?: number): QualNameContext | QualNameContext[] {
@@ -6159,35 +6159,35 @@ export class SigExtContext extends ParserRuleContext {
 			return this.getRuleContext(i, QualNameContext);
 		}
 	}
-	public IN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IN_TOK, 0); }
+	public IN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IN_TOK, 0); }
 	public PLUS_TOK(): TerminalNode[];
 	public PLUS_TOK(i: number): TerminalNode;
 	public PLUS_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.PLUS_TOK);
+			return this.getTokens(ForgeParser.PLUS_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.PLUS_TOK, i);
+			return this.getToken(ForgeParser.PLUS_TOK, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_sigExt; }
+	public get ruleIndex(): number { return ForgeParser.RULE_sigExt; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterSigExt) {
 			listener.enterSigExt(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitSigExt) {
 			listener.exitSigExt(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitSigExt) {
 			return visitor.visitSigExt(this);
 		} else {
@@ -6198,29 +6198,29 @@ export class SigExtContext extends ParserRuleContext {
 
 
 export class MultContext extends ParserRuleContext {
-	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LONE_TOK, 0); }
-	public SOME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SOME_TOK, 0); }
-	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ONE_TOK, 0); }
-	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TWO_TOK, 0); }
+	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LONE_TOK, 0); }
+	public SOME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SOME_TOK, 0); }
+	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ONE_TOK, 0); }
+	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TWO_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_mult; }
+	public get ruleIndex(): number { return ForgeParser.RULE_mult; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterMult) {
 			listener.enterMult(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitMult) {
 			listener.exitMult(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitMult) {
 			return visitor.visitMult(this);
 		} else {
@@ -6231,31 +6231,31 @@ export class MultContext extends ParserRuleContext {
 
 
 export class ArrowMultContext extends ParserRuleContext {
-	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LONE_TOK, 0); }
-	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SET_TOK, 0); }
-	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ONE_TOK, 0); }
-	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TWO_TOK, 0); }
-	public FUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FUNC_TOK, 0); }
-	public PFUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PFUNC_TOK, 0); }
+	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LONE_TOK, 0); }
+	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SET_TOK, 0); }
+	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ONE_TOK, 0); }
+	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TWO_TOK, 0); }
+	public FUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FUNC_TOK, 0); }
+	public PFUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PFUNC_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_arrowMult; }
+	public get ruleIndex(): number { return ForgeParser.RULE_arrowMult; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterArrowMult) {
 			listener.enterArrowMult(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitArrowMult) {
 			listener.exitArrowMult(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitArrowMult) {
 			return visitor.visitArrowMult(this);
 		} else {
@@ -6266,30 +6266,30 @@ export class ArrowMultContext extends ParserRuleContext {
 
 
 export class HelperMultContext extends ParserRuleContext {
-	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LONE_TOK, 0); }
-	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SET_TOK, 0); }
-	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ONE_TOK, 0); }
-	public FUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FUNC_TOK, 0); }
-	public PFUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PFUNC_TOK, 0); }
+	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LONE_TOK, 0); }
+	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SET_TOK, 0); }
+	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ONE_TOK, 0); }
+	public FUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FUNC_TOK, 0); }
+	public PFUNC_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PFUNC_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_helperMult; }
+	public get ruleIndex(): number { return ForgeParser.RULE_helperMult; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterHelperMult) {
 			listener.enterHelperMult(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitHelperMult) {
 			listener.exitHelperMult(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitHelperMult) {
 			return visitor.visitHelperMult(this);
 		} else {
@@ -6303,11 +6303,11 @@ export class ParaDeclContext extends ParserRuleContext {
 	public nameList(): NameListContext {
 		return this.getRuleContext(0, NameListContext);
 	}
-	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParser.COLON_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
-	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DISJ_TOK, 0); }
+	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DISJ_TOK, 0); }
 	public helperMult(): HelperMultContext | undefined {
 		return this.tryGetRuleContext(0, HelperMultContext);
 	}
@@ -6315,21 +6315,21 @@ export class ParaDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_paraDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_paraDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterParaDecl) {
 			listener.enterParaDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitParaDecl) {
 			listener.exitParaDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitParaDecl) {
 			return visitor.visitParaDecl(this);
 		} else {
@@ -6343,31 +6343,31 @@ export class QuantDeclContext extends ParserRuleContext {
 	public nameList(): NameListContext {
 		return this.getRuleContext(0, NameListContext);
 	}
-	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParser.COLON_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
-	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DISJ_TOK, 0); }
-	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SET_TOK, 0); }
+	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DISJ_TOK, 0); }
+	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SET_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_quantDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_quantDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQuantDecl) {
 			listener.enterQuantDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQuantDecl) {
 			listener.exitQuantDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQuantDecl) {
 			return visitor.visitQuantDecl(this);
 		} else {
@@ -6381,33 +6381,33 @@ export class ArrowDeclContext extends ParserRuleContext {
 	public nameList(): NameListContext {
 		return this.getRuleContext(0, NameListContext);
 	}
-	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParser.COLON_TOK, 0); }
 	public arrowMult(): ArrowMultContext {
 		return this.getRuleContext(0, ArrowMultContext);
 	}
 	public arrowExpr(): ArrowExprContext {
 		return this.getRuleContext(0, ArrowExprContext);
 	}
-	public VAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.VAR_TOK, 0); }
+	public VAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.VAR_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_arrowDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_arrowDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterArrowDecl) {
 			listener.enterArrowDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitArrowDecl) {
 			listener.exitArrowDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitArrowDecl) {
 			return visitor.visitArrowDecl(this);
 		} else {
@@ -6418,26 +6418,26 @@ export class ArrowDeclContext extends ParserRuleContext {
 
 
 export class PredTypeContext extends ParserRuleContext {
-	public WHEAT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.WHEAT_TOK, 0); }
+	public WHEAT_TOK(): TerminalNode { return this.getToken(ForgeParser.WHEAT_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_predType; }
+	public get ruleIndex(): number { return ForgeParser.RULE_predType; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterPredType) {
 			listener.enterPredType(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitPredType) {
 			listener.exitPredType(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitPredType) {
 			return visitor.visitPredType(this);
 		} else {
@@ -6448,7 +6448,7 @@ export class PredTypeContext extends ParserRuleContext {
 
 
 export class PredDeclContext extends ParserRuleContext {
-	public PRED_TOK(): TerminalNode { return this.getToken(ForgeParserParser.PRED_TOK, 0); }
+	public PRED_TOK(): TerminalNode { return this.getToken(ForgeParser.PRED_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
@@ -6461,7 +6461,7 @@ export class PredDeclContext extends ParserRuleContext {
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DOT_TOK, 0); }
+	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DOT_TOK, 0); }
 	public paraDecls(): ParaDeclsContext | undefined {
 		return this.tryGetRuleContext(0, ParaDeclsContext);
 	}
@@ -6469,21 +6469,21 @@ export class PredDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_predDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_predDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterPredDecl) {
 			listener.enterPredDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitPredDecl) {
 			listener.exitPredDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitPredDecl) {
 			return visitor.visitPredDecl(this);
 		} else {
@@ -6494,11 +6494,11 @@ export class PredDeclContext extends ParserRuleContext {
 
 
 export class FunDeclContext extends ParserRuleContext {
-	public FUN_TOK(): TerminalNode { return this.getToken(ForgeParserParser.FUN_TOK, 0); }
+	public FUN_TOK(): TerminalNode { return this.getToken(ForgeParser.FUN_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParser.COLON_TOK, 0); }
 	public expr(): ExprContext[];
 	public expr(i: number): ExprContext;
 	public expr(i?: number): ExprContext | ExprContext[] {
@@ -6508,12 +6508,12 @@ export class FunDeclContext extends ParserRuleContext {
 			return this.getRuleContext(i, ExprContext);
 		}
 	}
-	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DOT_TOK, 0); }
+	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DOT_TOK, 0); }
 	public paraDecls(): ParaDeclsContext | undefined {
 		return this.tryGetRuleContext(0, ParaDeclsContext);
 	}
@@ -6524,21 +6524,21 @@ export class FunDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_funDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_funDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterFunDecl) {
 			listener.enterFunDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitFunDecl) {
 			listener.exitFunDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitFunDecl) {
 			return visitor.visitFunDecl(this);
 		} else {
@@ -6549,32 +6549,32 @@ export class FunDeclContext extends ParserRuleContext {
 
 
 export class ParaDeclsContext extends ParserRuleContext {
-	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_PAREN_TOK, 0); }
-	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_PAREN_TOK, 0); }
+	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_PAREN_TOK, 0); }
+	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_PAREN_TOK, 0); }
 	public paraDeclList(): ParaDeclListContext | undefined {
 		return this.tryGetRuleContext(0, ParaDeclListContext);
 	}
-	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_SQUARE_TOK, 0); }
-	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_SQUARE_TOK, 0); }
+	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_SQUARE_TOK, 0); }
+	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_SQUARE_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_paraDecls; }
+	public get ruleIndex(): number { return ForgeParser.RULE_paraDecls; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterParaDecls) {
 			listener.enterParaDecls(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitParaDecls) {
 			listener.exitParaDecls(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitParaDecls) {
 			return visitor.visitParaDecls(this);
 		} else {
@@ -6585,7 +6585,7 @@ export class ParaDeclsContext extends ParserRuleContext {
 
 
 export class AssertDeclContext extends ParserRuleContext {
-	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ASSERT_TOK, 0); }
+	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParser.ASSERT_TOK, 0); }
 	public block(): BlockContext {
 		return this.getRuleContext(0, BlockContext);
 	}
@@ -6596,21 +6596,21 @@ export class AssertDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_assertDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_assertDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterAssertDecl) {
 			listener.enterAssertDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitAssertDecl) {
 			listener.exitAssertDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitAssertDecl) {
 			return visitor.visitAssertDecl(this);
 		} else {
@@ -6621,12 +6621,12 @@ export class AssertDeclContext extends ParserRuleContext {
 
 
 export class CmdDeclContext extends ParserRuleContext {
-	public RUN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RUN_TOK, 0); }
-	public CHECK_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.CHECK_TOK, 0); }
+	public RUN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RUN_TOK, 0); }
+	public CHECK_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.CHECK_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
-	public COLON_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COLON_TOK, 0); }
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
@@ -6636,7 +6636,7 @@ export class CmdDeclContext extends ParserRuleContext {
 	public scope(): ScopeContext | undefined {
 		return this.tryGetRuleContext(0, ScopeContext);
 	}
-	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FOR_TOK, 0); }
+	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FOR_TOK, 0); }
 	public bounds(): BoundsContext | undefined {
 		return this.tryGetRuleContext(0, BoundsContext);
 	}
@@ -6644,21 +6644,21 @@ export class CmdDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_cmdDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_cmdDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterCmdDecl) {
 			listener.enterCmdDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitCmdDecl) {
 			listener.exitCmdDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitCmdDecl) {
 			return visitor.visitCmdDecl(this);
 		} else {
@@ -6669,11 +6669,11 @@ export class CmdDeclContext extends ParserRuleContext {
 
 
 export class TestDeclContext extends ParserRuleContext {
-	public IS_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IS_TOK, 0); }
-	public SAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SAT_TOK, 0); }
-	public UNSAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.UNSAT_TOK, 0); }
-	public THEOREM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.THEOREM_TOK, 0); }
-	public FORGE_ERROR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FORGE_ERROR_TOK, 0); }
+	public IS_TOK(): TerminalNode { return this.getToken(ForgeParser.IS_TOK, 0); }
+	public SAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SAT_TOK, 0); }
+	public UNSAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.UNSAT_TOK, 0); }
+	public THEOREM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.THEOREM_TOK, 0); }
+	public FORGE_ERROR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FORGE_ERROR_TOK, 0); }
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
@@ -6683,11 +6683,11 @@ export class TestDeclContext extends ParserRuleContext {
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
-	public COLON_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COLON_TOK, 0); }
 	public scope(): ScopeContext | undefined {
 		return this.tryGetRuleContext(0, ScopeContext);
 	}
-	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FOR_TOK, 0); }
+	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FOR_TOK, 0); }
 	public bounds(): BoundsContext | undefined {
 		return this.tryGetRuleContext(0, BoundsContext);
 	}
@@ -6695,21 +6695,21 @@ export class TestDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_testDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_testDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTestDecl) {
 			listener.enterTestDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTestDecl) {
 			listener.exitTestDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTestDecl) {
 			return visitor.visitTestDecl(this);
 		} else {
@@ -6720,11 +6720,11 @@ export class TestDeclContext extends ParserRuleContext {
 
 
 export class TestExpectDeclContext extends ParserRuleContext {
-	public EXPECT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.EXPECT_TOK, 0); }
+	public EXPECT_TOK(): TerminalNode { return this.getToken(ForgeParser.EXPECT_TOK, 0); }
 	public testBlock(): TestBlockContext {
 		return this.getRuleContext(0, TestBlockContext);
 	}
-	public TEST_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TEST_TOK, 0); }
+	public TEST_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TEST_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
@@ -6732,21 +6732,21 @@ export class TestExpectDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_testExpectDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_testExpectDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTestExpectDecl) {
 			listener.enterTestExpectDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTestExpectDecl) {
 			listener.exitTestExpectDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTestExpectDecl) {
 			return visitor.visitTestExpectDecl(this);
 		} else {
@@ -6757,8 +6757,8 @@ export class TestExpectDeclContext extends ParserRuleContext {
 
 
 export class TestBlockContext extends ParserRuleContext {
-	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
 	public testDecl(): TestDeclContext[];
 	public testDecl(i: number): TestDeclContext;
 	public testDecl(i?: number): TestDeclContext | TestDeclContext[] {
@@ -6772,21 +6772,21 @@ export class TestBlockContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_testBlock; }
+	public get ruleIndex(): number { return ForgeParser.RULE_testBlock; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTestBlock) {
 			listener.enterTestBlock(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTestBlock) {
 			listener.exitTestBlock(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTestBlock) {
 			return visitor.visitTestBlock(this);
 		} else {
@@ -6797,11 +6797,11 @@ export class TestBlockContext extends ParserRuleContext {
 
 
 export class ScopeContext extends ParserRuleContext {
-	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParserParser.FOR_TOK, 0); }
+	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParser.FOR_TOK, 0); }
 	public number(): NumberContext | undefined {
 		return this.tryGetRuleContext(0, NumberContext);
 	}
-	public BUT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BUT_TOK, 0); }
+	public BUT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BUT_TOK, 0); }
 	public typescopeList(): TypescopeListContext | undefined {
 		return this.tryGetRuleContext(0, TypescopeListContext);
 	}
@@ -6809,21 +6809,21 @@ export class ScopeContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_scope; }
+	public get ruleIndex(): number { return ForgeParser.RULE_scope; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterScope) {
 			listener.enterScope(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitScope) {
 			listener.exitScope(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitScope) {
 			return visitor.visitScope(this);
 		} else {
@@ -6840,26 +6840,26 @@ export class TypescopeContext extends ParserRuleContext {
 	public qualName(): QualNameContext {
 		return this.getRuleContext(0, QualNameContext);
 	}
-	public EXACTLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EXACTLY_TOK, 0); }
+	public EXACTLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EXACTLY_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_typescope; }
+	public get ruleIndex(): number { return ForgeParser.RULE_typescope; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTypescope) {
 			listener.enterTypescope(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTypescope) {
 			listener.exitTypescope(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTypescope) {
 			return visitor.visitTypescope(this);
 		} else {
@@ -6870,32 +6870,32 @@ export class TypescopeContext extends ParserRuleContext {
 
 
 export class ConstContext extends ParserRuleContext {
-	public NONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NONE_TOK, 0); }
-	public UNIV_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.UNIV_TOK, 0); }
-	public IDEN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IDEN_TOK, 0); }
+	public NONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NONE_TOK, 0); }
+	public UNIV_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.UNIV_TOK, 0); }
+	public IDEN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IDEN_TOK, 0); }
 	public number(): NumberContext | undefined {
 		return this.tryGetRuleContext(0, NumberContext);
 	}
-	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.MINUS_TOK, 0); }
+	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.MINUS_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_const; }
+	public get ruleIndex(): number { return ForgeParser.RULE_const; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterConst) {
 			listener.enterConst(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitConst) {
 			listener.exitConst(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitConst) {
 			return visitor.visitConst(this);
 		} else {
@@ -6906,18 +6906,18 @@ export class ConstContext extends ParserRuleContext {
 
 
 export class SatisfiabilityDeclContext extends ParserRuleContext {
-	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ASSERT_TOK, 0); }
+	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParser.ASSERT_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public IS_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IS_TOK, 0); }
-	public SAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SAT_TOK, 0); }
-	public UNSAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.UNSAT_TOK, 0); }
-	public FORGE_ERROR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FORGE_ERROR_TOK, 0); }
+	public IS_TOK(): TerminalNode { return this.getToken(ForgeParser.IS_TOK, 0); }
+	public SAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SAT_TOK, 0); }
+	public UNSAT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.UNSAT_TOK, 0); }
+	public FORGE_ERROR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FORGE_ERROR_TOK, 0); }
 	public scope(): ScopeContext | undefined {
 		return this.tryGetRuleContext(0, ScopeContext);
 	}
-	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FOR_TOK, 0); }
+	public FOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FOR_TOK, 0); }
 	public bounds(): BoundsContext | undefined {
 		return this.tryGetRuleContext(0, BoundsContext);
 	}
@@ -6925,21 +6925,21 @@ export class SatisfiabilityDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_satisfiabilityDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_satisfiabilityDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterSatisfiabilityDecl) {
 			listener.enterSatisfiabilityDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitSatisfiabilityDecl) {
 			listener.exitSatisfiabilityDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitSatisfiabilityDecl) {
 			return visitor.visitSatisfiabilityDecl(this);
 		} else {
@@ -6950,7 +6950,7 @@ export class SatisfiabilityDeclContext extends ParserRuleContext {
 
 
 export class PropertyDeclContext extends ParserRuleContext {
-	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ASSERT_TOK, 0); }
+	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParser.ASSERT_TOK, 0); }
 	public name(): NameContext[];
 	public name(i: number): NameContext;
 	public name(i?: number): NameContext | NameContext[] {
@@ -6960,18 +6960,18 @@ export class PropertyDeclContext extends ParserRuleContext {
 			return this.getRuleContext(i, NameContext);
 		}
 	}
-	public IS_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IS_TOK, 0); }
+	public IS_TOK(): TerminalNode { return this.getToken(ForgeParser.IS_TOK, 0); }
 	public FOR_TOK(): TerminalNode[];
 	public FOR_TOK(i: number): TerminalNode;
 	public FOR_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.FOR_TOK);
+			return this.getTokens(ForgeParser.FOR_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.FOR_TOK, i);
+			return this.getToken(ForgeParser.FOR_TOK, i);
 		}
 	}
-	public SUFFICIENT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUFFICIENT_TOK, 0); }
-	public NECESSARY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NECESSARY_TOK, 0); }
+	public SUFFICIENT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUFFICIENT_TOK, 0); }
+	public NECESSARY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NECESSARY_TOK, 0); }
 	public scope(): ScopeContext | undefined {
 		return this.tryGetRuleContext(0, ScopeContext);
 	}
@@ -6982,21 +6982,21 @@ export class PropertyDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_propertyDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_propertyDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterPropertyDecl) {
 			listener.enterPropertyDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitPropertyDecl) {
 			listener.exitPropertyDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitPropertyDecl) {
 			return visitor.visitPropertyDecl(this);
 		} else {
@@ -7007,12 +7007,12 @@ export class PropertyDeclContext extends ParserRuleContext {
 
 
 export class QuantifiedPropertyDeclContext extends ParserRuleContext {
-	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ASSERT_TOK, 0); }
-	public ALL_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ALL_TOK, 0); }
+	public ASSERT_TOK(): TerminalNode { return this.getToken(ForgeParser.ASSERT_TOK, 0); }
+	public ALL_TOK(): TerminalNode { return this.getToken(ForgeParser.ALL_TOK, 0); }
 	public quantDeclList(): QuantDeclListContext {
 		return this.getRuleContext(0, QuantDeclListContext);
 	}
-	public BAR_TOK(): TerminalNode { return this.getToken(ForgeParserParser.BAR_TOK, 0); }
+	public BAR_TOK(): TerminalNode { return this.getToken(ForgeParser.BAR_TOK, 0); }
 	public name(): NameContext[];
 	public name(i: number): NameContext;
 	public name(i?: number): NameContext | NameContext[] {
@@ -7022,26 +7022,26 @@ export class QuantifiedPropertyDeclContext extends ParserRuleContext {
 			return this.getRuleContext(i, NameContext);
 		}
 	}
-	public IS_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IS_TOK, 0); }
+	public IS_TOK(): TerminalNode { return this.getToken(ForgeParser.IS_TOK, 0); }
 	public FOR_TOK(): TerminalNode[];
 	public FOR_TOK(i: number): TerminalNode;
 	public FOR_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.FOR_TOK);
+			return this.getTokens(ForgeParser.FOR_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.FOR_TOK, i);
+			return this.getToken(ForgeParser.FOR_TOK, i);
 		}
 	}
-	public SUFFICIENT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUFFICIENT_TOK, 0); }
-	public NECESSARY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NECESSARY_TOK, 0); }
-	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DISJ_TOK, 0); }
+	public SUFFICIENT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUFFICIENT_TOK, 0); }
+	public NECESSARY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NECESSARY_TOK, 0); }
+	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DISJ_TOK, 0); }
 	public LEFT_SQUARE_TOK(): TerminalNode[];
 	public LEFT_SQUARE_TOK(i: number): TerminalNode;
 	public LEFT_SQUARE_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.LEFT_SQUARE_TOK);
+			return this.getTokens(ForgeParser.LEFT_SQUARE_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.LEFT_SQUARE_TOK, i);
+			return this.getToken(ForgeParser.LEFT_SQUARE_TOK, i);
 		}
 	}
 	public exprList(): ExprListContext[];
@@ -7057,9 +7057,9 @@ export class QuantifiedPropertyDeclContext extends ParserRuleContext {
 	public RIGHT_SQUARE_TOK(i: number): TerminalNode;
 	public RIGHT_SQUARE_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.RIGHT_SQUARE_TOK);
+			return this.getTokens(ForgeParser.RIGHT_SQUARE_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.RIGHT_SQUARE_TOK, i);
+			return this.getToken(ForgeParser.RIGHT_SQUARE_TOK, i);
 		}
 	}
 	public scope(): ScopeContext | undefined {
@@ -7072,21 +7072,21 @@ export class QuantifiedPropertyDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_quantifiedPropertyDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_quantifiedPropertyDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQuantifiedPropertyDecl) {
 			listener.enterQuantifiedPropertyDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQuantifiedPropertyDecl) {
 			listener.exitQuantifiedPropertyDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQuantifiedPropertyDecl) {
 			return visitor.visitQuantifiedPropertyDecl(this);
 		} else {
@@ -7097,14 +7097,14 @@ export class QuantifiedPropertyDeclContext extends ParserRuleContext {
 
 
 export class TestSuiteDeclContext extends ParserRuleContext {
-	public TEST_TOK(): TerminalNode { return this.getToken(ForgeParserParser.TEST_TOK, 0); }
-	public SUITE_TOK(): TerminalNode { return this.getToken(ForgeParserParser.SUITE_TOK, 0); }
-	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParserParser.FOR_TOK, 0); }
+	public TEST_TOK(): TerminalNode { return this.getToken(ForgeParser.TEST_TOK, 0); }
+	public SUITE_TOK(): TerminalNode { return this.getToken(ForgeParser.SUITE_TOK, 0); }
+	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParser.FOR_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
 	public testConstruct(): TestConstructContext[];
 	public testConstruct(i: number): TestConstructContext;
 	public testConstruct(i?: number): TestConstructContext | TestConstructContext[] {
@@ -7118,21 +7118,21 @@ export class TestSuiteDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_testSuiteDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_testSuiteDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTestSuiteDecl) {
 			listener.enterTestSuiteDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTestSuiteDecl) {
 			listener.exitTestSuiteDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTestSuiteDecl) {
 			return visitor.visitTestSuiteDecl(this);
 		} else {
@@ -7162,21 +7162,21 @@ export class TestConstructContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_testConstruct; }
+	public get ruleIndex(): number { return ForgeParser.RULE_testConstruct; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTestConstruct) {
 			listener.enterTestConstruct(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTestConstruct) {
 			listener.exitTestConstruct(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTestConstruct) {
 			return visitor.visitTestConstruct(this);
 		} else {
@@ -7187,7 +7187,7 @@ export class TestConstructContext extends ParserRuleContext {
 
 
 export class ArrowOpContext extends ParserRuleContext {
-	public ARROW_TOK(): TerminalNode { return this.getToken(ForgeParserParser.ARROW_TOK, 0); }
+	public ARROW_TOK(): TerminalNode { return this.getToken(ForgeParser.ARROW_TOK, 0); }
 	public mult(): MultContext[];
 	public mult(i: number): MultContext;
 	public mult(i?: number): MultContext | MultContext[] {
@@ -7201,30 +7201,30 @@ export class ArrowOpContext extends ParserRuleContext {
 	public SET_TOK(i: number): TerminalNode;
 	public SET_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.SET_TOK);
+			return this.getTokens(ForgeParser.SET_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.SET_TOK, i);
+			return this.getToken(ForgeParser.SET_TOK, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_arrowOp; }
+	public get ruleIndex(): number { return ForgeParser.RULE_arrowOp; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterArrowOp) {
 			listener.enterArrowOp(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitArrowOp) {
 			listener.exitArrowOp(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitArrowOp) {
 			return visitor.visitArrowOp(this);
 		} else {
@@ -7235,33 +7235,33 @@ export class ArrowOpContext extends ParserRuleContext {
 
 
 export class CompareOpContext extends ParserRuleContext {
-	public IN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IN_TOK, 0); }
-	public EQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EQ_TOK, 0); }
-	public LT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LT_TOK, 0); }
-	public GT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.GT_TOK, 0); }
-	public LEQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEQ_TOK, 0); }
-	public GEQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.GEQ_TOK, 0); }
-	public IS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IS_TOK, 0); }
-	public NI_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NI_TOK, 0); }
+	public IN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IN_TOK, 0); }
+	public EQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EQ_TOK, 0); }
+	public LT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LT_TOK, 0); }
+	public GT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.GT_TOK, 0); }
+	public LEQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEQ_TOK, 0); }
+	public GEQ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.GEQ_TOK, 0); }
+	public IS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IS_TOK, 0); }
+	public NI_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NI_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_compareOp; }
+	public get ruleIndex(): number { return ForgeParser.RULE_compareOp; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterCompareOp) {
 			listener.enterCompareOp(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitCompareOp) {
 			listener.exitCompareOp(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitCompareOp) {
 			return visitor.visitCompareOp(this);
 		} else {
@@ -7275,7 +7275,7 @@ export class LetDeclContext extends ParserRuleContext {
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public EQ_TOK(): TerminalNode { return this.getToken(ForgeParserParser.EQ_TOK, 0); }
+	public EQ_TOK(): TerminalNode { return this.getToken(ForgeParser.EQ_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
@@ -7283,21 +7283,21 @@ export class LetDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_letDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_letDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterLetDecl) {
 			listener.enterLetDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitLetDecl) {
 			listener.exitLetDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitLetDecl) {
 			return visitor.visitLetDecl(this);
 		} else {
@@ -7308,8 +7308,8 @@ export class LetDeclContext extends ParserRuleContext {
 
 
 export class BlockContext extends ParserRuleContext {
-	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode { return this.getToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
 	public expr(): ExprContext[];
 	public expr(i: number): ExprContext;
 	public expr(i?: number): ExprContext | ExprContext[] {
@@ -7323,21 +7323,21 @@ export class BlockContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_block; }
+	public get ruleIndex(): number { return ForgeParser.RULE_block; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBlock) {
 			listener.enterBlock(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBlock) {
 			listener.exitBlock(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBlock) {
 			return visitor.visitBlock(this);
 		} else {
@@ -7351,7 +7351,7 @@ export class BlockOrBarContext extends ParserRuleContext {
 	public block(): BlockContext | undefined {
 		return this.tryGetRuleContext(0, BlockContext);
 	}
-	public BAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BAR_TOK, 0); }
+	public BAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BAR_TOK, 0); }
 	public expr(): ExprContext | undefined {
 		return this.tryGetRuleContext(0, ExprContext);
 	}
@@ -7359,21 +7359,21 @@ export class BlockOrBarContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_blockOrBar; }
+	public get ruleIndex(): number { return ForgeParser.RULE_blockOrBar; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBlockOrBar) {
 			listener.enterBlockOrBar(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBlockOrBar) {
 			listener.exitBlockOrBar(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBlockOrBar) {
 			return visitor.visitBlockOrBar(this);
 		} else {
@@ -7384,9 +7384,9 @@ export class BlockOrBarContext extends ParserRuleContext {
 
 
 export class QuantContext extends ParserRuleContext {
-	public ALL_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ALL_TOK, 0); }
-	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NO_TOK, 0); }
-	public SUM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUM_TOK, 0); }
+	public ALL_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ALL_TOK, 0); }
+	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NO_TOK, 0); }
+	public SUM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUM_TOK, 0); }
 	public mult(): MultContext | undefined {
 		return this.tryGetRuleContext(0, MultContext);
 	}
@@ -7394,21 +7394,21 @@ export class QuantContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_quant; }
+	public get ruleIndex(): number { return ForgeParser.RULE_quant; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQuant) {
 			listener.enterQuant(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQuant) {
 			listener.exitQuant(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQuant) {
 			return visitor.visitQuant(this);
 		} else {
@@ -7428,37 +7428,37 @@ export class QualNameContext extends ParserRuleContext {
 			return this.getRuleContext(i, NameContext);
 		}
 	}
-	public THIS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.THIS_TOK, 0); }
+	public THIS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.THIS_TOK, 0); }
 	public SLASH_TOK(): TerminalNode[];
 	public SLASH_TOK(i: number): TerminalNode;
 	public SLASH_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.SLASH_TOK);
+			return this.getTokens(ForgeParser.SLASH_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.SLASH_TOK, i);
+			return this.getToken(ForgeParser.SLASH_TOK, i);
 		}
 	}
-	public INT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.INT_TOK, 0); }
-	public SUM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUM_TOK, 0); }
+	public INT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.INT_TOK, 0); }
+	public SUM_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUM_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_qualName; }
+	public get ruleIndex(): number { return ForgeParser.RULE_qualName; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQualName) {
 			listener.enterQualName(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQualName) {
 			listener.exitQualName(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQualName) {
 			return visitor.visitQualName(this);
 		} else {
@@ -7469,7 +7469,7 @@ export class QualNameContext extends ParserRuleContext {
 
 
 export class OptionDeclContext extends ParserRuleContext {
-	public OPTION_TOK(): TerminalNode { return this.getToken(ForgeParserParser.OPTION_TOK, 0); }
+	public OPTION_TOK(): TerminalNode { return this.getToken(ForgeParser.OPTION_TOK, 0); }
 	public qualName(): QualNameContext[];
 	public qualName(i: number): QualNameContext;
 	public qualName(i?: number): QualNameContext | QualNameContext[] {
@@ -7479,30 +7479,30 @@ export class OptionDeclContext extends ParserRuleContext {
 			return this.getRuleContext(i, QualNameContext);
 		}
 	}
-	public FILE_PATH_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.FILE_PATH_TOK, 0); }
+	public FILE_PATH_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.FILE_PATH_TOK, 0); }
 	public number(): NumberContext | undefined {
 		return this.tryGetRuleContext(0, NumberContext);
 	}
-	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.MINUS_TOK, 0); }
+	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.MINUS_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_optionDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_optionDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterOptionDecl) {
 			listener.enterOptionDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitOptionDecl) {
 			listener.exitOptionDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitOptionDecl) {
 			return visitor.visitOptionDecl(this);
 		} else {
@@ -7513,26 +7513,26 @@ export class OptionDeclContext extends ParserRuleContext {
 
 
 export class NameContext extends ParserRuleContext {
-	public IDENTIFIER_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IDENTIFIER_TOK, 0); }
+	public IDENTIFIER_TOK(): TerminalNode { return this.getToken(ForgeParser.IDENTIFIER_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_name; }
+	public get ruleIndex(): number { return ForgeParser.RULE_name; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterName) {
 			listener.enterName(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitName) {
 			listener.exitName(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitName) {
 			return visitor.visitName(this);
 		} else {
@@ -7546,7 +7546,7 @@ export class NameListContext extends ParserRuleContext {
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public nameList(): NameListContext | undefined {
 		return this.tryGetRuleContext(0, NameListContext);
 	}
@@ -7554,21 +7554,21 @@ export class NameListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_nameList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_nameList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterNameList) {
 			listener.enterNameList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitNameList) {
 			listener.exitNameList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitNameList) {
 			return visitor.visitNameList(this);
 		} else {
@@ -7582,7 +7582,7 @@ export class QualNameListContext extends ParserRuleContext {
 	public qualName(): QualNameContext {
 		return this.getRuleContext(0, QualNameContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public qualNameList(): QualNameListContext | undefined {
 		return this.tryGetRuleContext(0, QualNameListContext);
 	}
@@ -7590,21 +7590,21 @@ export class QualNameListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_qualNameList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_qualNameList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQualNameList) {
 			listener.enterQualNameList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQualNameList) {
 			listener.exitQualNameList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQualNameList) {
 			return visitor.visitQualNameList(this);
 		} else {
@@ -7618,7 +7618,7 @@ export class ParaDeclListContext extends ParserRuleContext {
 	public paraDecl(): ParaDeclContext {
 		return this.getRuleContext(0, ParaDeclContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public paraDeclList(): ParaDeclListContext | undefined {
 		return this.tryGetRuleContext(0, ParaDeclListContext);
 	}
@@ -7626,21 +7626,21 @@ export class ParaDeclListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_paraDeclList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_paraDeclList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterParaDeclList) {
 			listener.enterParaDeclList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitParaDeclList) {
 			listener.exitParaDeclList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitParaDeclList) {
 			return visitor.visitParaDeclList(this);
 		} else {
@@ -7654,7 +7654,7 @@ export class QuantDeclListContext extends ParserRuleContext {
 	public quantDecl(): QuantDeclContext {
 		return this.getRuleContext(0, QuantDeclContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public quantDeclList(): QuantDeclListContext | undefined {
 		return this.tryGetRuleContext(0, QuantDeclListContext);
 	}
@@ -7662,21 +7662,21 @@ export class QuantDeclListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_quantDeclList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_quantDeclList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQuantDeclList) {
 			listener.enterQuantDeclList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQuantDeclList) {
 			listener.exitQuantDeclList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQuantDeclList) {
 			return visitor.visitQuantDeclList(this);
 		} else {
@@ -7690,7 +7690,7 @@ export class ArrowDeclListContext extends ParserRuleContext {
 	public arrowDecl(): ArrowDeclContext {
 		return this.getRuleContext(0, ArrowDeclContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public arrowDeclList(): ArrowDeclListContext | undefined {
 		return this.tryGetRuleContext(0, ArrowDeclListContext);
 	}
@@ -7698,21 +7698,21 @@ export class ArrowDeclListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_arrowDeclList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_arrowDeclList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterArrowDeclList) {
 			listener.enterArrowDeclList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitArrowDeclList) {
 			listener.exitArrowDeclList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitArrowDeclList) {
 			return visitor.visitArrowDeclList(this);
 		} else {
@@ -7726,7 +7726,7 @@ export class LetDeclListContext extends ParserRuleContext {
 	public letDecl(): LetDeclContext {
 		return this.getRuleContext(0, LetDeclContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public letDeclList(): LetDeclListContext | undefined {
 		return this.tryGetRuleContext(0, LetDeclListContext);
 	}
@@ -7734,21 +7734,21 @@ export class LetDeclListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_letDeclList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_letDeclList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterLetDeclList) {
 			listener.enterLetDeclList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitLetDeclList) {
 			listener.exitLetDeclList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitLetDeclList) {
 			return visitor.visitLetDeclList(this);
 		} else {
@@ -7762,7 +7762,7 @@ export class TypescopeListContext extends ParserRuleContext {
 	public typescope(): TypescopeContext {
 		return this.getRuleContext(0, TypescopeContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public typescopeList(): TypescopeListContext | undefined {
 		return this.tryGetRuleContext(0, TypescopeListContext);
 	}
@@ -7770,21 +7770,21 @@ export class TypescopeListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_typescopeList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_typescopeList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterTypescopeList) {
 			listener.enterTypescopeList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitTypescopeList) {
 			listener.exitTypescopeList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitTypescopeList) {
 			return visitor.visitTypescopeList(this);
 		} else {
@@ -7798,7 +7798,7 @@ export class ExprListContext extends ParserRuleContext {
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public exprList(): ExprListContext | undefined {
 		return this.tryGetRuleContext(0, ExprListContext);
 	}
@@ -7806,21 +7806,21 @@ export class ExprListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_exprList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_exprList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExprList) {
 			listener.enterExprList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExprList) {
 			listener.exitExprList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExprList) {
 			return visitor.visitExprList(this);
 		} else {
@@ -7834,40 +7834,40 @@ export class ExprContext extends ParserRuleContext {
 	public expr1(): Expr1Context | undefined {
 		return this.tryGetRuleContext(0, Expr1Context);
 	}
-	public LET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LET_TOK, 0); }
+	public LET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LET_TOK, 0); }
 	public letDeclList(): LetDeclListContext | undefined {
 		return this.tryGetRuleContext(0, LetDeclListContext);
 	}
 	public blockOrBar(): BlockOrBarContext | undefined {
 		return this.tryGetRuleContext(0, BlockOrBarContext);
 	}
-	public BIND_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BIND_TOK, 0); }
+	public BIND_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BIND_TOK, 0); }
 	public quant(): QuantContext | undefined {
 		return this.tryGetRuleContext(0, QuantContext);
 	}
 	public quantDeclList(): QuantDeclListContext | undefined {
 		return this.tryGetRuleContext(0, QuantDeclListContext);
 	}
-	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DISJ_TOK, 0); }
+	public DISJ_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DISJ_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr) {
 			listener.enterExpr(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr) {
 			listener.exitExpr(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr) {
 			return visitor.visitExpr(this);
 		} else {
@@ -7884,26 +7884,26 @@ export class Expr1Context extends ParserRuleContext {
 	public expr1(): Expr1Context | undefined {
 		return this.tryGetRuleContext(0, Expr1Context);
 	}
-	public OR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.OR_TOK, 0); }
+	public OR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.OR_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr1; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr1; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr1) {
 			listener.enterExpr1(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr1) {
 			listener.exitExpr1(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr1) {
 			return visitor.visitExpr1(this);
 		} else {
@@ -7920,26 +7920,26 @@ export class Expr1_5Context extends ParserRuleContext {
 	public expr1_5(): Expr1_5Context | undefined {
 		return this.tryGetRuleContext(0, Expr1_5Context);
 	}
-	public XOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.XOR_TOK, 0); }
+	public XOR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.XOR_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr1_5; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr1_5; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr1_5) {
 			listener.enterExpr1_5(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr1_5) {
 			listener.exitExpr1_5(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr1_5) {
 			return visitor.visitExpr1_5(this);
 		} else {
@@ -7956,26 +7956,26 @@ export class Expr2Context extends ParserRuleContext {
 	public expr2(): Expr2Context | undefined {
 		return this.tryGetRuleContext(0, Expr2Context);
 	}
-	public IFF_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IFF_TOK, 0); }
+	public IFF_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IFF_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr2; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr2; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr2) {
 			listener.enterExpr2(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr2) {
 			listener.exitExpr2(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr2) {
 			return visitor.visitExpr2(this);
 		} else {
@@ -7989,7 +7989,7 @@ export class Expr3Context extends ParserRuleContext {
 	public expr4(): Expr4Context {
 		return this.getRuleContext(0, Expr4Context);
 	}
-	public IMP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.IMP_TOK, 0); }
+	public IMP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.IMP_TOK, 0); }
 	public expr3(): Expr3Context[];
 	public expr3(i: number): Expr3Context;
 	public expr3(i?: number): Expr3Context | Expr3Context[] {
@@ -7999,26 +7999,26 @@ export class Expr3Context extends ParserRuleContext {
 			return this.getRuleContext(i, Expr3Context);
 		}
 	}
-	public ELSE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ELSE_TOK, 0); }
+	public ELSE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ELSE_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr3; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr3; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr3) {
 			listener.enterExpr3(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr3) {
 			listener.exitExpr3(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr3) {
 			return visitor.visitExpr3(this);
 		} else {
@@ -8035,26 +8035,26 @@ export class Expr4Context extends ParserRuleContext {
 	public expr4(): Expr4Context | undefined {
 		return this.tryGetRuleContext(0, Expr4Context);
 	}
-	public AND_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.AND_TOK, 0); }
+	public AND_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.AND_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr4; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr4; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr4) {
 			listener.enterExpr4(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr4) {
 			listener.exitExpr4(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr4) {
 			return visitor.visitExpr4(this);
 		} else {
@@ -8074,29 +8074,29 @@ export class Expr4_5Context extends ParserRuleContext {
 			return this.getRuleContext(i, Expr5Context);
 		}
 	}
-	public UNTIL_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.UNTIL_TOK, 0); }
-	public RELEASE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RELEASE_TOK, 0); }
-	public SINCE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SINCE_TOK, 0); }
-	public TRIGGERED_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TRIGGERED_TOK, 0); }
+	public UNTIL_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.UNTIL_TOK, 0); }
+	public RELEASE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RELEASE_TOK, 0); }
+	public SINCE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SINCE_TOK, 0); }
+	public TRIGGERED_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TRIGGERED_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr4_5; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr4_5; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr4_5) {
 			listener.enterExpr4_5(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr4_5) {
 			listener.exitExpr4_5(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr4_5) {
 			return visitor.visitExpr4_5(this);
 		} else {
@@ -8110,35 +8110,35 @@ export class Expr5Context extends ParserRuleContext {
 	public expr6(): Expr6Context | undefined {
 		return this.tryGetRuleContext(0, Expr6Context);
 	}
-	public NEG_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NEG_TOK, 0); }
+	public NEG_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NEG_TOK, 0); }
 	public expr5(): Expr5Context | undefined {
 		return this.tryGetRuleContext(0, Expr5Context);
 	}
-	public ALWAYS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ALWAYS_TOK, 0); }
-	public EVENTUALLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EVENTUALLY_TOK, 0); }
-	public AFTER_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.AFTER_TOK, 0); }
-	public BEFORE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BEFORE_TOK, 0); }
-	public ONCE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ONCE_TOK, 0); }
-	public HISTORICALLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.HISTORICALLY_TOK, 0); }
+	public ALWAYS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ALWAYS_TOK, 0); }
+	public EVENTUALLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EVENTUALLY_TOK, 0); }
+	public AFTER_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.AFTER_TOK, 0); }
+	public BEFORE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BEFORE_TOK, 0); }
+	public ONCE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ONCE_TOK, 0); }
+	public HISTORICALLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.HISTORICALLY_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr5; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr5; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr5) {
 			listener.enterExpr5(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr5) {
 			listener.exitExpr5(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr5) {
 			return visitor.visitExpr5(this);
 		} else {
@@ -8158,26 +8158,26 @@ export class Expr6Context extends ParserRuleContext {
 	public compareOp(): CompareOpContext | undefined {
 		return this.tryGetRuleContext(0, CompareOpContext);
 	}
-	public NEG_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NEG_TOK, 0); }
+	public NEG_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NEG_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr6; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr6; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr6) {
 			listener.enterExpr6(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr6) {
 			listener.exitExpr6(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr6) {
 			return visitor.visitExpr6(this);
 		} else {
@@ -8191,31 +8191,31 @@ export class Expr7Context extends ParserRuleContext {
 	public expr8(): Expr8Context {
 		return this.getRuleContext(0, Expr8Context);
 	}
-	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NO_TOK, 0); }
-	public SOME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SOME_TOK, 0); }
-	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LONE_TOK, 0); }
-	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ONE_TOK, 0); }
-	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TWO_TOK, 0); }
-	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SET_TOK, 0); }
+	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NO_TOK, 0); }
+	public SOME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SOME_TOK, 0); }
+	public LONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LONE_TOK, 0); }
+	public ONE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ONE_TOK, 0); }
+	public TWO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TWO_TOK, 0); }
+	public SET_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SET_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr7; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr7; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr7) {
 			listener.enterExpr7(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr7) {
 			listener.exitExpr7(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr7) {
 			return visitor.visitExpr7(this);
 		} else {
@@ -8235,27 +8235,27 @@ export class Expr8Context extends ParserRuleContext {
 	public expr10(): Expr10Context | undefined {
 		return this.tryGetRuleContext(0, Expr10Context);
 	}
-	public PLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PLUS_TOK, 0); }
-	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.MINUS_TOK, 0); }
+	public PLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PLUS_TOK, 0); }
+	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.MINUS_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr8; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr8; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr8) {
 			listener.enterExpr8(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr8) {
 			listener.exitExpr8(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr8) {
 			return visitor.visitExpr8(this);
 		} else {
@@ -8269,7 +8269,7 @@ export class Expr9Context extends ParserRuleContext {
 	public expr10(): Expr10Context | undefined {
 		return this.tryGetRuleContext(0, Expr10Context);
 	}
-	public CARD_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.CARD_TOK, 0); }
+	public CARD_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.CARD_TOK, 0); }
 	public expr9(): Expr9Context | undefined {
 		return this.tryGetRuleContext(0, Expr9Context);
 	}
@@ -8277,21 +8277,21 @@ export class Expr9Context extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr9; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr9; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr9) {
 			listener.enterExpr9(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr9) {
 			listener.exitExpr9(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr9) {
 			return visitor.visitExpr9(this);
 		} else {
@@ -8308,26 +8308,26 @@ export class Expr10Context extends ParserRuleContext {
 	public expr10(): Expr10Context | undefined {
 		return this.tryGetRuleContext(0, Expr10Context);
 	}
-	public PPLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PPLUS_TOK, 0); }
+	public PPLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PPLUS_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr10; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr10; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr10) {
 			listener.enterExpr10(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr10) {
 			listener.exitExpr10(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr10) {
 			return visitor.visitExpr10(this);
 		} else {
@@ -8344,26 +8344,26 @@ export class Expr11Context extends ParserRuleContext {
 	public expr11(): Expr11Context | undefined {
 		return this.tryGetRuleContext(0, Expr11Context);
 	}
-	public AMP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.AMP_TOK, 0); }
+	public AMP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.AMP_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr11; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr11; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr11) {
 			listener.enterExpr11(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr11) {
 			listener.exitExpr11(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr11) {
 			return visitor.visitExpr11(this);
 		} else {
@@ -8387,21 +8387,21 @@ export class Expr12Context extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr12; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr12; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr12) {
 			listener.enterExpr12(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr12) {
 			listener.exitExpr12(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr12) {
 			return visitor.visitExpr12(this);
 		} else {
@@ -8418,27 +8418,27 @@ export class Expr13Context extends ParserRuleContext {
 	public expr13(): Expr13Context | undefined {
 		return this.tryGetRuleContext(0, Expr13Context);
 	}
-	public SUBT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUBT_TOK, 0); }
-	public SUPT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.SUPT_TOK, 0); }
+	public SUBT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUBT_TOK, 0); }
+	public SUPT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.SUPT_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr13; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr13; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr13) {
 			listener.enterExpr13(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr13) {
 			listener.exitExpr13(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr13) {
 			return visitor.visitExpr13(this);
 		} else {
@@ -8455,30 +8455,30 @@ export class Expr14Context extends ParserRuleContext {
 	public expr14(): Expr14Context | undefined {
 		return this.tryGetRuleContext(0, Expr14Context);
 	}
-	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_SQUARE_TOK, 0); }
+	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_SQUARE_TOK, 0); }
 	public exprList(): ExprListContext | undefined {
 		return this.tryGetRuleContext(0, ExprListContext);
 	}
-	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_SQUARE_TOK, 0); }
+	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_SQUARE_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr14; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr14; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr14) {
 			listener.enterExpr14(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr14) {
 			listener.exitExpr14(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr14) {
 			return visitor.visitExpr14(this);
 		} else {
@@ -8495,34 +8495,34 @@ export class Expr15Context extends ParserRuleContext {
 	public expr15(): Expr15Context | undefined {
 		return this.tryGetRuleContext(0, Expr15Context);
 	}
-	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.DOT_TOK, 0); }
+	public DOT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.DOT_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
-	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_SQUARE_TOK, 0); }
+	public LEFT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_SQUARE_TOK, 0); }
 	public exprList(): ExprListContext | undefined {
 		return this.tryGetRuleContext(0, ExprListContext);
 	}
-	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_SQUARE_TOK, 0); }
+	public RIGHT_SQUARE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_SQUARE_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr15; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr15; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr15) {
 			listener.enterExpr15(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr15) {
 			listener.exitExpr15(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr15) {
 			return visitor.visitExpr15(this);
 		} else {
@@ -8539,26 +8539,26 @@ export class Expr16Context extends ParserRuleContext {
 	public expr16(): Expr16Context | undefined {
 		return this.tryGetRuleContext(0, Expr16Context);
 	}
-	public PRIME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PRIME_TOK, 0); }
+	public PRIME_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PRIME_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr16; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr16; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr16) {
 			listener.enterExpr16(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr16) {
 			listener.exitExpr16(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr16) {
 			return visitor.visitExpr16(this);
 		} else {
@@ -8575,28 +8575,28 @@ export class Expr17Context extends ParserRuleContext {
 	public expr17(): Expr17Context | undefined {
 		return this.tryGetRuleContext(0, Expr17Context);
 	}
-	public TILDE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.TILDE_TOK, 0); }
-	public EXP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EXP_TOK, 0); }
-	public STAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.STAR_TOK, 0); }
+	public TILDE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.TILDE_TOK, 0); }
+	public EXP_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EXP_TOK, 0); }
+	public STAR_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.STAR_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr17; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr17; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr17) {
 			listener.enterExpr17(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr17) {
 			listener.exitExpr17(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr17) {
 			return visitor.visitExpr17(this);
 		} else {
@@ -8613,25 +8613,25 @@ export class Expr18Context extends ParserRuleContext {
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public AT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.AT_TOK, 0); }
+	public AT_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.AT_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
-	public BACKQUOTE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BACKQUOTE_TOK, 0); }
-	public THIS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.THIS_TOK, 0); }
-	public LEFT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
+	public BACKQUOTE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BACKQUOTE_TOK, 0); }
+	public THIS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.THIS_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_CURLY_TOK, 0); }
 	public quantDeclList(): QuantDeclListContext | undefined {
 		return this.tryGetRuleContext(0, QuantDeclListContext);
 	}
 	public blockOrBar(): BlockOrBarContext | undefined {
 		return this.tryGetRuleContext(0, BlockOrBarContext);
 	}
-	public RIGHT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
-	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_PAREN_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_PAREN_TOK, 0); }
 	public expr(): ExprContext | undefined {
 		return this.tryGetRuleContext(0, ExprContext);
 	}
-	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_PAREN_TOK, 0); }
+	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_PAREN_TOK, 0); }
 	public block(): BlockContext | undefined {
 		return this.tryGetRuleContext(0, BlockContext);
 	}
@@ -8642,21 +8642,21 @@ export class Expr18Context extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_expr18; }
+	public get ruleIndex(): number { return ForgeParser.RULE_expr18; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExpr18) {
 			listener.enterExpr18(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExpr18) {
 			listener.exitExpr18(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExpr18) {
 			return visitor.visitExpr18(this);
 		} else {
@@ -8670,7 +8670,7 @@ export class ArrowExprContext extends ParserRuleContext {
 	public qualName(): QualNameContext {
 		return this.getRuleContext(0, QualNameContext);
 	}
-	public ARROW_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ARROW_TOK, 0); }
+	public ARROW_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ARROW_TOK, 0); }
 	public arrowExpr(): ArrowExprContext | undefined {
 		return this.tryGetRuleContext(0, ArrowExprContext);
 	}
@@ -8678,21 +8678,21 @@ export class ArrowExprContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_arrowExpr; }
+	public get ruleIndex(): number { return ForgeParser.RULE_arrowExpr; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterArrowExpr) {
 			listener.enterArrowExpr(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitArrowExpr) {
 			listener.exitArrowExpr(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitArrowExpr) {
 			return visitor.visitArrowExpr(this);
 		} else {
@@ -8710,21 +8710,21 @@ export class SexprDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_sexprDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_sexprDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterSexprDecl) {
 			listener.enterSexprDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitSexprDecl) {
 			listener.exitSexprDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitSexprDecl) {
 			return visitor.visitSexprDecl(this);
 		} else {
@@ -8735,26 +8735,26 @@ export class SexprDeclContext extends ParserRuleContext {
 
 
 export class SexprContext extends ParserRuleContext {
-	public SEXPR_TOK(): TerminalNode { return this.getToken(ForgeParserParser.SEXPR_TOK, 0); }
+	public SEXPR_TOK(): TerminalNode { return this.getToken(ForgeParser.SEXPR_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_sexpr; }
+	public get ruleIndex(): number { return ForgeParser.RULE_sexpr; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterSexpr) {
 			listener.enterSexpr(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitSexpr) {
 			listener.exitSexpr(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitSexpr) {
 			return visitor.visitSexpr(this);
 		} else {
@@ -8765,7 +8765,7 @@ export class SexprContext extends ParserRuleContext {
 
 
 export class InstDeclContext extends ParserRuleContext {
-	public INST_TOK(): TerminalNode { return this.getToken(ForgeParserParser.INST_TOK, 0); }
+	public INST_TOK(): TerminalNode { return this.getToken(ForgeParser.INST_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
@@ -8779,21 +8779,21 @@ export class InstDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_instDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_instDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterInstDecl) {
 			listener.enterInstDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitInstDecl) {
 			listener.exitInstDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitInstDecl) {
 			return visitor.visitInstDecl(this);
 		} else {
@@ -8811,21 +8811,21 @@ export class EvalRelDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_evalRelDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_evalRelDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterEvalRelDecl) {
 			listener.enterEvalRelDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitEvalRelDecl) {
 			listener.exitEvalRelDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitEvalRelDecl) {
 			return visitor.visitEvalRelDecl(this);
 		} else {
@@ -8836,7 +8836,7 @@ export class EvalRelDeclContext extends ParserRuleContext {
 
 
 export class EvalDeclContext extends ParserRuleContext {
-	public EVAL_TOK(): TerminalNode { return this.getToken(ForgeParserParser.EVAL_TOK, 0); }
+	public EVAL_TOK(): TerminalNode { return this.getToken(ForgeParser.EVAL_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
@@ -8844,21 +8844,21 @@ export class EvalDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_evalDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_evalDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterEvalDecl) {
 			listener.enterEvalDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitEvalDecl) {
 			listener.exitEvalDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitEvalDecl) {
 			return visitor.visitEvalDecl(this);
 		} else {
@@ -8869,15 +8869,15 @@ export class EvalDeclContext extends ParserRuleContext {
 
 
 export class ExampleDeclContext extends ParserRuleContext {
-	public EXAMPLE_TOK(): TerminalNode { return this.getToken(ForgeParserParser.EXAMPLE_TOK, 0); }
+	public EXAMPLE_TOK(): TerminalNode { return this.getToken(ForgeParser.EXAMPLE_TOK, 0); }
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public IS_TOK(): TerminalNode { return this.getToken(ForgeParserParser.IS_TOK, 0); }
+	public IS_TOK(): TerminalNode { return this.getToken(ForgeParser.IS_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
-	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParserParser.FOR_TOK, 0); }
+	public FOR_TOK(): TerminalNode { return this.getToken(ForgeParser.FOR_TOK, 0); }
 	public bounds(): BoundsContext {
 		return this.getRuleContext(0, BoundsContext);
 	}
@@ -8885,21 +8885,21 @@ export class ExampleDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_exampleDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_exampleDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterExampleDecl) {
 			listener.enterExampleDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitExampleDecl) {
 			listener.exitExampleDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitExampleDecl) {
 			return visitor.visitExampleDecl(this);
 		} else {
@@ -8913,11 +8913,11 @@ export class QueryDeclContext extends ParserRuleContext {
 	public name(): NameContext {
 		return this.getRuleContext(0, NameContext);
 	}
-	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParserParser.COLON_TOK, 0); }
+	public COLON_TOK(): TerminalNode { return this.getToken(ForgeParser.COLON_TOK, 0); }
 	public arrowExpr(): ArrowExprContext {
 		return this.getRuleContext(0, ArrowExprContext);
 	}
-	public EQ_TOK(): TerminalNode { return this.getToken(ForgeParserParser.EQ_TOK, 0); }
+	public EQ_TOK(): TerminalNode { return this.getToken(ForgeParser.EQ_TOK, 0); }
 	public expr(): ExprContext {
 		return this.getRuleContext(0, ExprContext);
 	}
@@ -8925,21 +8925,21 @@ export class QueryDeclContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_queryDecl; }
+	public get ruleIndex(): number { return ForgeParser.RULE_queryDecl; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterQueryDecl) {
 			listener.enterQueryDecl(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitQueryDecl) {
 			listener.exitQueryDecl(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitQueryDecl) {
 			return visitor.visitQueryDecl(this);
 		} else {
@@ -8953,7 +8953,7 @@ export class NumberListContext extends ParserRuleContext {
 	public number(): NumberContext {
 		return this.getRuleContext(0, NumberContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
 	public numberList(): NumberListContext | undefined {
 		return this.tryGetRuleContext(0, NumberListContext);
 	}
@@ -8961,21 +8961,21 @@ export class NumberListContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_numberList; }
+	public get ruleIndex(): number { return ForgeParser.RULE_numberList; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterNumberList) {
 			listener.enterNumberList(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitNumberList) {
 			listener.exitNumberList(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitNumberList) {
 			return visitor.visitNumberList(this);
 		} else {
@@ -8986,26 +8986,26 @@ export class NumberListContext extends ParserRuleContext {
 
 
 export class NumberContext extends ParserRuleContext {
-	public NUM_CONST_TOK(): TerminalNode { return this.getToken(ForgeParserParser.NUM_CONST_TOK, 0); }
+	public NUM_CONST_TOK(): TerminalNode { return this.getToken(ForgeParser.NUM_CONST_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_number; }
+	public get ruleIndex(): number { return ForgeParser.RULE_number; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterNumber) {
 			listener.enterNumber(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitNumber) {
 			listener.exitNumber(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitNumber) {
 			return visitor.visitNumber(this);
 		} else {
@@ -9016,8 +9016,8 @@ export class NumberContext extends ParserRuleContext {
 
 
 export class BoundsContext extends ParserRuleContext {
-	public LEFT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_CURLY_TOK, 0); }
-	public RIGHT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_CURLY_TOK, 0); }
+	public LEFT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_CURLY_TOK, 0); }
+	public RIGHT_CURLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_CURLY_TOK, 0); }
 	public bound(): BoundContext[];
 	public bound(i: number): BoundContext;
 	public bound(i?: number): BoundContext | BoundContext[] {
@@ -9030,26 +9030,26 @@ export class BoundsContext extends ParserRuleContext {
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public EXACTLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.EXACTLY_TOK, 0); }
+	public EXACTLY_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.EXACTLY_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_bounds; }
+	public get ruleIndex(): number { return ForgeParser.RULE_bounds; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBounds) {
 			listener.enterBounds(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBounds) {
 			listener.exitBounds(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBounds) {
 			return visitor.visitBounds(this);
 		} else {
@@ -9060,33 +9060,33 @@ export class BoundsContext extends ParserRuleContext {
 
 
 export class AtomNameOrNumberContext extends ParserRuleContext {
-	public BACKQUOTE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.BACKQUOTE_TOK, 0); }
+	public BACKQUOTE_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.BACKQUOTE_TOK, 0); }
 	public name(): NameContext | undefined {
 		return this.tryGetRuleContext(0, NameContext);
 	}
 	public number(): NumberContext | undefined {
 		return this.tryGetRuleContext(0, NumberContext);
 	}
-	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.MINUS_TOK, 0); }
+	public MINUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.MINUS_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_atomNameOrNumber; }
+	public get ruleIndex(): number { return ForgeParser.RULE_atomNameOrNumber; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterAtomNameOrNumber) {
 			listener.enterAtomNameOrNumber(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitAtomNameOrNumber) {
 			listener.exitAtomNameOrNumber(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitAtomNameOrNumber) {
 			return visitor.visitAtomNameOrNumber(this);
 		} else {
@@ -9106,7 +9106,7 @@ export class BoundContext extends ParserRuleContext {
 	public bindRHSUnion(): BindRHSUnionContext | undefined {
 		return this.tryGetRuleContext(0, BindRHSUnionContext);
 	}
-	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.NO_TOK, 0); }
+	public NO_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.NO_TOK, 0); }
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
@@ -9114,21 +9114,21 @@ export class BoundContext extends ParserRuleContext {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_bound; }
+	public get ruleIndex(): number { return ForgeParser.RULE_bound; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBound) {
 			listener.enterBound(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBound) {
 			listener.exitBound(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBound) {
 			return visitor.visitBound(this);
 		} else {
@@ -9139,7 +9139,7 @@ export class BoundContext extends ParserRuleContext {
 
 
 export class BoundLHSContext extends ParserRuleContext {
-	public CARD_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.CARD_TOK, 0); }
+	public CARD_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.CARD_TOK, 0); }
 	public qualName(): QualNameContext[];
 	public qualName(i: number): QualNameContext;
 	public qualName(i?: number): QualNameContext | QualNameContext[] {
@@ -9156,30 +9156,30 @@ export class BoundLHSContext extends ParserRuleContext {
 	public DOT_TOK(i: number): TerminalNode;
 	public DOT_TOK(i?: number): TerminalNode | TerminalNode[] {
 		if (i === undefined) {
-			return this.getTokens(ForgeParserParser.DOT_TOK);
+			return this.getTokens(ForgeParser.DOT_TOK);
 		} else {
-			return this.getToken(ForgeParserParser.DOT_TOK, i);
+			return this.getToken(ForgeParser.DOT_TOK, i);
 		}
 	}
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_boundLHS; }
+	public get ruleIndex(): number { return ForgeParser.RULE_boundLHS; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBoundLHS) {
 			listener.enterBoundLHS(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBoundLHS) {
 			listener.exitBoundLHS(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBoundLHS) {
 			return visitor.visitBoundLHS(this);
 		} else {
@@ -9196,28 +9196,28 @@ export class BindRHSUnionContext extends ParserRuleContext {
 	public bindRHSUnion(): BindRHSUnionContext | undefined {
 		return this.tryGetRuleContext(0, BindRHSUnionContext);
 	}
-	public PLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.PLUS_TOK, 0); }
-	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_PAREN_TOK, 0); }
-	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_PAREN_TOK, 0); }
+	public PLUS_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.PLUS_TOK, 0); }
+	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_PAREN_TOK, 0); }
+	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_PAREN_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_bindRHSUnion; }
+	public get ruleIndex(): number { return ForgeParser.RULE_bindRHSUnion; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBindRHSUnion) {
 			listener.enterBindRHSUnion(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBindRHSUnion) {
 			listener.exitBindRHSUnion(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBindRHSUnion) {
 			return visitor.visitBindRHSUnion(this);
 		} else {
@@ -9228,35 +9228,35 @@ export class BindRHSUnionContext extends ParserRuleContext {
 
 
 export class BindRHSProductContext extends ParserRuleContext {
-	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_PAREN_TOK, 0); }
+	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_PAREN_TOK, 0); }
 	public bindRHSProduct(): BindRHSProductContext | undefined {
 		return this.tryGetRuleContext(0, BindRHSProductContext);
 	}
-	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_PAREN_TOK, 0); }
+	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_PAREN_TOK, 0); }
 	public bindRHSProductBase(): BindRHSProductBaseContext | undefined {
 		return this.tryGetRuleContext(0, BindRHSProductBaseContext);
 	}
-	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.COMMA_TOK, 0); }
-	public ARROW_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.ARROW_TOK, 0); }
+	public COMMA_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.COMMA_TOK, 0); }
+	public ARROW_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.ARROW_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_bindRHSProduct; }
+	public get ruleIndex(): number { return ForgeParser.RULE_bindRHSProduct; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBindRHSProduct) {
 			listener.enterBindRHSProduct(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBindRHSProduct) {
 			listener.exitBindRHSProduct(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBindRHSProduct) {
 			return visitor.visitBindRHSProduct(this);
 		} else {
@@ -9273,30 +9273,30 @@ export class BindRHSProductBaseContext extends ParserRuleContext {
 	public qualName(): QualNameContext | undefined {
 		return this.tryGetRuleContext(0, QualNameContext);
 	}
-	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.LEFT_PAREN_TOK, 0); }
+	public LEFT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.LEFT_PAREN_TOK, 0); }
 	public bindRHSUnion(): BindRHSUnionContext | undefined {
 		return this.tryGetRuleContext(0, BindRHSUnionContext);
 	}
-	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParserParser.RIGHT_PAREN_TOK, 0); }
+	public RIGHT_PAREN_TOK(): TerminalNode | undefined { return this.tryGetToken(ForgeParser.RIGHT_PAREN_TOK, 0); }
 	constructor(parent: ParserRuleContext | undefined, invokingState: number) {
 		super(parent, invokingState);
 	}
 	// @Override
-	public get ruleIndex(): number { return ForgeParserParser.RULE_bindRHSProductBase; }
+	public get ruleIndex(): number { return ForgeParser.RULE_bindRHSProductBase; }
 	// @Override
-	public enterRule(listener: ForgeParserListener): void {
+	public enterRule(listener: ForgeListener): void {
 		if (listener.enterBindRHSProductBase) {
 			listener.enterBindRHSProductBase(this);
 		}
 	}
 	// @Override
-	public exitRule(listener: ForgeParserListener): void {
+	public exitRule(listener: ForgeListener): void {
 		if (listener.exitBindRHSProductBase) {
 			listener.exitBindRHSProductBase(this);
 		}
 	}
 	// @Override
-	public accept<Result>(visitor: ForgeParserVisitor<Result>): Result {
+	public accept<Result>(visitor: ForgeVisitor<Result>): Result {
 		if (visitor.visitBindRHSProductBase) {
 			return visitor.visitBindRHSProductBase(this);
 		} else {

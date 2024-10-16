@@ -187,7 +187,7 @@
 		"lint": "eslint ./client/src ./server/src --ext .ts,.tsx",
 		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
 		"test": "sh ./scripts/e2e.sh",
-		"antlr4ts": "antlr4ts -visitor grammar/ForgeLexer.g4 grammar/ForgeParser.g4"
+		"antlr4ts": "antlr4ts -visitor grammar/ForgeLexer.g4 grammar/Forge.g4"
 	},
 	"devDependencies": {
 		"@types/mocha": "^8.2.2",

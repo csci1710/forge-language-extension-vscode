@@ -1,4 +1,4 @@
-grammar ForgeParser;
+grammar Forge;
 
 options { tokenVocab=ForgeLexer; }
 
