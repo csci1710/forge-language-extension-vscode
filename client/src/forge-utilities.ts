@@ -1,8 +1,10 @@
 
 import {spawn } from 'child_process';
+import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { tempFile } from './gen-utilities';
 
+import {ForgeUtil} from 'forge-toadus-parser';
 
 /*
 	Utilites related to Forge syntax.
@@ -10,8 +12,38 @@ import { tempFile } from './gen-utilities';
 */
 
 
+function getSubstringFromDocument(
+	startLine: number,
+	startCol: number,
+	endLine: number,
+	endCol: number
+): string {
+
+	const TE = vscode.window.activeTextEditor;
+	if (!TE) {
+		return "";
+	}
+	
+	const doc = TE.document;
+
+	const start = new vscode.Position(startLine, startCol);
+	const end = new vscode.Position(endLine, endCol);
+	const range = new vscode.Range(start, end);
+	const text = doc.getText(range);
+	return text;
+}
+
+
+
 // Returns only the predicates from the input text.
 export function getPredicatesOnly(inputText : string) : string {
+
+	const forgeutils = new ForgeUtil(inputText);
+	const ps = forgeutils.getPredicates();
+
+
+
+
 	const predicates = findForgePredicates(inputText);
 	return predicates.join('\n');
 }
@@ -56,11 +88,11 @@ function findForgePredicates(inputText : string) : [string] {
     let inPredicate = false;
     let braceLevel = 0;
     let currentPredicate = '';
-    let predicates : [string] = [''];
+    const predicates : [string] = [''];
 
 
 
-    for (let line of lines) {
+    for (const line of lines) {
 
         if (inPredicate) {
             currentPredicate += line + '\n';
@@ -81,7 +113,7 @@ function findForgePredicates(inputText : string) : [string] {
 
             if (match) {
                 inPredicate = true;
-                braceLevel = (line.match(/\{/g) || []).length;;
+                braceLevel = (line.match(/\{/g) || []).length;
                 currentPredicate = line + '\n';
             }
         }
@@ -90,16 +122,15 @@ function findForgePredicates(inputText : string) : [string] {
     return predicates;
 }
 
-
 export function findForgeExamples(inputText) {
     const withoutComments = removeForgeComments(inputText);
     const lines = withoutComments.split('\n');
     let inExample = false;
     let braceLevel = 0;
     let currentExample = '';
-    let examples : string[]= [];
+    const examples : string[]= [];
 
-    for (let line of lines) {
+    for (const line of lines) {
         if (inExample) {
             currentExample += line + '\n';
             braceLevel += (line.match(/\{/g) || []).length;
@@ -134,8 +165,8 @@ const predicatePattern =  /pred\s+([^]*?)({|\n|$)/;
 
 export function getSigList(s : string) : string[] {
 	const pattern = /\bsig\s+(\w+)/g;
-    var matches : string[] = [];
-    var match;
+    const matches : string[] = [];
+    let match;
     while ((match = pattern.exec(s)) !== null) {
         matches.push(match[1]);
     }
@@ -162,8 +193,8 @@ export function findAllExamples(fileContent : string) {
 	const exampleRegex = /example\s+(\w+)\s+is\s+(?:{)?(.*?)(?:})?\s+for\s+{([\s\S]*?)}/g;
  
 
-	let examples : Object[] = [];
-	let matches = fileContent.matchAll(exampleRegex);
+	const examples : Object[] = [];
+	const matches = fileContent.matchAll(exampleRegex);
 
 	for (const match of matches){
         const exampleName = match[1];
@@ -182,8 +213,8 @@ export function findAllExamples(fileContent : string) {
 export function findAllAssertions(fileContent : string) {
 	const assertRegex = /assert\s+(\w+)\s+is\s+(necessary|sufficient)\s+for\s+(\w+)/g;
 
-    let assertions : Object[] = [];
-	let matches = fileContent.matchAll(assertRegex);
+    const assertions : Object[] = [];
+	const matches = fileContent.matchAll(assertRegex);
 
     for (const match of matches){
         const assertionName = `Assert ${match[1]} is ${match[2]} for ${match[3]}`;
@@ -211,8 +242,8 @@ export function findAllQuantifiedAssertions(fileContent : string) {
 	}
 
 
-    let assertions : Object[] = [];
-	let matches  = fileContent.matchAll(quantifiedAssertRegex);
+    const assertions : Object[] = [];
+	const matches  = fileContent.matchAll(quantifiedAssertRegex);
 
     for (const match of matches){
         
@@ -242,7 +273,7 @@ export function findExampleByName(fileContent : string, exampleName: string) {
 	// having trouble with the regex. A language server would help.
 	const all_examples = findForgeExamples(fileContent);
 	const r = new RegExp(`\\b${exampleName}\\b`, 'g'); // Add 'g' flag for global search
-	var to_search = all_examples.filter(e => r.test(e))[0];
+	const to_search = all_examples.filter(e => r.test(e))[0];
 
 
 	const exampleRegex = new RegExp(`example\\s+${exampleName}\\s+is\\s+(?:{)?([\\s\\S]*?)(?:})?\\s+for\\s+{([\\s\\S]*?)}`, 'g'); // Add 'g' flag for global search
@@ -280,20 +311,20 @@ export function assertionToExpr(lhs, rhs, op, quantifier_prefix = "") : string {
 
 export function retrievePredName(pred: string, wheat : string) : Object {
 
-	var exp = new RegExp(`pred\\s+(${pred})\\b\s*([[\\s\\S]+])?`);
-	var match = wheat.match(exp);
+	const exp = new RegExp(`pred\\s+(${pred})\\b\s*([[\\s\\S]+])?`);
+	const match = wheat.match(exp);
 
 	if (match == null) {
 		return {
 			predName: pred,
 			params :  ""
-		}
+		};
 	}
 	else {
 		return {
 			predName: match[1],
 			params : match[2] || ""
-		}
+		};
 	}
 }
 
@@ -315,23 +346,23 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 	function extractAssignments() {
 
 		function assignmentContinued(x : string)  {
-			let t = x.replace(/\(/g, "").replace(/\)/g, "")
+			const t = x.replace(/\(/g, "").replace(/\)/g, "")
 					.replace(/\{/g, "").replace(/\}/g, "").trim();
 			return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
 		}
 
 
 		const lines = exampleBody.split('\n');
-		let expressions : string[] = [];
-		let assignments : Object[] = [];
+		const expressions : string[] = [];
+		const assignments : Object[] = [];
 		
 		let currentAssignment = { variable: '', value: '' };
 		let isAssignmentContinued = false;
 	
-		for (var l of lines) {
-			var line = l.trim();
+		for (const l of lines) {
+			const line = l.trim();
 			if (line == '') {
-				continue
+				continue;
 			} 
 	
 			isAssignmentContinued = assignmentContinued(line);
@@ -341,7 +372,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 			{
 				assignments.push({...currentAssignment});
 				if (/^\s*\w+\s*=/.test(line)) {
-					let parts = line.split('=');
+					const parts = line.split('=');
 					const lhs = parts[0].trim();
 					const rhs = parts[1].trim();
 					currentAssignment = { variable: lhs, value: rhs };
@@ -350,7 +381,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 					expressions.push(line);
 				}
 			}
-		};
+		}
 	
 
 		if (isAssignmentContinued) {
@@ -361,7 +392,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 	function sigToExpr(assignment) {
 		const atom_name = assignment.variable;
-		var atom_rhs = assignment.value.replace(/`/g, '');
+		const atom_rhs = assignment.value.replace(/`/g, '');
 		const atom_rhs_list = atom_rhs
 			.replace(/\s+|\n|\r/g, '') // Replace all whitespace, newline, or return with empty string
 			.replace(/\+/g, ' ')
@@ -373,8 +404,8 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 		// Remove any duplicates
 		const atom_rhs_comma_sep = Array.from(atom_rhs_set).join(', ');
 
-		var quantifier = "";
-		var constraint = "";
+		let quantifier = "";
+		let constraint = "";
 		if (atom_rhs_comma_sep != '') {
 		 quantifier = sigNames.includes(atom_name) ? `some disj ${atom_rhs_comma_sep} : ${atom_name} | {\n` : '';
 		 constraint = `${atom_name} = ${atom_rhs}`;
@@ -421,7 +452,7 @@ export function exampleToPred(example, sigNames: string[], wheatPredNames : stri
 
 export function getFailingTestNames(o: string): string[] {
 
-	let lines = o.split("\n");
+	const lines = o.split("\n");
 	return lines.map(getFailingTestName).filter((x) => x != "");
 }
 
@@ -464,7 +495,7 @@ export function getFailingTestName(o: string): string {
 			return "";
 		}
 		if (match[1]) return match[1];
-		return match[2]
+		return match[2];
 	} 
 	return "";
 }
@@ -490,9 +521,9 @@ export type ExtractedTestSuite = {
 export function findAllStructuredTests(suite: string) {
 
 
-	var examples = findAllExamples(suite);
-	var assertions = findAllAssertions(suite);
-	var quantifiedAssertions = findAllQuantifiedAssertions(suite);
+	const examples = findAllExamples(suite);
+	const assertions = findAllAssertions(suite);
+	const quantifiedAssertions = findAllQuantifiedAssertions(suite);
 
 	return {examples, assertions, quantifiedAssertions};
 }
@@ -531,14 +562,14 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 			
 			if (startIndex !== undefined && endIndex !== undefined) {
 				
-				var to_search = input.substring(endIndex);
+				const to_search = input.substring(endIndex);
 				// Search till you find a matched closing brace.
 
-				var i = endIndex + 1;
-				var s = "{";
+				let i = endIndex + 1;
+				let s = "{";
 
 				while (!isBalancedBraces(s) && i < input.length) {
-					s += input[i]
+					s += input[i];
 					i++;
 				}
 
@@ -557,14 +588,14 @@ export function extractTestSuite(input: string): ExtractedTestSuite[] {
 	}
 	  
 	//const pattern = /test suite for\s+(\w+)\s*\{(.*)\}/gs;
-	let identifiedSuites = findTestSuiteIndices(input);
+	const identifiedSuites = findTestSuiteIndices(input);
 
   
 	for (const suite of identifiedSuites) {
 	  const predicateName = suite['pred'];
 	  const content = suite['s'];
 
-		let ts: ExtractedTestSuite = {
+		const ts: ExtractedTestSuite = {
 			predicateName: predicateName,
 			tests: findAllStructuredTests(content)
 			};
@@ -623,10 +654,10 @@ export async function ensureForgeVersion(minVersion: string, error_reporter : (s
 	`;
 
 	fs.writeFileSync(filePath, emptyForgeFile);
-	let p = spawn('racket', [`"${filePath}"`], { shell: true });
+	const p = spawn('racket', [`"${filePath}"`], { shell: true });
 
-	var stdout = '';
-	var stderr = '';
+	let stdout = '';
+	let stderr = '';
 
 	const ERR_FORGE = "Could not determine Forge version. Please ensure that Forge is installed.";
 	p.stderr.on('data', (err: string) => {
@@ -652,7 +683,7 @@ export async function ensureForgeVersion(minVersion: string, error_reporter : (s
 		const match = stdout.match(forgeVersionRegex);
 		if (match) {
 
-			let version = (match[1] == undefined) ? (match[2] + ".0") : match[1];
+			const version = (match[1] == undefined) ? (match[2] + ".0") : match[1];
 			if (compareVersions(version, minVersion) < 0) {
 				error_reporter(`You are running Forge version ${version}, which is too old for this extension. Please update to at least ${minVersion} for guaranteed compatibility.`);
 			}			
@@ -664,7 +695,7 @@ export async function ensureForgeVersion(minVersion: string, error_reporter : (s
 
 export function combineTestsWithModel(wheatText: string, tests: string): string {
 	// If separator doesn't exist (in that case, look for #lang forge)
-	const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+	const TEST_SEPARATOR = "//// Do not edit anything above this line ////";
 	const hashlang_decl = "#lang";
 
 	if (tests.includes(TEST_SEPARATOR)) {
@@ -675,7 +706,7 @@ export function combineTestsWithModel(wheatText: string, tests: string): string 
 	tests = tests.replace(hashlang_decl, "// #lang");
 
 
-	var combined = wheatText + "\n" + tests;
+	let combined = wheatText + "\n" + tests;
 	combined = removeForgeComments(combined);
 
 	combined = combined.replace(/\t/g, " ");
@@ -711,7 +742,7 @@ export function emptyOutPredicate(wheat : string, predicateName: string) {
 				// Construct the new predicate with an empty body
 
 				const predicate_beginning = predicate.substring(0, predicateBodyStartIndex);
-				let predicate_body = predicateStart.includes('{') ? '}' : ' { }';
+				const predicate_body = predicateStart.includes('{') ? '}' : ' { }';
 				const newPredicate = `${predicate_beginning}${predicate_body}${predicate.substring(predicateBodyEndIndex + 1)}`;
 				// Replace the original predicate in the output text
 				outputText = outputText.replace(predicate, newPredicate);
@@ -742,7 +773,7 @@ export function emptyOutAllPredicates(code : string) {
 			const predicateBodyEndIndex = predicate.lastIndexOf('}');
 			// Construct the new predicate with an empty body
 			const predicate_beginning = predicate.substring(0, predicateBodyStartIndex);
-			let predicate_body = predicateStart.includes('{') ? '}' : ' { }';
+			const predicate_body = predicateStart.includes('{') ? '}' : ' { }';
 			const newPredicate = `${predicate_beginning}${predicate_body}${predicate.substring(predicateBodyEndIndex + 1)}`;
 			// Replace the original predicate in the output text
 			outputText = outputText.replace(predicate, newPredicate);
