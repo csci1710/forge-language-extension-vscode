@@ -124,7 +124,6 @@ export class ConceptualMutator {
 	student_util: ForgeUtil;
 	full_source_util: ForgeUtil;
 
-
 	mutant: HydratedPredicate[] = [];
 
 
@@ -154,9 +153,7 @@ export class ConceptualMutator {
 		this.error_messages = [];
 		this.inconsistent_tests = [];
 
-
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
-
 			let name = p.name;
 			let body = get_text_from_block(p.block, source_text);
 			let params_text = get_text_from_block(p.params, source_text);
@@ -170,14 +167,103 @@ export class ConceptualMutator {
 			return new HydratedPredicate(name, params, body);
 		}
 
-
-		/*
-			By default, the mutant is ALL the predicates in the source_text.
-		*/
 		this.mutant = this.full_source_util.getPreds().map(predicateToHydratedPredicate);
 	}
 
-	isInstructorAuthored(p: Predicate): boolean {
+
+
+
+	/**
+	 * 
+	 * @returns A mutated version of the wheat that is consistent with the student's tests.
+	 */
+	public generateMutantConsistentWithFailingTests() : string {
+
+		let w_os = this.forge_output.split("\n");
+		for (let w_o of w_os) {
+
+			// Do not carry out any more than the maximum number of mutations.
+			if (this.num_mutations >= this.max_mutations) {
+				break;
+			}
+
+			const testName = getFailingTestName(w_o);
+
+			if (example_regex.test(w_o)) {
+				// Mutate to example
+
+			} else if (quantified_assertion_regex.test(w_o)) {
+
+
+				const match = w_o.match(quantified_assertion_regex);
+
+				if (match == null) {
+					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
+					return;
+				}
+
+
+
+
+
+				// Need to find the assertion.
+				// And mutate to the quantified assertion.
+			}
+			else if (assertion_regex.test(w_o)) {
+				const match = w_o.match(assertion_regex);
+
+				if (match == null) {
+					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
+					return;
+				}
+
+				
+				const lhs_pred = match[1];
+				const op = match[2];
+				const rhs_pred = match[3];
+
+				// Need to find the assertion. This I think we can do with left / right.
+				// And mutate to the assertion.
+
+			}
+			else if (test_regex.test(w_o)) {
+
+				const test_expect_failure_msg = `❗Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
+				this.error_messages.push(test_expect_failure_msg)
+			}
+			else if (testName != "") {
+				throw new Error("Something went very wrong!");
+			}
+		}
+
+
+		return this.mutantToString();
+	}
+
+
+
+	protected mutantToString(): string {
+
+		let predStrings = this.mutant.map((p) => {
+			let declParams = p.declParams();
+			let body = p.body;
+			return `pred ${p.name}${declParams}\n {\n ${body} \n}`;
+		});
+
+		let PREFIX = "#lang forge\n option run_sterling off\n";
+		let sigDecls = []; // TODO!
+		let sigs = sigDecls.join("\n\n");
+
+		let predicates = predStrings.join("\n\n");
+		return `${PREFIX}\n${sigs}\n\n${predicates}`;
+
+	}
+
+
+
+
+
+	private isInstructorAuthored(p: Predicate): boolean {
 
 		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
 
@@ -189,13 +275,11 @@ export class ConceptualMutator {
 		return false;
 	}
 
-	xor(a: boolean, b: boolean): boolean {
+	private xor(a: boolean, b: boolean): boolean {
 		return (a && !b) || (!a && b);
 	};
 
-
-
-	getNewName(name: string) {
+	private getNewName(name: string) {
 		this.num_mutations++;
 		return `${name}_inner_${this.num_mutations}`;
 	}
@@ -203,7 +287,7 @@ export class ConceptualMutator {
 
 	// Eases predicate i in the mutant to also accept s.
 	// i and s are both predicate names.
-	easePredicate(i: string, s: string, quantified_prefix: string = ""): void {
+	protected easePredicate(i: string, s: string, quantified_prefix: string = ""): void {
 
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -227,7 +311,7 @@ export class ConceptualMutator {
 	}
 
 
-	constrainPredicateByInclusion(i: string, s: string, quantified_prefix: string = ""): void {
+	protected constrainPredicateByInclusion(i: string, s: string, quantified_prefix: string = ""): void {
 
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -249,7 +333,7 @@ export class ConceptualMutator {
 		this.mutant.push(p_i_prime);
 	}
 
-	constrainPredicateByExclusion(i: string, s: string, quantified_prefix: string = ""): void {
+	protected constrainPredicateByExclusion(i: string, s: string, quantified_prefix: string = ""): void {
 
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -277,7 +361,7 @@ export class ConceptualMutator {
 		ASSUMES THAT either LHS or RHS is authored by the instructor.
 
 	*/
-	mutateToAssertion(a: AssertionTest) {
+	protected mutateToAssertion(a: AssertionTest) {
 
 		// TEST IS ALWAYS OF THE FORM pred => prop
 		// SO BELIEF IS ALWAYS lhs => rhs
@@ -308,7 +392,7 @@ export class ConceptualMutator {
 	}
 
 
-	mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
+	protected mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
 		// TEST IS ALWAYS OF THE FORM pred => prop
 		// SO BELIEF IS ALWAYS lhs => rhs
 		let lhs = a.pred;
@@ -345,11 +429,7 @@ export class ConceptualMutator {
 
 
 
-	mutateToExample(e: Example) {
-
-
-
-
+	protected mutateToExample(e: Example) {
 
 		// Determine if positive or negative example.
 		// Find if testExpr
@@ -388,18 +468,24 @@ export class ConceptualMutator {
 	}
 
 	/// How would this even work?
-	mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) { }
+	protected mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) { }
 
+	protected mutateToTest(t: Test) { } // Not implemented yet, very HARD.
 
-
-	mutateToTest(t: Test) { } // Not implemented yet, very HARD.
+	protected mutateToVaccuity() {
+		this.mutant.forEach(
+			(p) => {
+				p.body = "";
+			}
+		);
+	}
 
 	///////////////////////////////////////////////////////////////////////////////
 
 
 	// TODO: Make this better. This is far too verbose, and is from
 	// the original implementation.
-	exampleToPredicate(e: Example): HydratedPredicate {
+	protected exampleToPredicate(e: Example): HydratedPredicate {
 
 		const exampleName = e.name;
 		const exampleBody = get_text_from_block(e.bounds, this.source_text);
