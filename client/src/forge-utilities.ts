@@ -2,7 +2,12 @@
 import {spawn } from 'child_process';
 import * as fs from 'fs';
 import { tempFile } from './gen-utilities';
-
+import {ForgeUtil, 
+	Block,
+	Sig, Predicate, Function, 
+	Test, AssertionTest, QuantifiedAssertionTest, Example, SatisfiabilityAssertionTest,
+	Formula, Expr 
+} from "forge-toadus-parser";
 
 /*
 	Utilites related to Forge syntax.
@@ -10,8 +15,12 @@ import { tempFile } from './gen-utilities';
 */
 
 
+// Get from active Document
+
+
 // Returns only the predicates from the input text.
 export function getPredicatesOnly(inputText : string) : string {
+	
 	const predicates = findForgePredicates(inputText);
 	return predicates.join('\n');
 }
