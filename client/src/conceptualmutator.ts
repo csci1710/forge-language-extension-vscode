@@ -199,11 +199,10 @@ export class ConceptualMutator {
 		return `${name}_inner_${this.num_mutations}`;
 	}
 
-	////////////////////// WHAT ABOUT QUANTIFIERS AND PARAMS./////////
 
 	// Eases predicate i in the mutant to also accept s.
 	// i and s are both predicate names.
-	easePredicate(i : string, s : string) : void {
+	easePredicate(i : string, s : string, quantified_prefix : string = "") : void {
 
 		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -219,7 +218,7 @@ export class ConceptualMutator {
 
 
 		let callParams = p_i.callParams();
-		let new_i_body = `(${newName_i}${callParams} or ${s})`; 
+		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} or ${s})`; 
 
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
@@ -227,7 +226,7 @@ export class ConceptualMutator {
 	}
 
 
-	constrainPredicateByInclusion(i : string, s : string) : void {
+	constrainPredicateByInclusion(i : string, s : string, quantified_prefix : string = "") : void {
 
 		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -242,16 +241,14 @@ export class ConceptualMutator {
 
 		p_i.name = newName_i;
 		let callParams = p_i.callParams();
-		let new_i_body = `(${newName_i}${callParams} and ${s})`;
+		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} and ${s})`;
 
 		// New i = old i AND s.
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
 
-
-
-	constrainPredicateByExclusion(i : string, s : string) : void {
+	constrainPredicateByExclusion(i : string, s : string, quantified_prefix : string = "") : void {
 
 		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -267,7 +264,7 @@ export class ConceptualMutator {
 		p_i.name = newName_i;
 		let callParams = p_i.callParams();
 
-		let new_i_body = `(${newName_i}${callParams} and (not ${s}))`;
+		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} and (not ${s}))`;
 
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
@@ -285,7 +282,7 @@ export class ConceptualMutator {
 		// SO BELIEF IS ALWAYS lhs => rhs
 		let lhs = a.pred;
 		let rhs = a.prop;
-		let rel = a.rel;
+		let rel = a.check;
 
 		let lhs_in_wheat = this.isInstructorAuthored(lhs);
 		let rhs_in_wheat = this.isInstructorAuthored(rhs);
@@ -310,7 +307,100 @@ export class ConceptualMutator {
 	}
 
 
+	mutateToQuantifiedAssertion(a : QuantifiedAssertionTest) {
+		// TEST IS ALWAYS OF THE FORM pred => prop
+		// SO BELIEF IS ALWAYS lhs => rhs
+		let lhs = a.pred;
+		let rhs = a.prop;
+		let rel = a.check;
+		let disj = (a.disj) ? "disj" : "";
+
+		const quantifier = "all";
+		const quantDecls = get_text_from_block(a.quantDecls, this.source_text);
+
+		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
+
+		let lhs_in_wheat = this.isInstructorAuthored(lhs);
+		let rhs_in_wheat = this.isInstructorAuthored(rhs);
 
 
+		let test_name = (rel === "sufficient") ? `${quantifiedPrefix} ${lhs.name} is sufficient for ${rhs.name}` : `${rhs.name} is necessary for ${lhs.name}`;
+
+		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
+			this.error_messages.push(`❗Excluding assert ${test_name} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
+			return;
+		}
+
+		this.inconsistent_tests.push(test_name);
+		
+		if (lhs_in_wheat) {
+			this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
+		}
+		else {
+			this.easePredicate(rhs, lhs, quantifiedPrefix);
+		}
+
+	}
+
+
+	
+	mutateToExample(e : Example) {
+
+
+
+
+
+		// Determine if positive or negative example.
+		// Find if testExpr
+		const negationRegex = /(not|!)\s*(\b\w+\b)/;
+		let exampletestExpr = get_text_from_block(e.textExpr, this.source_text);
+		let negativeExample = exampletestExpr.match(negationRegex);
+		
+		// Pred under test
+		let p_i = exampletestExpr;
+		if(negativeExample) {
+			p_i = negativeExample[2];
+		}
+
+		// Ensure p_i is in the wheat.
+		if(!this.isInstructorAuthored(p_i))
+		{
+			this.error_messages.push(`⛔ Example ${e.name} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
+			return;
+		}
+
+		this.inconsistent_tests.push(e.name);
+
+
+		// Example to characteristic predicate.
+		let hp = this.exampleToPredicate(e);
+
+		this.mutant.push(hp);
+
+		if(negativeExample) {
+			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
+			this.constrainPredicateByExclusion(p_i, hp.name);
+		}
+		else {
+			// OR Student Belief :	failedExample.exampleName => failedExample.examplePredicate 
+			this.easePredicate(p_i, hp.name);
+		}
+	}
+
+	/// How would this even work?
+	mutateToSatisfiabilityAssertion(a : SatisfiabilityAssertionTest) {} 
+
+
+
+	mutateToTest(t : Test) {} // Not implemented yet, very HARD.
+
+	///////////////////////////////////////////////////////////////////////////////
+
+
+	// TODO: Implement!!
+	exampleToPredicate(e : Example) : HydratedPredicate {
+
+		return new HydratedPredicate(e.name, {}, get_text_from_block(e.block, this.source_text));
+	}
 }
 

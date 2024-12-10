@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { removeForgeComments, getFailingTestNames, getFailingTestName, combineTestsWithModel } from './forge-utilities';
-import { Mutator } from './mutator';
+import { ConceptualMutator } from './conceptualmutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
 import * as os from 'os';
@@ -119,7 +119,7 @@ export class HalpRunner {
 		const w_o = run_result.stderr;
 		const source_text = run_result.runsource;
 
-		const mutator = new Mutator(w, studentTests, w_o, testFileName, source_text);
+		const mutator = new ConceptualMutator(w, studentTests, w_o, testFileName, source_text);
 
 		if (this.isConsistent(w_o)) {
 
@@ -182,7 +182,7 @@ ${w_o}`;
 	}
 
 
-	private async runComprehensiveStrategy(mutator : Mutator, studentTests : string, testFileName : string, ): Promise<string[]> {
+	private async runComprehensiveStrategy(mutator : ConceptualMutator, studentTests : string, testFileName : string, ): Promise<string[]> {
 
 			mutator.mutateToStudentMisunderstanding();
 			let assessed_tests = mutator.inconsistent_tests.join("\n");
