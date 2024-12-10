@@ -1,13 +1,14 @@
 import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, emptyOutPredicate, emptyOutAllPredicates } from './forge-utilities';
 import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
-import {window} from 'vscode';
+import { window } from 'vscode';
 
 
-import {ForgeUtil, 
+import {
+	ForgeUtil,
 	Block,
-	Sig, Predicate, Function, 
+	Sig, Predicate, Function,
 	Test, AssertionTest, QuantifiedAssertionTest, Example, SatisfiabilityAssertionTest,
-	Formula, Expr 
+	Formula, Expr
 } from "forge-toadus-parser";
 
 
@@ -15,38 +16,38 @@ import {ForgeUtil,
 
 
 class HydratedPredicate {
-    constructor(
-        public name: string,
-        public params: Record<string, string>,
-        public body: string
-        ) {
-            
-        }
+	constructor(
+		public name: string,
+		public params: Record<string, string>,
+		public body: string
+	) {
 
-	declParams() : string {
+	}
+
+	declParams(): string {
 		let paramStrings = [];
 		for (let [name, type] of Object.entries(this.params)) {
 			paramStrings.push(`${name}: ${type}`);
 		}
 
-		if(paramStrings.length == 0) {
+		if (paramStrings.length == 0) {
 			return "";
 		}
-		
+
 		let paramStringsJoined = paramStrings.join(", ");
 		return "[" + paramStringsJoined + "]";
 	}
 
-	callParams() : string {
+	callParams(): string {
 		let paramStrings = [];
 		for (let [name, type] of Object.entries(this.params)) {
 			paramStrings.push(name);
 		}
 
-		if(paramStrings.length == 0) {
+		if (paramStrings.length == 0) {
 			return "";
 		}
-		
+
 		let paramStringsJoined = paramStrings.join(", ");
 		return "[" + paramStringsJoined + "]";
 	}
@@ -66,7 +67,7 @@ function get_block_from_active_editor(fromRow: number, toRow: number, fromColumn
 	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
 
-function get_text_block(fromRow : number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
+function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
 	let lines = text.split("\n");
 	let block = "";
 
@@ -87,7 +88,7 @@ function get_text_block(fromRow : number, toRow: number, fromColumn: number, toC
 }
 
 
-function get_text_from_block(b : Block, text : string) : string {
+function get_text_from_block(b: Block, text: string): string {
 
 	if (!b) {
 		return "";
@@ -119,12 +120,12 @@ export class ConceptualMutator {
 	inconsistent_tests: string[];
 	num_mutations: number = 0;
 
-	wheat_util : ForgeUtil;
-	student_util : ForgeUtil;
-	full_source_util : ForgeUtil;
+	wheat_util: ForgeUtil;
+	student_util: ForgeUtil;
+	full_source_util: ForgeUtil;
 
 
-	mutant : HydratedPredicate[] = [];
+	mutant: HydratedPredicate[] = [];
 
 
 	/**
@@ -137,11 +138,11 @@ export class ConceptualMutator {
 	 * @param max_mutations - The maximum number of mutations that can be carried out(default: 200).
 	 */
 	constructor(public wheat: string,
-				public student_tests: string,
-				public forge_output: string,
-				public test_file_name: string,
-				public source_text: string,
-				public max_mutations: number = 200) {
+		public student_tests: string,
+		public forge_output: string,
+		public test_file_name: string,
+		public source_text: string,
+		public max_mutations: number = 200) {
 
 		this.wheat_util = new ForgeUtil(wheat);
 		this.student_util = new ForgeUtil(student_tests);
@@ -169,16 +170,16 @@ export class ConceptualMutator {
 			return new HydratedPredicate(name, params, body);
 		}
 
-		
+
 		/*
 			By default, the mutant is ALL the predicates in the source_text.
 		*/
 		this.mutant = this.full_source_util.getPreds().map(predicateToHydratedPredicate);
 	}
 
-	isInstructorAuthored(p : Predicate) : boolean {
-		
-		let wheat_predicates : Predicate[] = this.wheat_util.getPreds();
+	isInstructorAuthored(p: Predicate): boolean {
+
+		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
 
 		for (let wp of wheat_predicates) {
 			if (wp.name == p.name) {
@@ -194,7 +195,7 @@ export class ConceptualMutator {
 
 
 
-	getNewName(name : string) {
+	getNewName(name: string) {
 		this.num_mutations++;
 		return `${name}_inner_${this.num_mutations}`;
 	}
@@ -202,10 +203,10 @@ export class ConceptualMutator {
 
 	// Eases predicate i in the mutant to also accept s.
 	// i and s are both predicate names.
-	easePredicate(i : string, s : string, quantified_prefix : string = "") : void {
+	easePredicate(i: string, s: string, quantified_prefix: string = ""): void {
 
-		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
+		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
 
 		if (!p_i || !p_s) {
@@ -218,7 +219,7 @@ export class ConceptualMutator {
 
 
 		let callParams = p_i.callParams();
-		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} or ${s})`; 
+		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} or ${s})`;
 
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
@@ -226,12 +227,12 @@ export class ConceptualMutator {
 	}
 
 
-	constrainPredicateByInclusion(i : string, s : string, quantified_prefix : string = "") : void {
+	constrainPredicateByInclusion(i: string, s: string, quantified_prefix: string = ""): void {
 
-		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
+		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-		
+
 		if (!p_i || !p_s) {
 			this.error_messages.push(`❗Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
 			return;
@@ -248,12 +249,12 @@ export class ConceptualMutator {
 		this.mutant.push(p_i_prime);
 	}
 
-	constrainPredicateByExclusion(i : string, s : string, quantified_prefix : string = "") : void {
+	constrainPredicateByExclusion(i: string, s: string, quantified_prefix: string = ""): void {
 
-		let p_i : HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s : HydratedPredicate = this.mutant.find((p) => p.name == s);
+		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-		
+
 		if (!p_i || !p_s) {
 			this.error_messages.push(`❗Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
 			return;
@@ -276,7 +277,7 @@ export class ConceptualMutator {
 		ASSUMES THAT either LHS or RHS is authored by the instructor.
 
 	*/
-	mutateToAssertion(a : AssertionTest) {
+	mutateToAssertion(a: AssertionTest) {
 
 		// TEST IS ALWAYS OF THE FORM pred => prop
 		// SO BELIEF IS ALWAYS lhs => rhs
@@ -307,7 +308,7 @@ export class ConceptualMutator {
 	}
 
 
-	mutateToQuantifiedAssertion(a : QuantifiedAssertionTest) {
+	mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
 		// TEST IS ALWAYS OF THE FORM pred => prop
 		// SO BELIEF IS ALWAYS lhs => rhs
 		let lhs = a.pred;
@@ -332,7 +333,7 @@ export class ConceptualMutator {
 		}
 
 		this.inconsistent_tests.push(test_name);
-		
+
 		if (lhs_in_wheat) {
 			this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
 		}
@@ -343,8 +344,8 @@ export class ConceptualMutator {
 	}
 
 
-	
-	mutateToExample(e : Example) {
+
+	mutateToExample(e: Example) {
 
 
 
@@ -355,16 +356,15 @@ export class ConceptualMutator {
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
 		let exampletestExpr = get_text_from_block(e.textExpr, this.source_text);
 		let negativeExample = exampletestExpr.match(negationRegex);
-		
+
 		// Pred under test
 		let p_i = exampletestExpr;
-		if(negativeExample) {
+		if (negativeExample) {
 			p_i = negativeExample[2];
 		}
 
 		// Ensure p_i is in the wheat.
-		if(!this.isInstructorAuthored(p_i))
-		{
+		if (!this.isInstructorAuthored(p_i)) {
 			this.error_messages.push(`⛔ Example ${e.name} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
 			return;
 		}
@@ -377,7 +377,7 @@ export class ConceptualMutator {
 
 		this.mutant.push(hp);
 
-		if(negativeExample) {
+		if (negativeExample) {
 			// Student Belief: failedExample.exampleName => (not failedExample.examplePredicate)
 			this.constrainPredicateByExclusion(p_i, hp.name);
 		}
@@ -388,19 +388,136 @@ export class ConceptualMutator {
 	}
 
 	/// How would this even work?
-	mutateToSatisfiabilityAssertion(a : SatisfiabilityAssertionTest) {} 
+	mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) { }
 
 
 
-	mutateToTest(t : Test) {} // Not implemented yet, very HARD.
+	mutateToTest(t: Test) { } // Not implemented yet, very HARD.
 
 	///////////////////////////////////////////////////////////////////////////////
 
 
-	// TODO: Implement!!
-	exampleToPredicate(e : Example) : HydratedPredicate {
+	// TODO: Make this better. This is far too verbose, and is from
+	// the original implementation.
+	exampleToPredicate(e: Example): HydratedPredicate {
 
-		return new HydratedPredicate(e.name, {}, get_text_from_block(e.block, this.source_text));
+		const exampleName = e.name;
+		const exampleBody = get_text_from_block(e.bounds, this.source_text);
+
+		// Now bounds have two components:
+		// Assignments and expressions
+
+		// We need to put ALL the assignments on sigs on the outside, and then expressions and relations inside.
+		/*
+			some disj ${atom_rhs_comma_sep} : ${atom_name} | {
+				${atom_name} = ${atom_rhs}
+					.... etc
+				expressions
+				relations
+			}
+		*/
+		// TODO: ISSUE: What if the example has a some disj quantifier in its body? That would break this.
+
+
+		function extractAssignments() {
+
+			function assignmentContinued(x: string) {
+				let t = x.replace(/\(/g, "").replace(/\)/g, "")
+					.replace(/\{/g, "").replace(/\}/g, "").trim();
+				return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
+			}
+
+
+			const lines = exampleBody.split('\n');
+			let expressions: string[] = [];
+			let assignments: Object[] = [];
+
+			let currentAssignment = { variable: '', value: '' };
+			let isAssignmentContinued = false;
+
+			for (var l of lines) {
+				var line = l.trim();
+				if (line == '') {
+					continue
+				}
+
+				isAssignmentContinued = assignmentContinued(line);
+				if (isAssignmentContinued) {
+					currentAssignment.value += ' ' + line.trim();
+				} else {
+					assignments.push({ ...currentAssignment });
+					if (/^\s*\w+\s*=/.test(line)) {
+						let parts = line.split('=');
+						const lhs = parts[0].trim();
+						const rhs = parts[1].trim();
+						currentAssignment = { variable: lhs, value: rhs };
+						isAssignmentContinued = true;
+					} else {
+						expressions.push(line);
+					}
+				}
+			};
+
+
+			if (isAssignmentContinued) {
+				assignments.push({ ...currentAssignment });
+			}
+			return [assignments, expressions];
+		}
+
+
+
+
+		let sigNames = this.full_source_util.getSigs().map((s: Sig) => s.name);
+
+		function sigToExpr(assignment) {
+			const atom_name = assignment.variable;
+			var atom_rhs = assignment.value.replace(/`/g, '');
+			const atom_rhs_list = atom_rhs
+				.replace(/\s+|\n|\r/g, '') // Replace all whitespace, newline, or return with empty string
+				.replace(/\+/g, ' ')
+				.replace(/->/g, ' ')
+				.split(' ').map(item => item.trim());
+
+			// Remove any elements that are in sigNames
+			const atom_rhs_set = new Set(atom_rhs_list.filter(item => !sigNames.includes(item)));
+			// Remove any duplicates
+			const atom_rhs_comma_sep = Array.from(atom_rhs_set).join(', ');
+
+			var quantifier = "";
+			var constraint = "";
+			if (atom_rhs_comma_sep != '') {
+				quantifier = sigNames.includes(atom_name) ? `some disj ${atom_rhs_comma_sep} : ${atom_name} | {\n` : '';
+				constraint = `${atom_name} = ${atom_rhs}`;
+			}
+
+			return {
+				quantifier,
+				constraint
+			};
+		}
+
+
+		const [assignments, expressions] = extractAssignments();
+
+		// All the expressions go on the outside.
+		const expressionString = expressions.join('\n');
+		const sigExpressions = assignments.map(sigToExpr);
+		const sigQuantifiers = sigExpressions.map(a => a.quantifier).filter(a => a != '');
+		const sigQuantifiersAsString = sigQuantifiers.join("\n");
+		const sigConstraints = sigExpressions.map(a => a.constraint).join("\n");
+		const sigAssignmentsPostfix = '}'.repeat(sigQuantifiers.length) + "\n";
+
+
+
+		const pred_body = `
+		${sigQuantifiersAsString}
+		${sigConstraints}
+		${expressionString}
+		${sigAssignmentsPostfix}
+	`;
+
+		return new HydratedPredicate(e.name, {}, pred_body);
 	}
 }
 
