@@ -146,6 +146,12 @@ export class ConceptualMutator {
 		this.error_messages = [];
 		this.inconsistent_tests = [];
 
+
+		// TODO: Maybe this should keep track of the passing and
+		// failing tests rather than the calling code.
+
+
+
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
 			let name = p.name;
 			let body_block : Block = p.body;
@@ -174,7 +180,47 @@ export class ConceptualMutator {
 
 
 
+
+
+
 	/**
+	 * Mutate to remove belief.
+	 * Modifies the mutant so that it fails passing tests of inclusion.
+	 */
+	public mutateToExcludeInclusionTests() : number {
+
+		let assertions = this.full_source_util.getAssertions();
+		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
+		let examples = this.full_source_util.getExamples();
+
+		// TODO: Here we have to also think about the test expects. Deal with that later.
+
+
+		for (let a of assertions) {
+			if (this.isTestOfInclusion(a)) {
+				
+				
+				this.mutateAwayAssertion(a);
+
+			}
+			else if (this.isTestOfExclusion(a)) {
+				// FILL
+			}
+			else {
+				// DO NOTHING, ADD A MESSAGE ABOUT HOW WE EXCLUDE THIS.
+			}
+		}
+
+
+
+
+
+		return this.num_mutations;
+	}
+
+
+	/**
+	 * Modifies the mutant so that it passes failing tests.
 	 * @returns The number of mutations carried out.
 	 */
 	public mutateToFailingTests() : number {
@@ -311,7 +357,6 @@ export class ConceptualMutator {
 		return null;
 	}
 
-	// TODO: Double check this.
 	private getAssertion(lhs: string, op: string, rhs: string): AssertionTest {
 
 		let assertions = this.student_util.getAssertions();
@@ -447,13 +492,10 @@ export class ConceptualMutator {
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
-	/////////////////////////////////////////////////////////////////////////
 
-	/*
-		Mutates the wheat to generate a mutant that is consistent with the student's tests.
-		ASSUMES THAT either LHS or RHS is authored by the instructor.
 
-	*/
+
+	/////////////////// MUTATION OPERATIONS TO CONSISTENCY ////////////////////////////////
 	protected mutateToAssertion(a: AssertionTest) {
 
 		// TEST IS ALWAYS OF THE FORM pred => prop
@@ -520,8 +562,7 @@ export class ConceptualMutator {
 
 	}
 
-
-
+	// TODO: Very much not sure how this works.
 	protected mutateToExample(e: Example) {
 
 		// Determine if positive or negative example.
@@ -573,7 +614,74 @@ export class ConceptualMutator {
 		);
 	}
 
-	///////////////////////////////////////////////////////////////////////////////
+
+	////////////////// MUTATION OPERATIONS TO INCONSISTENCY (AKA REMOVE) /////////////////////////////////////
+
+	/**
+	 * 
+	 * Excludes the assertions behavior from the mutant.
+	 */
+	protected mutateAwayAssertion(a: AssertionTest) {
+		
+		let lhs = a.pred;
+		let rhs = a.prop;
+		let rel = a.check;
+
+		// let lhs_in_wheat = this.isInstructorAuthored(lhs);
+		// let rhs_in_wheat = this.isInstructorAuthored(rhs);
+
+		// if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
+		// 	this.error_messages.push(`❗Excluding assert ${lhs} ${rel} ${rhs} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
+		// 	return;
+		// }
+		// else if (!rhs_in_wheat) {
+		// 	// Ideally we only want to mutate away assertions of inclusion ( that is s => i),
+		// 	// since otherwise we would be UNSAT.
+
+		// 	// BUT WE HOPE THAT THIS IS DEALT WITH BY THE CALLING FUNCTION.
+		
+		// 	// JUST KNOW THAT THIS IS A WARNING.
+		// }
+
+
+
+
+		const assertionAsExpr = `${lhs} implies ${rhs}`;
+		const predicateName = `from_assertion_${lhs}_implies_${rhs}`; // TODO: Is this good?
+	
+		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
+
+		this.mutant.push(new_mutation_predicate);
+
+		// Now, we want to exclude this assertion from rhs.
+		this.constrainPredicateByExclusion(rhs, predicateName);
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	///////////////////////////////////////////////////////////////////////////////////
 
 
 	// TODO: Make this better. This is far too verbose, and is from
@@ -697,6 +805,27 @@ export class ConceptualMutator {
 	`;
 
 		return new HydratedPredicate(e.name, {}, pred_body);
+	}
+
+
+
+	private isTestOfInclusion(t: Test): boolean {
+
+		// Encode Assertion, Example, and QuantifiedAssertion
+		// SHOUDL RETURN FALSE IF WHEAT IS NOT DIRECTLY REFERENCED.
+
+
+		return false;
+	}
+
+	private isTestOfExclusion(t: Test): boolean {
+
+		// Encode Assertion, Example, and QuantifiedAssertion
+
+		// SHOUDL RETURN FALSE IF WHEAT IS NOT DIRECTLY REFERENCED.
+
+
+		return false;
 	}
 }
 
