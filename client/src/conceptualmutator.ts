@@ -351,12 +351,17 @@ export class ConceptualMutator {
 
 	}
 
-	private isInstructorAuthored(p: Predicate): boolean {
+	private isInstructorAuthored(p: Predicate | string): boolean {
+
+		// if p is a string, then it is the name of the predicate.
+		// if p is a Predicate, then it is the predicate itself.
+		let pname = (typeof p === "string") ? p : p.name;
+		
 
 		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
 
 		for (let wp of wheat_predicates) {
-			if (wp.name == p.name) {
+			if (wp.name == pname) {
 				return true;
 			}
 		}
@@ -461,7 +466,7 @@ export class ConceptualMutator {
 		let rhs_in_wheat = this.isInstructorAuthored(rhs);
 
 
-		let test_name = (rel === "sufficient") ? `${lhs.name} is sufficient for ${rhs.name}` : `${rhs.name} is necessary for ${lhs.name}`;
+		let test_name = (rel === "sufficient") ? `${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
 
 		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
 			this.error_messages.push(`❗Excluding assert ${test_name} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
@@ -497,7 +502,7 @@ export class ConceptualMutator {
 		let rhs_in_wheat = this.isInstructorAuthored(rhs);
 
 
-		let test_name = (rel === "sufficient") ? `${quantifiedPrefix} ${lhs.name} is sufficient for ${rhs.name}` : `${rhs.name} is necessary for ${lhs.name}`;
+		let test_name = (rel === "sufficient") ? `${quantifiedPrefix} ${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
 
 		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
 			this.error_messages.push(`❗Excluding assert ${test_name} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
