@@ -195,25 +195,63 @@ export class ConceptualMutator {
 
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
-
-		for (let a of assertions) {
-			if (this.isTestOfInclusion(a)) {
-				
-				
-				this.mutateAwayAssertion(a);
-
-			}
-			else if (this.isTestOfExclusion(a)) {
-				// FILL
-			}
-			else {
-				// DO NOTHING, ADD A MESSAGE ABOUT HOW WE EXCLUDE THIS.
+		for (let e of examples) {
+			if(this.isTestOfInclusion(e)) {
+				this.mutateAwayExample(e);
 			}
 		}
 
 
+		for (let a of assertions) {
+			if (this.isTestOfInclusion(a)) {
+				this.mutateAwayAssertion(a);
+
+			}
+		}
+
+		for (let qa of quantifiedAssertions) {
+			if (this.isTestOfInclusion(qa)) {
+				this.mutateAwayQuantifiedAssertion(qa);
+			}
+		}
+
+		return this.num_mutations;
+	}
+
+	mutatefromExclusionTestIntersection() : number {
+
+		// First mutate to vaccuity.
+		this.mutateToVaccuity();
+
+		let assertions = this.full_source_util.getAssertions();
+		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
+		let examples = this.full_source_util.getExamples();
+
+		// TODO: Here we have to also think about the test expects. Deal with that later.
+
+		for (let e of examples) {
+			if(this.isTestOfExclusion(e)) {
+				// Build the predicate under test from the example.
 
 
+
+			}
+		}
+
+
+		for (let a of assertions) {
+			if (this.isTestOfExclusion(a)) {
+
+				// Build the predicate under test from the assertion.
+			}
+		}
+
+		for (let qa of quantifiedAssertions) {
+			if (this.isTestOfExclusion(qa)) {
+				// Build the predicate under test from the quantified assertion.
+
+			}
+		}
 
 		return this.num_mutations;
 	}
@@ -686,7 +724,22 @@ export class ConceptualMutator {
 
 
 
+	protected mutateAwayExample(e: Example) {
 
+		// BUT ONLY IF THIS IS A POSITIVE EXAMPLE.
+
+		let p = this.exampleToPredicate(e);
+		this.mutant.push(p);
+
+		// Now, we want to exclude this assertion from rhs.
+		this.constrainPredicateByExclusion(e.name, p.name);
+
+
+
+		// AND IF IT IS A NEGATIVE EXAMPLE?
+		// WE COULD EASE THE PREDICATE TO INCLUDE THE NEGATION OF THE EXAMPLE.
+
+	}
 
 
 
