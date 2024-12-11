@@ -530,8 +530,8 @@ export class ConceptualMutator {
 	protected mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
 		// TEST IS ALWAYS OF THE FORM pred => prop
 		// SO BELIEF IS ALWAYS lhs => rhs
-		let lhs = a.pred;
-		let rhs = a.prop;
+		let lhs = a.pred;    // TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
+		let rhs = a.prop;	// I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
 		let rel = a.check;
 		let disj = (a.disj) ? "disj" : "";
 
@@ -644,10 +644,8 @@ export class ConceptualMutator {
 		// }
 
 
-
-
 		const assertionAsExpr = `${lhs} implies ${rhs}`;
-		const predicateName = `from_assertion_${lhs}_implies_${rhs}`; // TODO: Is this good?
+		const predicateName = this.randomNameGenerator();
 	
 		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
 
@@ -660,10 +658,30 @@ export class ConceptualMutator {
 	}
 
 
+	protected mutateAwayQuantifiedAssertion(a: QuantifiedAssertionTest) {
+
+		// TODO: I THINK THIS IS BUGGY.
+		let lhs = a.pred; // // TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
+		let rhs = a.prop;// TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
+		let rel = a.check;
 
 
 
+		const quantifier = "all";
+		const quantDecls = get_text_from_block(a.quantDecls, this.source_text);
+		const disj = (a.disj) ? "disj" : "";
+		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
 
+
+		const quantifiedAssertionAsExpr = `${quantifiedPrefix} (${lhs} implies ${rhs})`;
+		const predicateName = this.randomNameGenerator();
+		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, quantifiedAssertionAsExpr);
+		this.mutant.push(new_mutation_predicate);
+
+		// Now, we want to exclude this assertion from rhs.
+		this.constrainPredicateByExclusion(rhs, predicateName);
+
+	}
 
 
 
@@ -826,6 +844,12 @@ export class ConceptualMutator {
 
 
 		return false;
+	}
+
+	private randomNameGenerator(): string {
+		// Generates a random predicate name starting with p and then 5 random characters.
+		let randomName = 'generated_' + Math.random().toString(36).substring(2, 7);
+		return randomName;
 	}
 }
 
