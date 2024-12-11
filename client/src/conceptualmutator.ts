@@ -1,5 +1,5 @@
-import { getNameUpToParameters, example_regex, assertion_regex, quantified_assertion_regex, extractTestSuite, assertionToExpr, emptyOutPredicate, emptyOutAllPredicates } from './forge-utilities';
-import { getPredicatesOnly, removeForgeComments, exampleToPred, getSigList, getPredList, findExampleByName, test_regex, getFailingTestName, retrievePredName } from './forge-utilities';
+import {  example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
+import {test_regex, getFailingTestName } from './forge-utilities';
 import { window } from 'vscode';
 
 
@@ -174,10 +174,9 @@ export class ConceptualMutator {
 
 
 	/**
-	 * 
-	 * @returns A mutated version of the wheat that is consistent with the student's tests.
+	 * @returns The number of mutations carried out.
 	 */
-	public generateMutantConsistentWithFailingTests() : string {
+	public mutateToFailingTests() : number {
 
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
@@ -192,6 +191,13 @@ export class ConceptualMutator {
 			if (example_regex.test(w_o)) {
 				// Mutate to example
 
+				let e = this.getExampleByName(testName);
+				if (e == null) {
+					this.error_messages.push(`❗Unexpected Error: I had trouble finding example "${testName}". Excluding it from my analysis.`);
+					continue;
+				}
+				this.mutateToExample(e);
+
 			} else if (quantified_assertion_regex.test(w_o)) {
 
 
@@ -203,11 +209,18 @@ export class ConceptualMutator {
 				}
 
 
-
-
-
-				// Need to find the assertion.
-				// And mutate to the quantified assertion.
+				const start_row = parseInt(match[1]);
+				const start_col = parseInt(match[2]);
+				//const span = parseInt(match[3]);
+				//const lhs_pred = match[4];
+				const op = match[5];
+				//const rhs_pred = match[6];
+				const a = this.getQuantifiedAssertion(start_row, start_col, op);
+				if (a == null) {
+					this.error_messages.push(`❗Excluding test "${testName}" from my analysis. I cannot provide feedback around assertions.`);
+					continue;
+				}
+				this.mutateToQuantifiedAssertion(a);
 			}
 			else if (assertion_regex.test(w_o)) {
 				const match = w_o.match(assertion_regex);
@@ -222,9 +235,12 @@ export class ConceptualMutator {
 				const op = match[2];
 				const rhs_pred = match[3];
 
-				// Need to find the assertion. This I think we can do with left / right.
-				// And mutate to the assertion.
-
+				const a = this.getAssertion(lhs_pred, op, rhs_pred);
+				if (a == null) {
+					this.error_messages.push(`❗Excluding test "${testName}" from my analysis. I cannot provide feedback around assertions.`);
+					continue;
+				}
+				this.mutateToAssertion(a);
 			}
 			else if (test_regex.test(w_o)) {
 
@@ -232,17 +248,17 @@ export class ConceptualMutator {
 				this.error_messages.push(test_expect_failure_msg)
 			}
 			else if (testName != "") {
+				// Could also be a assert is sat/unsat.
 				throw new Error("Something went very wrong!");
 			}
 		}
 
 
-		return this.mutantToString();
+		return this.num_mutations;
 	}
 
 
-
-	protected mutantToString(): string {
+	public getMutantAsString(): string {
 
 		let predStrings = this.mutant.map((p) => {
 			let declParams = p.declParams();
@@ -251,7 +267,7 @@ export class ConceptualMutator {
 		});
 
 		let PREFIX = "#lang forge\n option run_sterling off\n";
-		let sigDecls = []; // TODO!
+		let sigDecls = this.hydrateSigs();
 		let sigs = sigDecls.join("\n\n");
 
 		let predicates = predStrings.join("\n\n");
@@ -260,8 +276,79 @@ export class ConceptualMutator {
 	}
 
 
+	/**
+	 * Not ideal. This is a low fidelity solution.
+	 * @returns A list of sigs as strings.
+	 */
+	private hydrateSigs() : string[] {
+
+		let sigs : Sig[] = this.full_source_util.getSigs();
+		let sigStrings = sigs.map((s) => {
+			let name = s.name;
+
+			// I think this is the '' low fidelity '' solution for now.
+			let body = get_text_from_block(s, this.source_text);
+
+			return body;
+		});
+
+		return sigStrings;
 
 
+	}
+
+
+
+	private getExampleByName(name: string): Example {
+
+		let examples = this.student_util.getExamples();
+		for (let e of examples) {
+			if (e.name == name) {
+				return e;
+			}
+		}
+		return null;
+	}
+
+	// TODO: Double check this.
+	private getAssertion(lhs: string, op: string, rhs: string): AssertionTest {
+
+		let assertions = this.student_util.getAssertions();
+		for (let a of assertions) {
+			if (a.check == op) {
+				
+				// The assertion construct is always pred => prop
+				// But we need to find lhs' sufficient rhs OR rhs is necessary for lhs.
+				if(op == "sufficient" && a.pred == lhs && a.prop == rhs) {
+					return a;
+				}
+
+				if(op == "necessary" && a.pred == rhs && a.prop == lhs) {
+					return a;
+				}
+
+			}
+		}
+		return null;
+
+
+	}
+
+
+	private getQuantifiedAssertion(start_row: number, start_col: number, op: string): QuantifiedAssertionTest {
+
+		let assertions: QuantifiedAssertionTest[] = this.student_util.getQuantifiedAssertions();
+		for (let a of assertions) {
+			
+			// I thinkt this is enough to uniquely identify the assertion.
+			if (a.startRow == start_row && a.startCol == start_col && a.check == op)
+				return a;
+
+
+		}
+		return null;
+
+	}
 
 	private isInstructorAuthored(p: Predicate): boolean {
 

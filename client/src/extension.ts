@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, DiagnosticCollection, languages } from 'vscode';
-import { HalpRunner } from './halp';
+import { HintGenerator } from './hintgenerator';
 import { ensureForgeVersion } from './forge-utilities';
 
 
@@ -305,8 +305,8 @@ export async function activate(context: ExtensionContext) {
 		const fileName = document.fileName;
 		
 		if (fileName.endsWith('.test.frg')) {
-			var h = new HalpRunner(logger, halpOutput);
-			h.runHalp(content, fileName)
+			var h = new HintGenerator(logger, halpOutput);
+			h.generateHints(content, fileName)
 				.then((result) => {
 					
 					try {
