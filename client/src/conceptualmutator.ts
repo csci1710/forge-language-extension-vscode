@@ -55,19 +55,6 @@ class HydratedPredicate {
 
 
 
-function get_block_from_active_editor(fromRow: number, toRow: number, fromColumn: number, toColumn: number): string {
-	// Get the active editor
-	// Get the text from the active editor
-	// Return the text from the given row and column to the given row and column
-	let activeEditor = window.activeTextEditor;
-	if (!activeEditor) {
-		return ""; //What?
-	}
-	let text = activeEditor.document.getText();
-	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
-}
-
-// I THINK THIS IS WRONG.
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
 	let lines = text.split("\n");
 	let block = "";
@@ -169,9 +156,14 @@ export class ConceptualMutator {
 
 			let params = {};
 			let param_strings = params_text.split(",");
+
+
+
 			for (let param_string of param_strings) {
 				let [name, type] = param_string.split(":");
-				params[name.trim()] = type.trim();
+				if(name && type) {
+					params[name.trim()] = type.trim();
+				}
 			}
 			return new HydratedPredicate(name, params, body);
 		}
