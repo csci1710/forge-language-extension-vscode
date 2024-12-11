@@ -67,18 +67,19 @@ function get_block_from_active_editor(fromRow: number, toRow: number, fromColumn
 	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
 
+// I THINK THIS IS WRONG.
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
 	let lines = text.split("\n");
 	let block = "";
 
-	// TODO: To and from rows are correct!
+	// TODO: To and from rows are not correct?
 
 	for (let i = fromRow; i <= toRow; i++) {
 		let line = lines[i - 1];
 		if (i == fromRow) {
 			block += line.substring(fromColumn - 1);
 		} else if (i == toRow) {
-			block += line.substring(0, toColumn);
+			block += line.substring(0, toColumn + 1); // DO WE NEED TO ADD 1?
 		} else {
 			block += line;
 		}
@@ -94,7 +95,12 @@ function get_text_from_block(b: Block, text: string): string {
 		return "";
 	}
 
-	return get_text_block(b.fromRow, b.toRow, b.fromColumn, b.toColumn, text);
+	let fromRow = b.startRow;
+	let toRow = b.endRow;
+	let fromColumn = b.startColumn;
+	let toColumn = b.endColumn;
+
+	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
 
 
@@ -155,7 +161,10 @@ export class ConceptualMutator {
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
 			let name = p.name;
-			let body = get_text_from_block(p.block, source_text);
+			let body_block : Block = p.body;
+
+
+			let body = get_text_from_block(body_block, source_text);
 			let params_text = get_text_from_block(p.params, source_text);
 
 			let params = {};

@@ -124,8 +124,6 @@ export class HintGenerator {
 			// mutant per failing test.
 			if (this.mutationStrategy == "Per Test") {
 
-				// TODO: Clean this up.
-
 				let per_test_hints = await this.runPerTestStrategy(w, w_o, studentTests, testFileName, source_text);
 
 				// Now need to annotate per test hints with the test name.
@@ -139,7 +137,7 @@ export class HintGenerator {
 
 					var hint = this.generateHintFromCandidates(per_test_hints[test])
 					if (hint == "") {
-						hint = this.recordAmbiguousTest(testFileName, studentTests, mutator.forge_output);
+						hint = this.recordAmbiguousTest(testFileName, studentTests, w_o);
 					}
 
 					composite_hint += `\n${test} : ${hint}\n`;
@@ -155,7 +153,7 @@ export class HintGenerator {
 
 				// TODO: Clean this up.
 
-				var hints = await this.runComprehensiveStrategy(mutator, studentTests, testFileName);
+				var hints = await this.runComprehensiveStrategy(w, w_o, source_text, studentTests, testFileName);
 				return this.generateHintFromCandidates(hints);
 			}
 			else {
@@ -286,9 +284,11 @@ export class HintGenerator {
 				continue;
 			}
 
-			const lineMutator = new Mutator(w, studentTests, outputline, testFileName, source_text, 1);
-			lineMutator.mutateToStudentMisunderstanding();
-			var hints = await this.tryGetHintsFromMutantFailures(testFileName, lineMutator.mutant, lineMutator.student_preds, outputline);
+			const lineMutator = new ConceptualMutator(w, studentTests, outputline, testFileName, source_text, 1);
+			lineMutator.mutateToFailingTests();
+
+			let mutant = lineMutator.getMutantAsString();
+			var hints = await this.tryGetHintsFromMutantFailures(testFileName, mutant, lineMutator.student_tests, outputline);
 			per_test_hints[tn] = hints;
 
 
