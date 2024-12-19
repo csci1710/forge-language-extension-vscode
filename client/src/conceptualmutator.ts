@@ -643,6 +643,10 @@ export class ConceptualMutator {
 	// TODO: Very much not sure how this works.
 	protected mutateToExample(e: Example) {
 
+
+		// TODO: We should get this from isTestOfInclusion / isTestOfExclusion
+
+
 		// Determine if positive or negative example.
 		// Find if testExpr
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
@@ -916,21 +920,60 @@ export class ConceptualMutator {
 
 
 
-	private isTestOfInclusion(t: Test): boolean {
+	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
+		if (t instanceof AssertionTest || t instanceof QuantifiedAssertionTest) {
+			let rhs = t.prop;
+			let lhs = t.pred;
+			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
+		} else if (t instanceof Example) {
+			
+			const negationRegex = /(not|!)\s*(\b\w+\b)/;
+			let exampletestExpr = get_text_from_block(t.textExpr, this.source_text);
+			let negativeExample = exampletestExpr.match(negationRegex);
+	
+			// Pred under test
+			let p_i = exampletestExpr;
+			if (negativeExample) {
+				p_i = negativeExample[2];
+			}
+	
+			// Ensure p_i is in the wheat.
+			if (!this.isInstructorAuthored(p_i)) {
+				return false;
+			}
 
-		// Encode Assertion, Example, and QuantifiedAssertion
-		// SHOUDL RETURN FALSE IF WHEAT IS NOT DIRECTLY REFERENCED.
-
-
+			// If it is a positive example, then it is a test of inclusion.
+			return !negativeExample;
+		}
+	
 		return false;
 	}
 
-	private isTestOfExclusion(t: Test): boolean {
+	private isTestOfExclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
 
-		// Encode Assertion, Example, and QuantifiedAssertion
+		if (t instanceof AssertionTest || t instanceof QuantifiedAssertionTest) {
 
-		// SHOUDL RETURN FALSE IF WHEAT IS NOT DIRECTLY REFERENCED.
+			let rhs = t.prop;
+			let lhs = t.pred;
+			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
 
+
+		} else if (t instanceof Example) {
+			const negationRegex = /(not|!)\s*(\b\w+\b)/;
+			let exampletestExpr = get_text_from_block(t.textExpr, this.source_text);
+			let negativeExample = exampletestExpr.match(negationRegex);
+	
+			// Pred under test
+			let p_i = exampletestExpr;
+			if (negativeExample) {
+				p_i = negativeExample[2];
+			}
+	
+			// Ensure p_i is in the wheat.
+			if (this.isInstructorAuthored(p_i) && negativeExample) {
+				return true;
+			}
+		}
 
 		return false;
 	}
