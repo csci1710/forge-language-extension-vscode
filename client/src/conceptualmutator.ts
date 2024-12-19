@@ -563,9 +563,11 @@ export class ConceptualMutator {
 		const newName_i = this.getNewName(i);
 
 		p_i.name = newName_i;
-		let callParams = p_i.callParams();
+		let i_callParams = p_i.callParams();
 
-		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} and (not ${s}))`;
+		let s_callParams = p_s.callParams();
+
+		let new_i_body = `${quantified_prefix} (${newName_i}${i_callParams} and (not  ${s}${s_callParams}))`;
 
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
