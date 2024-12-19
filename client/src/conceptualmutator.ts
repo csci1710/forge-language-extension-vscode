@@ -237,9 +237,10 @@ export class ConceptualMutator {
 
 		for (let e of examples) {
 			if(this.isTestOfExclusion(e)) {
-				// Build the predicate under test from the example.
 
-
+				// Ensure the mutant does not
+				// accept the example.
+				this.mutateAwayExample(e);
 
 			}
 		}
@@ -249,12 +250,39 @@ export class ConceptualMutator {
 			if (this.isTestOfExclusion(a)) {
 
 				// Build the predicate under test from the assertion.
+				// pred => prop
+				let lhs = a.pred;
+				let rhs = a.prop;
+
+				// If it is a test of exclusion, then we
+				// know that the lhs is from the wheat.
+				this.constrainPredicateByInclusion(lhs, rhs);
+
 			}
 		}
 
 		for (let qa of quantifiedAssertions) {
 			if (this.isTestOfExclusion(qa)) {
 				// Build the predicate under test from the quantified assertion.
+
+
+				let lhs = qa.pred;
+				let rhs = qa.prop;
+				let rel = qa.check;
+
+				const quantifier = "all";
+				const quantDecls = get_text_from_block(qa.quantDecls, this.source_text);
+				const disj = (qa.disj) ? "disj" : "";
+				const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
+
+				// If it is a test of exclusion, then we
+				// know that the lhs is from the wheat.
+
+				// BUT IS THIS RIGHT? TODO: WHAT ABOUT THE EXACT ARGUMENTS TO EACH PREDICATE?
+				// THESE ARE NOT THE CALL PARAMS.
+
+
+				this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
 
 			}
 		}
@@ -494,6 +522,12 @@ export class ConceptualMutator {
 
 
 	protected constrainPredicateByInclusion(i: string, s: string, quantified_prefix: string = ""): void {
+
+		
+				// BUT IS THIS RIGHT? TODO: WHAT ABOUT THE EXACT ARGUMENTS TO EACH PREDICATE?
+				// THESE ARE NOT THE CALL PARAMS.
+
+
 
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
@@ -746,10 +780,6 @@ export class ConceptualMutator {
 		// WE COULD EASE THE PREDICATE TO INCLUDE THE NEGATION OF THE EXAMPLE.
 
 	}
-
-
-
-
 
 
 
