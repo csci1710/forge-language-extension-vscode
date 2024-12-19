@@ -82,13 +82,8 @@ export class HintGenerator {
 				return CONSISTENCY_MESSAGE;
 			}
 			// Otherwise, generate feedback around thoroughness.
-
-			let thoroughness_candidates = await generateThoroughnessFeedback();
-
-
-			// TODO: RE-ENABLE.				
-			// let thoroughness_candidates = await this.generateThoroughnessFeedback(mutator);
-			// return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
+			let thoroughness_candidates = await this.generateThoroughnessFeedback(w, studentTests, w_o, testFileName, source_text);
+			return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
 
 		}
 
@@ -501,7 +496,7 @@ export class HintGenerator {
 		const payload = {
 			"testFileName": testFileName,
 			"assignment": testFileName.replace('.test.frg', ''),
-			"student_preds": student_preds,
+			"student_preds": student_preds, // This is now all student tests.
 			"conceptual_mutant": mutant
 		}
 		this.logger.log_payload(payload, LogLevel.INFO, Event.THOROUGHNESS_MUTANT)
@@ -527,71 +522,49 @@ export class HintGenerator {
 		*/
 
 
-		// We will use this mutator to generate a mutant that is consistent with all tests of inclusion.
+		// We will use this mutator to generate a mutant that is INconsistent with all tests of inclusion.
 		const inclusion_mutator = new ConceptualMutator(wheat, student_tests, forge_output, test_file_name, source_text);
-
 
 		// We will use this mutator to generate a mutant that is consistent with all tests of exclusion.
 		const exclusion_mutator = new ConceptualMutator(wheat, student_tests, forge_output, test_file_name, source_text);
 
-		// We will use this mutator to generate a fully eased mutant.
-		const eased_mutator = new ConceptualMutator(wheat, student_tests, forge_output, test_file_name, source_text);
+		// We use this mutator to detect positive tests in the Autograder test suite.
+		// Ideally, we should change this.
+		const null_mutator = new ConceptualMutator(wheat, student_tests, forge_output, test_file_name, source_text);
 
 
+		let num_inclusion_mutations = inclusion_mutator.mutateToExcludeInclusionTests();
+		let num_exclusion_mutations = exclusion_mutator.mutatefromExclusionTestIntersection();
+		null_mutator.mutateToVaccuity();
 
 
-		
-
-		// positiveMutator.mutateToPositiveTests();
-		// negativeMutator.mutateToNegativeTests();
-		// nullMutator.mutateToVaccuity();
-
-		let skipped_tests = positiveMutator.error_messages.join("\n") + negativeMutator.error_messages.join("\n");
+		let skipped_tests = inclusion_mutator.error_messages.join("\n") + exclusion_mutator.error_messages.join("\n");
 		this.forgeOutput.appendLine(skipped_tests);
 
-		let tests_analyzed = positiveMutator.num_mutations + negativeMutator.num_mutations;
+		let tests_analyzed = num_inclusion_mutations + num_exclusion_mutations;
 
 		// There should be one mutation per considered, consistent test
 		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
 		this.forgeOutput.show();
 		try {
+
+			let mutantOfInclusion = inclusion_mutator.getMutantAsString();
+			let mutantOfExclusion = exclusion_mutator.getMutantAsString();
+			let vaccuousMutant = null_mutator.getMutantAsString();
+
 			// All those tests that were not covered by positive test cases
-			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(positiveMutator.test_file_name, positiveMutator.mutant, positiveMutator.student_preds);
+			let thoroughness_hints = await this.tryGetHintsFromMutantPasses(inclusion_mutator.test_file_name, mutantOfInclusion, inclusion_mutator.student_tests);
 
-			// Now we want 
+			// All those tests covered by negative test cases (and all positive tests)
+			let negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(exclusion_mutator.test_file_name, mutantOfExclusion, exclusion_mutator.student_tests);				
 
-			// More conservative strategy: Intersection (aka thoroughness hints only from negative tests)
-
-
-			if (this.thoroughnessStrategy == "Partial") {
-
-				// All those tests that were not covered by negative test cases
-				let negative_thoroughness_hints = await this.tryGetHintsFromMutantFailures(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds, negativeMutator.forge_output, Event.THOROUGHNESS_MUTANT);	
+			// (in theory) all positive test cases. TODO: There may be scenarios were this is buggy, so we need to think about it.
+			let positive_test_hints = await this.tryGetHintsFromMutantPasses(null_mutator.test_file_name, vaccuousMutant, null_mutator.student_tests);
+			let negative_covered_hints = negative_covered_hints_and_pos.filter(hint => !positive_test_hints.includes(hint));
 
 
-				const intersection = thoroughness_hints.filter(hint => negative_thoroughness_hints.includes(hint));
-				return intersection;
-			}
-			else if (this.thoroughnessStrategy == "Full") {
-
-				// All those tests covered by negative test cases (and all positive tests)
-				let negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(negativeMutator.test_file_name, negativeMutator.mutant, negativeMutator.student_preds);				
-
-				// (in theory) all positive test cases. i think this isn't quite right.
-				let positive_test_hints = await this.tryGetHintsFromMutantPasses(nullMutator.test_file_name, nullMutator.mutant, nullMutator.student_preds);
-				let negative_covered_hints = negative_covered_hints_and_pos.filter(hint => !positive_test_hints.includes(hint));
-
-
-				let difference = thoroughness_hints.filter(hint => !negative_covered_hints.includes(hint));
-				return difference;
-
-			}
-			else {
-				const msg = "Something was wrong in the extension settings. toadusponens.thoroughnessFeedback must be 'Off', 'Partial' or 'Full'"
-				vscode.window.showErrorMessage(msg);
-				return [msg];
-			}
-
+			let difference = thoroughness_hints.filter(hint => !negative_covered_hints.includes(hint));
+			return difference;
 
 		}
 		catch (e) {

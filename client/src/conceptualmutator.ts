@@ -218,7 +218,13 @@ export class ConceptualMutator {
 		return this.num_mutations;
 	}
 
-	mutatefromExclusionTestIntersection() : number {
+
+	/**
+	 * TODO: Needs to be implemented.
+	 * Generates a mutant consistent with *all* tests of exclusion.
+	 * @returns 
+	 */
+	public mutatefromExclusionTestIntersection() : number {
 
 		// First mutate to vaccuity.
 		this.mutateToVaccuity();
@@ -644,7 +650,7 @@ export class ConceptualMutator {
 
 	protected mutateToTest(t: Test) { } // Not implemented yet, very HARD.
 
-	protected mutateToVaccuity() {
+	public mutateToVaccuity() {
 		this.mutant.forEach(
 			(p) => {
 				p.body = "";
