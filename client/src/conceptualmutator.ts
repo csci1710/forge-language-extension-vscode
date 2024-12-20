@@ -12,6 +12,27 @@ import {
 } from "forge-toadus-parser";
 
 
+// TODO: These feel like something I should be able to get 
+// AWAY from using.
+function isAssertionTest(t: any): t is AssertionTest {
+    return t && typeof t === 'object' && 'prop' in t && 'pred' in t && !(t as QuantifiedAssertionTest).quantifier;
+}
+
+function isQuantifiedAssertionTest(t: any): t is QuantifiedAssertionTest {
+    return t && typeof t === 'object' && 'prop' in t && 'pred' in t && 'quantifier' in t;
+}
+
+function isExample(t: any): t is Example {
+    
+	if (!t) {
+		return false;
+	}
+
+	let ttt = typeof t;
+	let te = 'testExpr' in t;
+
+	return (ttt === 'object') && te;
+}
 
 
 
@@ -176,11 +197,6 @@ export class ConceptualMutator {
 
 		this.mutant = this.full_source_util.getPreds().map(predicateToHydratedPredicate);
 	}
-
-
-
-
-
 
 
 	/**
@@ -646,7 +662,7 @@ export class ConceptualMutator {
 		// Determine if positive or negative example.
 		// Find if testExpr
 		const negationRegex = /(not|!)\s*(\b\w+\b)/;
-		let exampletestExpr = get_text_from_block(e.textExpr, this.source_text);
+		let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
 		let negativeExample = exampletestExpr.match(negationRegex);
 
 		// Pred under test
@@ -917,14 +933,28 @@ export class ConceptualMutator {
 
 
 	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
-		if (t instanceof AssertionTest || t instanceof QuantifiedAssertionTest) {
-			let rhs = t.prop;
-			let lhs = t.pred;
+		
+		if (isAssertionTest(t)) {
+
+			let a = t as AssertionTest;
+			let rhs = a.prop;
+			let lhs = a.pred;
 			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
-		} else if (t instanceof Example) {
+
+		} else if(isQuantifiedAssertionTest(t)) {
+
+			let qa = t as QuantifiedAssertionTest;
+
+			let rhs = qa.prop;
+			let lhs = qa.pred;
+			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
+		} else if (isExample(t)) {
 			
+			let e = t as Example;
+
+
 			const negationRegex = /(not|!)\s*(\b\w+\b)/;
-			let exampletestExpr = get_text_from_block(t.textExpr, this.source_text);
+			let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
 			let negativeExample = exampletestExpr.match(negationRegex);
 	
 			// Pred under test
@@ -947,16 +977,26 @@ export class ConceptualMutator {
 
 	private isTestOfExclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
 
-		if (t instanceof AssertionTest || t instanceof QuantifiedAssertionTest) {
-
-			let rhs = t.prop;
-			let lhs = t.pred;
+		if (isAssertionTest(t))
+		{
+			let a = t as AssertionTest;
+			let rhs = a.prop;
+			let lhs = a.pred;
 			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
+		}
+		else if(isQuantifiedAssertionTest(t)) {
+
+			let qa = t as QuantifiedAssertionTest;
+			let rhs = qa.prop;
+			let lhs = qa.pred;
+			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
+		} else if (isExample(t)) {
+
+			let e = t as Example;
 
 
-		} else if (t instanceof Example) {
 			const negationRegex = /(not|!)\s*(\b\w+\b)/;
-			let exampletestExpr = get_text_from_block(t.textExpr, this.source_text);
+			let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
 			let negativeExample = exampletestExpr.match(negationRegex);
 	
 			// Pred under test

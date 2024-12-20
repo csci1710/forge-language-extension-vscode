@@ -505,8 +505,7 @@ export class HintGenerator {
 	async generateThoroughnessFeedback(wheat : string, student_tests : string, forge_output : string, test_file_name : string, source_text :string) : Promise<string[]> {
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
-		this.forgeOutput.appendLine(`🐸 Step 2: Asessing the thoroughness of your test-suite. 
-			I will ignore ANY tests that are not in 'test-suite's`);
+		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite.`);
 		this.forgeOutput.show();
 
 		/*
