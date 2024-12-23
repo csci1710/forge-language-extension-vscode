@@ -133,8 +133,6 @@ function get_text_from_block(b: Block, text: string): string {
 export class ConceptualMutator {
 	// TODO: Keep track of SKIPPED tests and INCONSISTENT tests.
 	skipped_tests: SkippedTest[];
-
-	error_messages: string[];
 	inconsistent_tests: string[];
 	num_mutations: number = 0;
 
@@ -168,7 +166,6 @@ export class ConceptualMutator {
 		this.wheat_util.processSpec();
 		this.student_util.processSpec();
 		this.full_source_util.processSpec();
-		this.error_messages = [];
 		this.inconsistent_tests = [];
 		this.skipped_tests = [];
 
@@ -221,11 +218,9 @@ export class ConceptualMutator {
 			}
 		}
 
-
 		for (let a of assertions) {
 			if (this.isTestOfInclusion(a)) {
 				this.mutateAwayAssertion(a);
-
 			}
 		}
 
@@ -261,10 +256,8 @@ export class ConceptualMutator {
 				// Ensure the mutant does not
 				// accept the example.
 				this.mutateAwayExample(e);
-
 			}
 		}
-
 
 		for (let a of assertions) {
 			if (this.isTestOfExclusion(a)) {
@@ -277,15 +270,12 @@ export class ConceptualMutator {
 				// If it is a test of exclusion, then we
 				// know that the lhs is from the wheat.
 				this.constrainPredicateByInclusion(lhs, rhs);
-
 			}
 		}
 
 		for (let qa of quantifiedAssertions) {
 			if (this.isTestOfExclusion(qa)) {
 				// Build the predicate under test from the quantified assertion.
-
-
 				let lhs = qa.pred;
 				let rhs = qa.prop;
 				let rel = qa.check;
@@ -599,9 +589,9 @@ export class ConceptualMutator {
 
 
 		let test_name = (rel === "sufficient") ? `${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
-
 		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
-			this.error_messages.push(`❗Excluding assert ${test_name} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
+			let reason = (lhs_in_wheat && rhs_in_wheat) ? `Both ${lhs} and ${rhs} are from the assignment statement.` : `Neither ${lhs} nor ${rhs} are from the assignment statement.`;
+			this.skipped_tests.push(new SkippedTest(test_name,`${reason}. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`));
 			return;
 		}
 
@@ -637,7 +627,8 @@ export class ConceptualMutator {
 		let test_name = (rel === "sufficient") ? `${quantifiedPrefix} ${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
 
 		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
-			this.error_messages.push(`❗Excluding assert ${test_name} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
+			let reason = (lhs_in_wheat && rhs_in_wheat) ? `Both ${lhs} and ${rhs} are from the assignment statement.` : `Neither ${lhs} nor ${rhs} are from the assignment statement.`;
+			this.skipped_tests.push(new SkippedTest(test_name,`${reason}. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`));
 			return;
 		}
 
@@ -672,7 +663,7 @@ export class ConceptualMutator {
 
 		// Ensure p_i is in the wheat.
 		if (!this.isInstructorAuthored(p_i)) {
-			this.error_messages.push(`⛔ Example ${e.name} is not consistent with the assignment. However, I cannot provide more feedback since it does not test a predicate defined in the assignment statement.`);
+			this.skipped_tests.push(new SkippedTest(e.name,`Example does not directly test a predicate (or its negation) from the assignment statement.`));
 			return;
 		}
 
