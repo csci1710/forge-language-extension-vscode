@@ -142,9 +142,14 @@ export class HintGenerator {
 			}
 
 			else if (this.mutationStrategy == "Comprehensive") {
-							// The comprehensive strategy is high performance and low granularity.
+			// The comprehensive strategy is high performance and low granularity.
 			// It generates a single conceptual mutant that is consistent with all failing tests.
 			// It then generates feedback around this single mutant.
+
+
+			// TODO: THere is a question here, however, of what we should do if there are NO
+			// hints. This means that some tests are (i)nconsistent and we cant give feedback)
+			// OR that some tests are ambiguous (and so we can't give feedback).
 
 				const hints = await this.runComprehensiveStrategy(w, w_o, source_text, studentTests, testFileName);
 				return this.generateHintFromCandidates(hints);

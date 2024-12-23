@@ -25,15 +25,7 @@ function isQuantifiedAssertionTest(t: any): t is QuantifiedAssertionTest {
 }
 
 function isExample(t: any): t is Example {
-
-	if (!t) {
-		return false;
-	}
-
-	let ttt = typeof t;
-	let te = 'testExpr' in t;
-
-	return (ttt === 'object') && te;
+	return t && (typeof t === 'object') && ('testExpr' in t);
 }
 
 
@@ -86,17 +78,10 @@ class HydratedPredicate {
 }
 
 
-
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
 	let lines = text.split("\n");
 	let block = "";
-
-	// TODO: To and from rows are not correct?
-
-	// WHat if toRow and fromRow are the same?
 	const sameRow = fromRow == toRow;
-
-
 	for (let i = fromRow; i <= toRow; i++) {
 		let line = lines[i - 1];
 		if (i == fromRow) {
@@ -132,23 +117,14 @@ function get_text_from_block(b: Block, text: string): string {
 }
 
 
-
-// TODO: Mutated predicates shold
-
-
-
-
-
-
-
-
-
 /*
 	Mutates a Forge ``wheat'' (aka correct solution)
 	to generate a mutant that is consistent with the student's
 	tests.
 */
 export class ConceptualMutator {
+	// TODO: Keep track of SKIPPED tests and INCONSISTENT tests.
+	skipped_tests: string[];
 
 	error_messages: string[];
 	inconsistent_tests: string[];
@@ -186,7 +162,7 @@ export class ConceptualMutator {
 		this.full_source_util.processSpec();
 		this.error_messages = [];
 		this.inconsistent_tests = [];
-
+		this.skipped_tests = [];
 
 		// TODO: Maybe this should keep track of the passing and
 		// failing tests rather than the calling code.
@@ -392,19 +368,19 @@ export class ConceptualMutator {
 
 				const a = this.getAssertion(lhs_pred, op, rhs_pred);
 				if (a == null) {
-					this.error_messages.push(`❗Excluding test "${testName}" from my analysis. I cannot provide feedback around assertions.`);
+					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis`);
 					continue;
 				}
 				this.mutateToAssertion(a);
 			}
 			else if (test_regex.test(w_o)) {
 
-				const test_expect_failure_msg = `❗Excluding test "${testName}" from my analysis. I cannot provide feedback around test-expects.`;
+				const test_expect_failure_msg = `❗Excluding test "${testName}" from my analysis. I cannot provide feedback around "test expects".`;
 				this.error_messages.push(test_expect_failure_msg)
 			}
 			else if (testName != "") {
 				// Could also be a assert is sat/unsat.
-				throw new Error("Something went very wrong!");
+				this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis`);
 			}
 		}
 
@@ -424,6 +400,9 @@ export class ConceptualMutator {
 		let PREFIX = "#lang forge\n option run_sterling off\n";
 		let sigDecls = this.hydrateSigs();
 		let sigs = sigDecls.join("\n\n");
+
+
+		// TODO: ALSO NEED TO HYDRATE FUNCTIONS.
 
 		let predicates = predStrings.join("\n\n");
 		return `${PREFIX}\n${sigs}\n\n${predicates}`;
@@ -513,7 +492,6 @@ export class ConceptualMutator {
 		pname = pname.trim();
 
 		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
-
 		for (let wp of wheat_predicates) {
 			if (wp.name == pname) {
 				return true;
