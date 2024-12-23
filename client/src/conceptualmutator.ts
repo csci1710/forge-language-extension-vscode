@@ -14,6 +14,14 @@ import {
 
 const negationRegex = /(not|!)\s*(\b\w+\b)/;
 
+
+
+class SkippedTest {
+	constructor(public test: string, public reason: string) { }
+}
+
+
+
 // TODO: These feel like something I should be able to get 
 // AWAY from using.
 function isAssertionTest(t: any): t is AssertionTest {
@@ -124,7 +132,7 @@ function get_text_from_block(b: Block, text: string): string {
 */
 export class ConceptualMutator {
 	// TODO: Keep track of SKIPPED tests and INCONSISTENT tests.
-	skipped_tests: string[];
+	skipped_tests: SkippedTest[];
 
 	error_messages: string[];
 	inconsistent_tests: string[];
@@ -309,36 +317,35 @@ export class ConceptualMutator {
 	 */
 	public mutateToFailingTests(): number {
 
+
+		// if(test_names.length != 0) {
+
+		// 	const excludingTestMessage = `❗Excluding test "${testName}" from my analysis. 
+		// 	This test is EITHER not consistent with the assignment OR tests some behavior not
+		// 	explicitly defined in the assignment statement. I cannot determine which of these is the case
+		// 	because of the format of the test.`;
+
+		// }
+
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
-
-			// Do not carry out any more than the maximum number of mutations.
-			if (this.num_mutations >= this.max_mutations) {
-				break;
-			}
-
 			const testName = getFailingTestName(w_o);
+			//const excludingTestMessage = `❗Excluding test "${testName}" from my analysis.`;
 
 			if (example_regex.test(w_o)) {
-				// Mutate to example
-
 				let e = this.getExampleByName(testName);
 				if (e == null) {
-					this.error_messages.push(`❗Unexpected Error: I had trouble finding example "${testName}". Excluding it from my analysis.`);
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToExample(e);
 
 			} else if (quantified_assertion_regex.test(w_o)) {
-
-
 				const match = w_o.match(quantified_assertion_regex);
-
 				if (match == null) {
-					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
-					return;
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
+					continue;
 				}
-
 
 				const start_row = parseInt(match[1]);
 				const start_col = parseInt(match[2]);
@@ -348,43 +355,37 @@ export class ConceptualMutator {
 				//const rhs_pred = match[6];
 				const a = this.getQuantifiedAssertion(start_row, start_col, op);
 				if (a == null) {
-					this.error_messages.push(`❗Excluding test "${testName}" from my analysis. I cannot provide feedback around assertions.`);
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToQuantifiedAssertion(a);
 			}
 			else if (assertion_regex.test(w_o)) {
 				const match = w_o.match(assertion_regex);
-
 				if (match == null) {
-					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis.`);
-					return;
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
+					continue;
 				}
-
-
 				const lhs_pred = match[1];
 				const op = match[2];
 				const rhs_pred = match[3];
-
 				const a = this.getAssertion(lhs_pred, op, rhs_pred);
 				if (a == null) {
-					this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis`);
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToAssertion(a);
 			}
 			else if (test_regex.test(w_o)) {
 
-				const test_expect_failure_msg = `❗Excluding test "${testName}" from my analysis. I cannot provide feedback around "test expects".`;
-				this.error_messages.push(test_expect_failure_msg)
+				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze test expects.`));
+				continue;
 			}
 			else if (testName != "") {
 				// Could also be a assert is sat/unsat.
-				this.error_messages.push(`❗Unexpected Error: Excluding test "${testName}" from my analysis`);
+				this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
 			}
 		}
-
-
 		return this.num_mutations;
 	}
 
