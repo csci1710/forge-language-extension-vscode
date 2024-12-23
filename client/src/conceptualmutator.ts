@@ -508,15 +508,12 @@ export class ConceptualMutator {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-
 		if (!p_i || !p_s) {
-			this.error_messages.push(`❗Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
-			return;
+			throw new Error(`Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
-
 
 		let callParams = p_i.callParams();
 		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} or ${s})`;
@@ -557,8 +554,7 @@ export class ConceptualMutator {
 
 
 		if (!p_i || !p_s) {
-			this.error_messages.push(`❗Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
-			return;
+			throw new Error(`Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
