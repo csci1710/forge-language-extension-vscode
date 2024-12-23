@@ -538,7 +538,7 @@ export class HintGenerator {
 		const tests_analyzed = num_inclusion_mutations + num_exclusion_mutations;
 
 		// There should be one mutation per considered, consistent test
-		this.forgeOutput.appendLine(`🐸 Step 3: Generating a hint to help you improve test thoroughness, with the remaining ${tests_analyzed} tests in mind. ⌛\n`);
+		this.forgeOutput.appendLine(`🐸 Step 3: Here are some ideas for scenarios NOT covered by the ${tests_analyzed} tests analyzed. ⌛\n`);
 		this.forgeOutput.show();
 		try {
 

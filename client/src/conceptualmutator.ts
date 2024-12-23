@@ -1,5 +1,5 @@
-import {  example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
-import {test_regex, getFailingTestName } from './forge-utilities';
+import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
+import { test_regex, getFailingTestName } from './forge-utilities';
 import { window } from 'vscode';
 
 
@@ -12,18 +12,20 @@ import {
 } from "forge-toadus-parser";
 
 
+const negationRegex = /(not|!)\s*(\b\w+\b)/;
+
 // TODO: These feel like something I should be able to get 
 // AWAY from using.
 function isAssertionTest(t: any): t is AssertionTest {
-    return t && typeof t === 'object' && 'prop' in t && 'pred' in t && !(t as QuantifiedAssertionTest).quantifier;
+	return t && typeof t === 'object' && 'prop' in t && 'pred' in t && !(t as QuantifiedAssertionTest).quantifier;
 }
 
 function isQuantifiedAssertionTest(t: any): t is QuantifiedAssertionTest {
-    return t && typeof t === 'object' && 'prop' in t && 'pred' in t && 'quantifier' in t;
+	return t && typeof t === 'object' && 'prop' in t && 'pred' in t && 'quantifier' in t;
 }
 
 function isExample(t: any): t is Example {
-    
+
 	if (!t) {
 		return false;
 	}
@@ -34,6 +36,15 @@ function isExample(t: any): t is Example {
 	return (ttt === 'object') && te;
 }
 
+
+function getExprFromBracesIfAny(s: string): string {
+
+	let scleaned = s.trim();
+	if (scleaned.startsWith("{") && scleaned.endsWith("}")) {
+		return scleaned.substring(1, scleaned.length - 1);
+	}
+	return scleaned;
+}
 
 
 class HydratedPredicate {
@@ -82,10 +93,19 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
 
 	// TODO: To and from rows are not correct?
 
+	// WHat if toRow and fromRow are the same?
+	const sameRow = fromRow == toRow;
+
+
 	for (let i = fromRow; i <= toRow; i++) {
 		let line = lines[i - 1];
 		if (i == fromRow) {
-			block += line.substring(fromColumn - 1);
+			if(sameRow) {
+				block += line.substring(fromColumn - 1, toColumn + 1);
+			}
+			else {
+				block += line.substring(fromColumn - 1);
+			}
 		} else if (i == toRow) {
 			block += line.substring(0, toColumn + 1); // DO WE NEED TO ADD 1?
 		} else {
@@ -175,7 +195,7 @@ export class ConceptualMutator {
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
 			let name = p.name;
-			let body_block : Block = p.body;
+			let body_block: Block = p.body;
 
 
 			let body = get_text_from_block(body_block, source_text);
@@ -188,7 +208,7 @@ export class ConceptualMutator {
 
 			for (let param_string of param_strings) {
 				let [name, type] = param_string.split(":");
-				if(name && type) {
+				if (name && type) {
 					params[name.trim()] = type.trim();
 				}
 			}
@@ -203,7 +223,7 @@ export class ConceptualMutator {
 	 * Mutate to remove belief.
 	 * Modifies the mutant so that it fails passing tests of inclusion.
 	 */
-	public mutateToExcludeInclusionTests() : number {
+	public mutateToExcludeInclusionTests(): number {
 
 		let assertions = this.full_source_util.getAssertions();
 		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
@@ -212,7 +232,7 @@ export class ConceptualMutator {
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
 		for (let e of examples) {
-			if(this.isTestOfInclusion(e)) {
+			if (this.isTestOfInclusion(e)) {
 				this.mutateAwayExample(e);
 			}
 		}
@@ -240,7 +260,7 @@ export class ConceptualMutator {
 	 * Generates a mutant consistent with *all* tests of exclusion.
 	 * @returns 
 	 */
-	public mutatefromExclusionTestIntersection() : number {
+	public mutatefromExclusionTestIntersection(): number {
 
 		// First mutate to vaccuity.
 		this.mutateToVaccuity();
@@ -252,7 +272,7 @@ export class ConceptualMutator {
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
 		for (let e of examples) {
-			if(this.isTestOfExclusion(e)) {
+			if (this.isTestOfExclusion(e)) {
 
 				// Ensure the mutant does not
 				// accept the example.
@@ -311,7 +331,7 @@ export class ConceptualMutator {
 	 * Modifies the mutant so that it passes failing tests.
 	 * @returns The number of mutations carried out.
 	 */
-	public mutateToFailingTests() : number {
+	public mutateToFailingTests(): number {
 
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
@@ -365,7 +385,7 @@ export class ConceptualMutator {
 					return;
 				}
 
-				
+
 				const lhs_pred = match[1];
 				const op = match[2];
 				const rhs_pred = match[3];
@@ -415,9 +435,9 @@ export class ConceptualMutator {
 	 * Not ideal. This is a low fidelity solution.
 	 * @returns A list of sigs as strings.
 	 */
-	private hydrateSigs() : string[] {
+	private hydrateSigs(): string[] {
 
-		let sigs : Sig[] = this.full_source_util.getSigs();
+		let sigs: Sig[] = this.full_source_util.getSigs();
 		let sigStrings = sigs.map((s) => {
 			let name = s.name;
 
@@ -450,14 +470,14 @@ export class ConceptualMutator {
 		let assertions = this.student_util.getAssertions();
 		for (let a of assertions) {
 			if (a.check == op) {
-				
+
 				// The assertion construct is always pred => prop
 				// But we need to find lhs' sufficient rhs OR rhs is necessary for lhs.
-				if(op == "sufficient" && a.pred == lhs && a.prop == rhs) {
+				if (op == "sufficient" && a.pred == lhs && a.prop == rhs) {
 					return a;
 				}
 
-				if(op == "necessary" && a.pred == rhs && a.prop == lhs) {
+				if (op == "necessary" && a.pred == rhs && a.prop == lhs) {
 					return a;
 				}
 
@@ -473,7 +493,7 @@ export class ConceptualMutator {
 
 		let assertions: QuantifiedAssertionTest[] = this.student_util.getQuantifiedAssertions();
 		for (let a of assertions) {
-			
+
 			// I thinkt this is enough to uniquely identify the assertion.
 			if (a.startRow == start_row && a.startCol == start_col && a.check == op)
 				return a;
@@ -489,7 +509,8 @@ export class ConceptualMutator {
 		// if p is a string, then it is the name of the predicate.
 		// if p is a Predicate, then it is the predicate itself.
 		let pname = (typeof p === "string") ? p : p.name;
-		
+
+		pname = pname.trim();
 
 		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
 
@@ -661,8 +682,7 @@ export class ConceptualMutator {
 
 		// Determine if positive or negative example.
 		// Find if testExpr
-		const negationRegex = /(not|!)\s*(\b\w+\b)/;
-		let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
+		let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
 		let negativeExample = exampletestExpr.match(negationRegex);
 
 		// Pred under test
@@ -716,7 +736,7 @@ export class ConceptualMutator {
 	 * Excludes the assertions behavior from the mutant.
 	 */
 	protected mutateAwayAssertion(a: AssertionTest) {
-		
+
 		let lhs = a.pred;
 		let rhs = a.prop;
 		let rel = a.check;
@@ -733,14 +753,14 @@ export class ConceptualMutator {
 		// 	// since otherwise we would be UNSAT.
 
 		// 	// BUT WE HOPE THAT THIS IS DEALT WITH BY THE CALLING FUNCTION.
-		
+
 		// 	// JUST KNOW THAT THIS IS A WARNING.
 		// }
 
 
 		const assertionAsExpr = `${lhs} implies ${rhs}`;
 		const predicateName = this.randomNameGenerator();
-	
+
 		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
 
 		this.mutant.push(new_mutation_predicate);
@@ -933,7 +953,7 @@ export class ConceptualMutator {
 
 
 	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
-		
+
 		if (isAssertionTest(t)) {
 
 			let a = t as AssertionTest;
@@ -941,7 +961,7 @@ export class ConceptualMutator {
 			let lhs = a.pred;
 			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
 
-		} else if(isQuantifiedAssertionTest(t)) {
+		} else if (isQuantifiedAssertionTest(t)) {
 
 			let qa = t as QuantifiedAssertionTest;
 
@@ -949,20 +969,17 @@ export class ConceptualMutator {
 			let lhs = qa.pred;
 			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
 		} else if (isExample(t)) {
-			
+
 			let e = t as Example;
-
-
-			const negationRegex = /(not|!)\s*(\b\w+\b)/;
-			let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
+			let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
 			let negativeExample = exampletestExpr.match(negationRegex);
-	
+
 			// Pred under test
 			let p_i = exampletestExpr;
 			if (negativeExample) {
 				p_i = negativeExample[2];
 			}
-	
+
 			// Ensure p_i is in the wheat.
 			if (!this.isInstructorAuthored(p_i)) {
 				return false;
@@ -971,20 +988,19 @@ export class ConceptualMutator {
 			// If it is a positive example, then it is a test of inclusion.
 			return !negativeExample;
 		}
-	
+
 		return false;
 	}
 
 	private isTestOfExclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
 
-		if (isAssertionTest(t))
-		{
+		if (isAssertionTest(t)) {
 			let a = t as AssertionTest;
 			let rhs = a.prop;
 			let lhs = a.pred;
 			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
 		}
-		else if(isQuantifiedAssertionTest(t)) {
+		else if (isQuantifiedAssertionTest(t)) {
 
 			let qa = t as QuantifiedAssertionTest;
 			let rhs = qa.prop;
@@ -994,17 +1010,15 @@ export class ConceptualMutator {
 
 			let e = t as Example;
 
-
-			const negationRegex = /(not|!)\s*(\b\w+\b)/;
-			let exampletestExpr = get_text_from_block(e.testExpr, this.source_text);
+			let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
 			let negativeExample = exampletestExpr.match(negationRegex);
-	
+
 			// Pred under test
 			let p_i = exampletestExpr;
 			if (negativeExample) {
 				p_i = negativeExample[2];
 			}
-	
+
 			// Ensure p_i is in the wheat.
 			if (this.isInstructorAuthored(p_i) && negativeExample) {
 				return true;
