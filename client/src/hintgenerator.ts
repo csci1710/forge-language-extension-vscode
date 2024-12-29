@@ -228,7 +228,8 @@ export class HintGenerator {
 		// These are the tests used to generate feedback.
 		const assessed_tests = mutator.inconsistent_tests.join("\n");
 		// These are the tests that Toadus Ponens could not analyze.
-		const skipped_tests = mutator.get_skipped_tests_as_string();
+		const skipped_tests = "Could not analyze the following tests:\n"+ mutator.get_skipped_tests_as_string();
+
 		this.forgeOutput.appendLine(skipped_tests);
 
 
@@ -537,7 +538,7 @@ export class HintGenerator {
 		null_mutator.mutateToVaccuity();
 
 
-		const skipped_tests = inclusion_mutator.error_messages.join("\n") + exclusion_mutator.error_messages.join("\n");
+		const skipped_tests = inclusion_mutator.get_skipped_tests_as_string() + exclusion_mutator.get_skipped_tests_as_string();
 		this.forgeOutput.appendLine(skipped_tests);
 
 		const tests_analyzed = num_inclusion_mutations + num_exclusion_mutations;

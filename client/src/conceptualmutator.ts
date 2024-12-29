@@ -529,8 +529,7 @@ export class ConceptualMutator {
 		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
 		if (!p_i || !p_s) {
-			this.error_messages.push(`❗Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
-			return;
+			throw new Error(`Predicate ${i} or ${s} not found! Something went wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
@@ -785,7 +784,12 @@ export class ConceptualMutator {
 
 
 
-
+	public get_skipped_tests_as_string(): string {
+		let skipped_test_strings = this.skipped_tests.map((s) => {
+			return `${s.test} : ${s.reason}`;
+		});
+		return skipped_test_strings.join("\n");
+	}
 
 
 
