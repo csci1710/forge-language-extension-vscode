@@ -706,23 +706,6 @@ export class ConceptualMutator {
 		let rhs = a.prop;
 		let rel = a.check;
 
-		// let lhs_in_wheat = this.isInstructorAuthored(lhs);
-		// let rhs_in_wheat = this.isInstructorAuthored(rhs);
-
-		// if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
-		// 	this.error_messages.push(`❗Excluding assert ${lhs} ${rel} ${rhs} from analysis. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`);
-		// 	return;
-		// }
-		// else if (!rhs_in_wheat) {
-		// 	// Ideally we only want to mutate away assertions of inclusion ( that is s => i),
-		// 	// since otherwise we would be UNSAT.
-
-		// 	// BUT WE HOPE THAT THIS IS DEALT WITH BY THE CALLING FUNCTION.
-
-		// 	// JUST KNOW THAT THIS IS A WARNING.
-		// }
-
-
 		const assertionAsExpr = `${lhs} implies ${rhs}`;
 		const predicateName = this.randomNameGenerator();
 
@@ -732,8 +715,6 @@ export class ConceptualMutator {
 
 		// Now, we want to exclude this assertion from rhs.
 		this.constrainPredicateByExclusion(rhs, predicateName);
-
-
 	}
 
 
