@@ -290,8 +290,6 @@ export class ConceptualMutator {
 
 				// BUT IS THIS RIGHT? TODO: WHAT ABOUT THE EXACT ARGUMENTS TO EACH PREDICATE?
 				// THESE ARE NOT THE CALL PARAMS.
-
-
 				this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
 
 			}
@@ -372,7 +370,6 @@ export class ConceptualMutator {
 				continue;
 			}
 			else if (testName != "") {
-				// Could also be a assert is sat/unsat.
 				this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
 			}
 		}
