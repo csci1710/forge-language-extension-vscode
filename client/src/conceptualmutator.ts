@@ -1,6 +1,5 @@
 import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
 import { test_regex, getFailingTestName } from './forge-utilities';
-import { window } from 'vscode';
 
 
 import {
@@ -8,7 +7,8 @@ import {
 	Block,
 	Sig, Predicate, Function,
 	Test, AssertionTest, QuantifiedAssertionTest, Example, SatisfiabilityAssertionTest,
-	Formula, Expr
+	ConsistencyAssertionTest, Expr,
+	Formula
 } from "forge-toadus-parser";
 
 

@@ -61,32 +61,15 @@ export function findForgeExamples(inputText) {
 }
 
 
-export const quantified_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Theorem .*_Assertion_All_(\w+)_is_(\w+)_for_(\w+)/;
-export const assertion_regex = /Theorem Assertion[ _](\w+)[ _]is[ _](\w+)[ _]for[ _](\w+) failed\./;
+/****
+ * Regex for extracting failing test names, types, and/or locations
+ */
 export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
+export const quantified_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Test quantified_(\w+)_assertion_for_(\w+)_.* failed./;
+export const assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Test (\w+)_assertion_for_(\w+)_.* failed./;
+export const consistency_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (consistent|inconsistent)_assertion_for_(\w+)_.*/;
+export const satisfaction_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (sat|unsat|forge_error)_assertion_.*/;
 export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
-
-const predicatePattern = /pred\s+([^]*?)({|\n|$)/;
-
-
-
-
-
-// export function assertionToExpr(lhs, rhs, op, quantifier_prefix = "") : string {
-
-
-// 	if (op == "sufficient") {
-// 		return `(${quantifier_prefix} ${lhs} => ${rhs})`;
-// 	}
-// 	else if (op == "necessary") {
-// 		return `(${quantifier_prefix} ${rhs} => ${lhs})`;
-// 	}
-// 	else {
-// 		throw new Error("Invalid op");
-// 	}
-// }
-
-
 
 export function getFailingTestNames(o: string): string[] {
 
@@ -152,19 +135,6 @@ export type ExtractedTestSuite = {
 	predicateName: string;
 	tests: ExtractedTests;
 } | null;
-
-
-
-
-// export function findAllStructuredTests(suite: string) {
-
-
-// 	var examples = findAllExamples(suite);
-// 	var assertions = findAllAssertions(suite);
-// 	var quantifiedAssertions = findAllQuantifiedAssertions(suite);
-
-// 	return {examples, assertions, quantifiedAssertions};
-// }
 
 
 function isBalancedBraces(content: string): boolean {

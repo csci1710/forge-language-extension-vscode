@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.3.3",
+	"version": "3.0.1",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -202,7 +202,7 @@
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
-		"forge-toadus-parser": "^1.0.0",
+		"forge-toadus-parser": "^1.1.0",
 		"glob": "^8.1.0",
 		"ts-node": "^10.9.2",
 		"vscode-languageserver": "^9.0.1",
