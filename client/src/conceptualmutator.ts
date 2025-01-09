@@ -1,10 +1,11 @@
+import { get } from 'http';
 import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
 import { test_regex, getFailingTestData } from './forge-utilities';
 
 
 import {
 	ForgeUtil,
-	Block,
+	Block, SyntaxNode,
 	Sig, Predicate, Function,
 	Test, AssertionTest, QuantifiedAssertionTest, Example, SatisfiabilityAssertionTest,
 	ConsistencyAssertionTest, Expr,
@@ -20,7 +21,9 @@ class SkippedTest {
 	constructor(public test: string, public reason: string) { }
 }
 
-
+function xor(a: boolean, b: boolean): boolean {
+	return (a && !b) || (!a && b);
+};
 
 // TODO: These feel like something I should be able to get 
 // AWAY from using.
@@ -110,7 +113,7 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
 }
 
 
-function get_text_from_block(b: Block, text: string): string {
+function get_text_from_syntaxnode(b: SyntaxNode, text: string): string {
 
 	if (!b) {
 		return "";
@@ -125,13 +128,13 @@ function get_text_from_block(b: Block, text: string): string {
 }
 
 
+
 /*
 	Mutates a Forge ``wheat'' (aka correct solution)
 	to generate a mutant that is consistent with the student's
 	tests.
 */
 export class ConceptualMutator {
-	// TODO: Keep track of SKIPPED tests and INCONSISTENT tests.
 	skipped_tests: SkippedTest[];
 	inconsistent_tests: string[];
 	num_mutations: number = 0;
@@ -142,6 +145,7 @@ export class ConceptualMutator {
 
 	mutant: HydratedPredicate[] = [];
 
+	// ALSO HAVE TO THINK ABOUT THE FUNCTIONS.
 
 	/**
 	 * Creates a new Mutator instance.
@@ -169,18 +173,15 @@ export class ConceptualMutator {
 		this.inconsistent_tests = [];
 		this.skipped_tests = [];
 
-		// TODO: Maybe this should keep track of the passing and
-		// failing tests rather than the calling code.
-
-
+		// TODO: Maybe this should keep track of the passing and failing tests rather than the calling code.
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
 			let name = p.name;
 			let body_block: Block = p.body;
 
 
-			let body = get_text_from_block(body_block, source_text);
-			let params_text = get_text_from_block(p.params, source_text);
+			let body = get_text_from_syntaxnode(body_block, source_text);
+			let params_text = get_text_from_syntaxnode(p.params, source_text);
 
 			let params = {};
 			let param_strings = params_text.split(",");
@@ -235,7 +236,6 @@ export class ConceptualMutator {
 
 
 	/**
-	 * TODO: Needs to be implemented.
 	 * Generates a mutant consistent with *all* tests of exclusion.
 	 * @returns 
 	 */
@@ -281,7 +281,7 @@ export class ConceptualMutator {
 				let rel = qa.check;
 
 				const quantifier = "all";
-				const quantDecls = get_text_from_block(qa.quantDecls, this.source_text);
+				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
 				const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
 
@@ -349,14 +349,15 @@ export class ConceptualMutator {
 				this.mutateToAssertion(a);
 			}
 			else if (testType == "satisfiability_assertion") {
-				let start_row = testData.startRow;
-				let start_col = testData.startCol;
-				const a = this.getSatisfactionAssertion(start_row, start_col);
-				if (a == null) {
-					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
-					continue;
-				}
-				this.mutateToSatisfiabilityAssertion(a);
+				// let start_row = testData.startRow;
+				// let start_col = testData.startCol;
+				// const a = this.getSatisfactionAssertion(start_row, start_col);
+				// if (a == null) {
+				// 	this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
+				// 	continue;
+				// }
+				// this.mutateToSatisfiabilityAssertion(a);
+				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze sat/unsat assertions.`));
 			}
 			else if (testType == "consistency_assertion") {
 				let start_row = testData.startRow;
@@ -378,6 +379,8 @@ export class ConceptualMutator {
 		return this.num_mutations;
 	}
 
+
+	///////// TODO THE FUNTIONS ABOVE NEED TO BE REWRITTEN FOR THE NEW FORGE ////
 
 	public getMutantAsString(): string {
 
@@ -411,7 +414,7 @@ export class ConceptualMutator {
 			let name = s.name;
 
 			// I think this is the '' low fidelity '' solution for now.
-			let body = get_text_from_block(s, this.source_text);
+			let body = get_text_from_syntaxnode(s, this.source_text);
 
 			return body;
 		});
@@ -496,9 +499,6 @@ export class ConceptualMutator {
 		return false;
 	}
 
-	private xor(a: boolean, b: boolean): boolean {
-		return (a && !b) || (!a && b);
-	};
 
 	private getNewName(name: string) {
 		this.num_mutations++;
@@ -506,22 +506,18 @@ export class ConceptualMutator {
 	}
 
 
-	// Eases predicate i in the mutant to also accept s.
-	// i and s are both predicate names.
-	protected easePredicate(i: string, s: string, quantified_prefix: string = ""): void {
 
+///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
+	protected easePredicate(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-		if (!p_i || !p_s) {
-			throw new Error(`Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
+		if (!p_i) {
+			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
-
-		let callParams = p_i.callParams();
-		let new_i_body = `${quantified_prefix} (${newName_i}${callParams} or ${s})`;
+		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} or (${e}))`;
 
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
@@ -529,46 +525,38 @@ export class ConceptualMutator {
 	}
 
 
-	protected constrainPredicateByInclusion(i: string, s: string, quantified_prefix: string = ""): void {
+	protected constrainPredicateByInclusion(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-		if (!p_i || !p_s) {
-			throw new Error(`Predicate ${i} or ${s} not found! Something went wrong, please contact the instructor.`);
+		if (!p_i) {
+			throw new Error(`Predicate ${i} not found! Something went wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
 
 		p_i.name = newName_i;
 
-		let i_callParams = p_i.callParams();
-		let s_callParams = p_s.callParams();
 
-		let new_i_body = `${quantified_prefix} (${newName_i}${i_callParams} and ${s}${s_callParams})`;
+		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (${e}))`;
 
 		// New i = old i AND s.
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
 
-	protected constrainPredicateByExclusion(i: string, s: string, quantified_prefix: string = ""): void {
+	protected constrainPredicateByExclusion(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
-		let p_s: HydratedPredicate = this.mutant.find((p) => p.name == s);
 
-
-		if (!p_i || !p_s) {
-			throw new Error(`Predicate ${i} or ${s} not found! Something is very wrong, please contact the instructor.`);
+		if (!p_i) {
+			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
 		}
 
 		const newName_i = this.getNewName(i);
-
 		p_i.name = newName_i;
-		let i_callParams = p_i.callParams();
-		let s_callParams = p_s.callParams();
 
-		let new_i_body = `${quantified_prefix} (${newName_i}${i_callParams} and (not  ${s}${s_callParams}))`;
 
+		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (not  (${e})))`;
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
@@ -576,83 +564,70 @@ export class ConceptualMutator {
 
 
 	/////////////////// MUTATION OPERATIONS TO CONSISTENCY ////////////////////////////////
-	protected mutateToAssertion(a: AssertionTest) {
 
-		// TEST IS ALWAYS OF THE FORM pred => prop
-		// SO BELIEF IS ALWAYS lhs => rhs
-		let lhs = a.pred;
-		let rhs = a.prop;
+
+
+	protected mutateToAssertion(a: AssertionTest) {
+		let pred = a.pred;
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
 
-		let lhs_in_wheat = this.isInstructorAuthored(lhs);
-		let rhs_in_wheat = this.isInstructorAuthored(rhs);
-
-
-		let test_name = (rel === "sufficient") ? `${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
-		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
-			let reason = (lhs_in_wheat && rhs_in_wheat) ? `Both ${lhs} and ${rhs} are from the assignment statement.` : `Neither ${lhs} nor ${rhs} are from the assignment statement.`;
-			this.skipped_tests.push(new SkippedTest(test_name,`${reason}. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`));
+		let test_name = `${rel}_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
+		if (!this.isInstructorAuthored(pred)) {
+			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
+
+
 		this.inconsistent_tests.push(test_name);
 
-
-		if (lhs_in_wheat) {
-			this.constrainPredicateByInclusion(lhs, rhs);
+		// i.e. believe pred => exp
+		if (rel === "necessary") {
+			this.constrainPredicateByInclusion(pred, exp);
 		}
 		else {
-			this.easePredicate(rhs, lhs);
+			this.easePredicate(pred, exp);
 		}
 	}
 
 
 	protected mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
-		// TEST IS ALWAYS OF THE FORM pred => prop
-		// SO BELIEF IS ALWAYS lhs => rhs
-		let lhs = a.pred;    // TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
-		let rhs = a.prop;	// I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
+		let pred = a.pred;
 		let rel = a.check;
 		let disj = (a.disj) ? "disj" : "";
 
-		const quantifier = "all";
-		const quantDecls = get_text_from_block(a.quantDecls, this.source_text);
+		let test_name = `${rel}_quantified_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
 
-		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
-
-		let lhs_in_wheat = this.isInstructorAuthored(lhs);
-		let rhs_in_wheat = this.isInstructorAuthored(rhs);
-
-
-		let test_name = (rel === "sufficient") ? `${quantifiedPrefix} ${lhs} is sufficient for ${rhs}` : `${rhs} is necessary for ${lhs}`;
-
-		if (!(this.xor(lhs_in_wheat, rhs_in_wheat))) {
-			let reason = (lhs_in_wheat && rhs_in_wheat) ? `Both ${lhs} and ${rhs} are from the assignment statement.` : `Neither ${lhs} nor ${rhs} are from the assignment statement.`;
-			this.skipped_tests.push(new SkippedTest(test_name,`${reason}. I can only give feedback around assertions that directly reference exactly one predicate from the assignment statement.`));
+		if(!this.isInstructorAuthored(pred)) {
+			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
-		this.inconsistent_tests.push(test_name);
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
+		const quantifier = "all";
+		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
+		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
 
-		if (lhs_in_wheat) {
-			this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
+		this.inconsistent_tests.push(test_name);
+		if (rel === "necessary") {
+			this.constrainPredicateByInclusion(pred, exp, quantifiedPrefix, pred_args);
 		}
 		else {
-			this.easePredicate(rhs, lhs, quantifiedPrefix);
+			this.easePredicate(pred, exp, quantifiedPrefix, pred_args);
 		}
-
 	}
 
 	// TODO: Very much not sure how this works.
 	protected mutateToExample(e: Example) {
-
 
 		// TODO: We should get this from isTestOfInclusion / isTestOfExclusion
 
 
 		// Determine if positive or negative example.
 		// Find if testExpr
-		let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
+		let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
 		let negativeExample = exampletestExpr.match(negationRegex);
 
 		// Pred under test
@@ -685,14 +660,44 @@ export class ConceptualMutator {
 		}
 	}
 
-	/// How would this even work?
-	protected mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) { }
+	protected mutateToConsistencyAssertion(a: ConsistencyAssertionTest) {
 
-	// TODO: THIS IS VERY HARD.
-	protected mutateToConsistencyAssertion(a: ConsistencyAssertionTest) { }
+		let pred = a.pred;
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		let isConsistent : boolean = a.consistent;
+		let consistency_prefix = isConsistent ? "consistent" : "inconsistent"
+
+		let test_name = `${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
+		if (!this.isInstructorAuthored(pred)) {
+			this.skipped_tests.push(new SkippedTest(a.name,`Assertion does not directly test a predicate from the assignment statement.`));
+			return;
+		}
+
+		this.inconsistent_tests.push(test_name);
+		// If isconsistent, then they believe pred & exp is SAT.
+		// SO WE need to EASE the predicate to ALLOW the expression.
+		if(isConsistent) {
+			this.easePredicate(pred, exp);
+		}
+		// If inconsistent, then they believe pred & exp is can never be SAT.
+		// SO WE need to CONSTRAIN the predicate to EXCLUDE the expression.
+		else {
+			this.constrainPredicateByExclusion(pred, exp);
+		}
 
 
-	protected mutateToTest(t: Test) { } // Not implemented yet, very HARD.
+
+	 }
+
+	private mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) {
+		/// How would this even work?
+		throw new Error("Not implemented.");
+	}
+
+
+	private mutateToTest(t: Test) {
+		throw new Error("Not implemented yet.");
+	} // Not implemented yet, very HARD.
 
 	public mutateToVaccuity() {
 		this.mutant.forEach(
@@ -705,11 +710,18 @@ export class ConceptualMutator {
 
 	////////////////// MUTATION OPERATIONS TO INCONSISTENCY (AKA REMOVE) /////////////////////////////////////
 
+
+	///////////// TODO: THESE NEED TO BE MODIFIED TO WORK WITH EXPRESSIONS IN ASSERTIONS /////////////
+
 	/**
 	 * 
 	 * Excludes the assertions behavior from the mutant.
 	 */
 	protected mutateAwayAssertion(a: AssertionTest) {
+
+
+		
+
 
 		let lhs = a.pred;
 		let rhs = a.prop;
@@ -737,7 +749,7 @@ export class ConceptualMutator {
 
 
 		const quantifier = "all";
-		const quantDecls = get_text_from_block(a.quantDecls, this.source_text);
+		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
 		const disj = (a.disj) ? "disj" : "";
 		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
 
@@ -792,7 +804,7 @@ export class ConceptualMutator {
 	protected exampleToPredicate(e: Example): HydratedPredicate {
 
 		const exampleName = e.name;
-		const exampleBody = get_text_from_block(e.bounds, this.source_text);
+		const exampleBody = get_text_from_syntaxnode(e.bounds, this.source_text);
 
 		// Now bounds have two components:
 		// Assignments and expressions
@@ -931,7 +943,7 @@ export class ConceptualMutator {
 		} else if (isExample(t)) {
 
 			let e = t as Example;
-			let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
+			let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
 			let negativeExample = exampletestExpr.match(negationRegex);
 
 			// Pred under test
@@ -970,7 +982,7 @@ export class ConceptualMutator {
 
 			let e = t as Example;
 
-			let exampletestExpr = getExprFromBracesIfAny(get_text_from_block(e.testExpr, this.source_text));
+			let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
 			let negativeExample = exampletestExpr.match(negationRegex);
 
 			// Pred under test

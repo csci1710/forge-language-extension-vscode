@@ -85,7 +85,6 @@ export function getFailingTestsData(o: string): TestData[] {
 
 
 
-
 // TODO: This needs to be RE-WRITTEN now that the test name is NOT obvious.
 // TODO: Should we abstract out getting the test NAME, type, and location?
 export function getFailingTestData(o: string): TestData {
