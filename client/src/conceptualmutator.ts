@@ -210,6 +210,7 @@ export class ConceptualMutator {
 		let assertions = this.full_source_util.getAssertions();
 		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
 		let examples = this.full_source_util.getExamples();
+		let consistencyAssertions = this.full_source_util.getConsistencyAssertions();
 
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
@@ -231,6 +232,14 @@ export class ConceptualMutator {
 			}
 		}
 
+		for (let ca of consistencyAssertions) {
+			if(this.isTestOfInclusion(ca)) {
+				// TODO: IS THIS RIGHT? IDK.
+				// THIS COULD EASILY MAKE SOMETHIGN UNSAT.
+				this.mutateAwayConsistencyAssertion(ca);
+			}
+		}
+
 		return this.num_mutations;
 	}
 
@@ -247,6 +256,7 @@ export class ConceptualMutator {
 		let assertions = this.full_source_util.getAssertions();
 		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
 		let examples = this.full_source_util.getExamples();
+		let consistencyAssertions = this.full_source_util.getConsistencyAssertions();
 
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
@@ -292,6 +302,13 @@ export class ConceptualMutator {
 				// THESE ARE NOT THE CALL PARAMS.
 				this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
 
+			}
+		}
+
+		for (let ca of consistencyAssertions) {
+			if(!this.isTestOfExclusion(ca)) {
+				// TODO: FILL THIS IN. IDK WHAT TO DO HERE.
+				throw new Error("Not implemented yet.");
 			}
 		}
 
@@ -720,48 +737,68 @@ export class ConceptualMutator {
 	protected mutateAwayAssertion(a: AssertionTest) {
 
 
-		
-
-
-		let lhs = a.pred;
-		let rhs = a.prop;
+		let pred = a.pred;
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
 
-		const assertionAsExpr = `${lhs} implies ${rhs}`;
+	
+
+		const assertionAsExpr = (rel === "necessary") ?
+								 `(${pred}) implies (${exp})` 
+								 : `(${exp}) implies (${pred})`;
+		
 		const predicateName = this.randomNameGenerator();
 
 		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
 
 		this.mutant.push(new_mutation_predicate);
 
-		// Now, we want to exclude this assertion from rhs.
-		this.constrainPredicateByExclusion(rhs, predicateName);
+		// Now exclude this from the predicate.
+		this.constrainPredicateByExclusion(pred, predicateName);
 	}
 
 
 	protected mutateAwayQuantifiedAssertion(a: QuantifiedAssertionTest) {
-
-		// TODO: I THINK THIS IS BUGGY.
-		let lhs = a.pred; // // TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
-		let rhs = a.prop;// TODO: I THINK THIS IS BUGGY (WHAT ABOUT THE PARAMS)
+		let pred = a.pred;
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
-
-
-
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
+		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
 		const disj = (a.disj) ? "disj" : "";
 		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
 
 
-		const quantifiedAssertionAsExpr = `${quantifiedPrefix} (${lhs} implies ${rhs})`;
+		const quantifiedAssertionAsExpr =  (rel === "necessary") ?
+		  `${quantifiedPrefix} ((${pred}${pred_args}) implies (${exp}))` 
+		: `${quantifiedPrefix} ((${exp}) implies (${pred}${pred_args}))`;
+
+
+		// TODO: Check -- is this okay, since we push the quantification
+		// *into* the new predicate? Or is this much more complicated.
 		const predicateName = this.randomNameGenerator();
 		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, quantifiedAssertionAsExpr);
 		this.mutant.push(new_mutation_predicate);
+		this.constrainPredicateByExclusion(pred, predicateName);
+	}
 
-		// Now, we want to exclude this assertion from rhs.
-		this.constrainPredicateByExclusion(rhs, predicateName);
+	protected mutateAwayConsistencyAssertion(a: ConsistencyAssertionTest) {
+		let pred = a.pred;
+		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		let isConsistent : boolean = a.consistent;
 
+
+		// If isconsistent, then they believe pred & exp is SAT.
+		// So exclude exp from pred.
+
+		if(isConsistent) {
+			this.constrainPredicateByExclusion(pred, exp);
+		}
+		// If inconsistent, then they believe pred & exp is can never be SAT.
+		// So ease pred to allow exp.
+		else {
+			this.easePredicate(pred, exp);
+		}
 	}
 
 
