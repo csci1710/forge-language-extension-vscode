@@ -2,7 +2,7 @@ import { RacketProcess } from './racketprocess';
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { removeForgeComments, getFailingTestNames, getFailingTestName, combineTestsWithModel } from './forge-utilities';
+import { removeForgeComments, getFailingTestsData, getFailingTestData, combineTestsWithModel } from './forge-utilities';
 import { ConceptualMutator } from './conceptualmutator';
 import { LogLevel, Logger, Event } from './logger';
 import { SymmetricEncryptor } from './encryption-util';
@@ -93,16 +93,13 @@ export class HintGenerator {
 		// First, we deal with test errors.
 		// We look for patterns in the output to check if any tests actually failed.
 
-		const failingTestNames = getFailingTestNames(w_o);
+		const failingTestNames = getFailingTestsData(w_o).map((testData) => testData.name);
 
 		// If not, just return a message that we found a runtime or syntax error in the tests.
 		if (failingTestNames.length == 0) {
 			const noTestFound = `I found a runtime or syntax error in your tests:\n ${w_o}`;
 			return noTestFound;
 		}
-
-
-
 
 		// Step 4: Some tests *have* fail against the wheat.
 		// Now there are two possibilities here -- the failing tests explore
@@ -235,7 +232,7 @@ export class HintGenerator {
 
 		// IF there are no inconsistent tests, everything is good right?
 		if (mutator.inconsistent_tests.length == 0) {
-			// TODO: Check what we should do here.
+			// SP: TODO: Figure out what we should do here.
 			return [];
 		}
 
@@ -285,8 +282,11 @@ export class HintGenerator {
 		const lines = w_o.split("\n");
 
 		for (const outputline of lines) {
-
-			const tn = getFailingTestName(outputline);
+			const testData = getFailingTestData(outputline);
+			if (testData == undefined) {
+				continue;
+			}
+			const tn = testData.name;
 			if (tn == "") {
 				continue;
 			}
@@ -429,7 +429,7 @@ export class HintGenerator {
 		if (ag_output == "") {
 			return [];
 		}
-		const tNames = getFailingTestNames(ag_output);
+		const tNames = getFailingTestsData(ag_output).map((testData) => testData.name);
 		const hint_map = await this.getHintMap(testFileName);
 
 		const issues = tNames.filter((tName) => !(tName in hint_map));
@@ -482,7 +482,10 @@ export class HintGenerator {
 
 	private async tryGetPassingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
 
-		const failed_tests = getFailingTestNames(ag_output);
+		// ENSURE THAT AUTOGRADER TESTS HAVE UNAMBIGUOUS NAMES
+		// SO TEST-EXPECT ONLY
+
+		const failed_tests = getFailingTestsData(ag_output).map((testData) => testData.name);
 		const hint_map = await this.getHintMap(testFileName);
 
 		const test_names = Object.keys(hint_map);

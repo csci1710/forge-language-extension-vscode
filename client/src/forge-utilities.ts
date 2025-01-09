@@ -64,61 +64,129 @@ export function findForgeExamples(inputText) {
 /****
  * Regex for extracting failing test names, types, and/or locations
  */
-export const example_regex = /Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
-export const quantified_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Test quantified_(\w+)_assertion_for_(\w+)_.* failed./;
-export const assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Test (\w+)_assertion_for_(\w+)_.* failed./;
-export const consistency_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (consistent|inconsistent)_assertion_for_(\w+)_.*/;
-export const satisfaction_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (sat|unsat|forge_error)_assertion_.*/;
-export const test_regex = /Failed test (\w+)\.|Theorem (\w+) failed/;
+export const example_regex = 			  	/Invalid example '(\w+)'; the instance specified does not satisfy the given predicate\./;
+export const quantified_assertion_regex = 	/:(\d+):(\d+) \(span (\d+)\)\] Test quantified_(\w+)_assertion_for_(\w+)_([^\s\\]*) failed./;
+export const assertion_regex = 				/:(\d+):(\d+) \(span (\d+)\)\] Test (\w+)_assertion_for_(\w+)_([^\s\\]*) failed./;
+export const consistency_assertion_regex =  /:(\d+):(\d+) \(span (\d+)\)\] Failed test (consistent|inconsistent)_assertion_for_(\w+)_([^\s\\]*)/;
+export const satisfaction_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (sat|unsat|forge_error)_assertion_([^\s\\]*)/;
+export const test_regex = 					/Failed test (\w+)\.|Theorem (\w+) failed/;
 
-export function getFailingTestNames(o: string): string[] {
+export class TestData {
 
+	constructor(public name: string, public type: string, public startRow: number,
+		public startCol: number, public span: number, public forgeOutput: string){ }
+}
+
+export function getFailingTestsData(o: string): TestData[] {
 	let lines = o.split("\n");
-	return lines.map(getFailingTestName).filter((x) => x != "");
+	return lines.map(getFailingTestData).filter((x) => x != undefined);
 }
 
 
-export function getFailingTestName(o: string): string {
+
+
+
+// TODO: This needs to be RE-WRITTEN now that the test name is NOT obvious.
+// TODO: Should we abstract out getting the test NAME, type, and location?
+export function getFailingTestData(o: string): TestData {
+
+
 	if (quantified_assertion_regex.test(o)) {
 		const match = o.match(quantified_assertion_regex);
 
 		if (match == null) {
-			return "";
+			return undefined;
 		}
 
+		let testName = match[4] + "_quantified_assertion_for_" + match[5] + "_" + match[6];
+		return new TestData(testName,
+							"quantified_assertion",
+							 parseInt(match[1]),
+							 parseInt(match[2]),
+							 parseInt(match[3]), o);
 
-		const lhs_pred = match[4];
-		const op = match[5];
-		const rhs_pred = match[6];
-		return "Assertion All " + lhs_pred + " is " + op + " for " + rhs_pred;
+		// Entire string is match[0]
+		// Line number is match[1]
+		// Column number is match[2]
+		// Span is match[3]
+		// Direction of assertion is match[4]
+		// Predicate name is match[5]
+		// Temp name is match[6]
 
 	} else if (assertion_regex.test(o)) {
-
-
 		const match = o.match(assertion_regex);
 		if (match == null) {
-			return "";
+			return undefined;
 		}
 
-		const lhs_pred = match[1];
-		const op = match[2];
-		const rhs_pred = match[3];
-		return "Assertion " + lhs_pred + " is " + op + " for " + rhs_pred;
+
+		// Entire string is match[0]
+		// Line number is match[1]
+		// Column number is match[2]
+		// Span is match[3]
+		// Direction of assertion is match[4]
+		// Predicate name is match[5]
+		// Temp name is match[6]
+
+		let test_name = match[4] + "_assertion_for_" + match[5] + "_" + match[6];
+		return new TestData(test_name,
+							"assertion",
+							 parseInt(match[1]),
+							 parseInt(match[2]),
+							 parseInt(match[3]), o);
+
 	} else if (example_regex.test(o)) {
 		const match = o.match(example_regex);
 		if (match == null) {
-			return "";
+			return undefined;
 		}
-		return match[1];
-	} else if (test_regex.test(o)) {
+		
+		let test_name = match[1];
+		return new TestData(test_name,
+							"example",
+							 -1,
+							 -1,
+							 -1, o);
+	}
+	else if (consistency_assertion_regex.test(o)) {
+		const match = o.match(consistency_assertion_regex);
+		if (match == null) {
+			return undefined;
+		}
+		let test_name = match[4] + "_assertion_for_" + match[5] + "_" + match[6];
+
+		return new TestData(test_name,
+							"consistency_assertion",
+							 parseInt(match[1]),
+							 parseInt(match[2]),
+							 parseInt(match[3]), o);
+
+	}
+	else if (satisfaction_assertion_regex.test(o)) {
+		const match = o.match(satisfaction_assertion_regex);
+		if (match == null) {
+			return undefined;
+		}
+		let test_name = match[4] + "_assertion_" + match[5];
+		return new TestData(test_name,
+							"satisfaction_assertion",
+							 parseInt(match[1]),
+							 parseInt(match[2]),
+							 parseInt(match[3]), o);
+	}
+	else if (test_regex.test(o)) {
 		const match = o.match(test_regex);
 		if (match == null) {
-			return "";
+			return undefined;
 		}
-		if (match[1]) return match[1];
-		return match[2]
+		let test_name = (match[1]) ? match[1] : match[2];
+		return new TestData(test_name,
+							"test-expect",
+							 -1,
+							 -1,
+							 -1, o);
 	}
-	return "";
+	return undefined;
 }
 
 /*******For test suite  */

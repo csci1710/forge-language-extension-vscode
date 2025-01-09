@@ -1,5 +1,5 @@
 import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
-import { test_regex, getFailingTestName } from './forge-utilities';
+import { test_regex, getFailingTestData } from './forge-utilities';
 
 
 import {
@@ -305,72 +305,74 @@ export class ConceptualMutator {
 	 */
 	public mutateToFailingTests(): number {
 
-
-		// if(test_names.length != 0) {
-
-		// 	const excludingTestMessage = `❗Excluding test "${testName}" from my analysis. 
-		// 	This test is EITHER not consistent with the assignment OR tests some behavior not
-		// 	explicitly defined in the assignment statement. I cannot determine which of these is the case
-		// 	because of the format of the test.`;
-
-		// }
-
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
-			const testName = getFailingTestName(w_o);
-			//const excludingTestMessage = `❗Excluding test "${testName}" from my analysis.`;
+			
+			const testData = getFailingTestData(w_o);
 
-			if (example_regex.test(w_o)) {
+			if (testData == undefined) {
+				continue;
+			}
+
+			//// Now we go through EACH test type.
+			const testName = testData.name;
+			const testType = testData.type;
+
+			if(testType == "example") {
 				let e = this.getExampleByName(testName);
 				if (e == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToExample(e);
+			}
+			else if (testType == "quantified_assertion") {
+				let start_row = testData.startRow;
+				let start_col = testData.startCol;
 
-			} else if (quantified_assertion_regex.test(w_o)) {
-				const match = w_o.match(quantified_assertion_regex);
-				if (match == null) {
-					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
-					continue;
-				}
-
-				const start_row = parseInt(match[1]);
-				const start_col = parseInt(match[2]);
-				//const span = parseInt(match[3]);
-				//const lhs_pred = match[4];
-				const op = match[5];
-				//const rhs_pred = match[6];
-				const a = this.getQuantifiedAssertion(start_row, start_col, op);
+				const a = this.getQuantifiedAssertion(start_row, start_col);
 				if (a == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToQuantifiedAssertion(a);
 			}
-			else if (assertion_regex.test(w_o)) {
-				const match = w_o.match(assertion_regex);
-				if (match == null) {
-					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
-					continue;
-				}
-				const lhs_pred = match[1];
-				const op = match[2];
-				const rhs_pred = match[3];
-				const a = this.getAssertion(lhs_pred, op, rhs_pred);
+			else if (testType == "assertion") {
+
+				let start_row = testData.startRow;
+				let start_col = testData.startCol;
+				const a = this.getAssertion(start_row, start_col);
 				if (a == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
 				}
 				this.mutateToAssertion(a);
 			}
-			else if (test_regex.test(w_o)) {
-
+			else if (testType == "satisfiability_assertion") {
+				let start_row = testData.startRow;
+				let start_col = testData.startCol;
+				const a = this.getSatisfactionAssertion(start_row, start_col);
+				if (a == null) {
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
+					continue;
+				}
+				this.mutateToSatisfiabilityAssertion(a);
+			}
+			else if (testType == "consistency_assertion") {
+				let start_row = testData.startRow;
+				let start_col = testData.startCol;
+				const a = this.getConsistencyAssertion(start_row, start_col);
+				if (a == null) {
+					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
+					continue;
+				}
+				this.mutateToConsistencyAssertion(a);
+			}
+			else if (testType == "test-expect") {
 				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze test expects.`));
-				continue;
 			}
 			else if (testName != "") {
-				this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
+					this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
 			}
 		}
 		return this.num_mutations;
@@ -432,44 +434,50 @@ export class ConceptualMutator {
 		return null;
 	}
 
-	private getAssertion(lhs: string, op: string, rhs: string): AssertionTest {
-
+	private getAssertion(start_row: number, start_col: number): AssertionTest {
 		let assertions = this.student_util.getAssertions();
 		for (let a of assertions) {
-			if (a.check == op) {
-
-				// The assertion construct is always pred => prop
-				// But we need to find lhs' sufficient rhs OR rhs is necessary for lhs.
-				if (op == "sufficient" && a.pred == lhs && a.prop == rhs) {
-					return a;
-				}
-
-				if (op == "necessary" && a.pred == rhs && a.prop == lhs) {
-					return a;
-				}
-
-			}
+			// I think this is enough to uniquely identify the assertion.
+			if (a.startRow == start_row && a.startCol == start_col)
+				return a;
 		}
 		return null;
-
-
 	}
 
 
-	private getQuantifiedAssertion(start_row: number, start_col: number, op: string): QuantifiedAssertionTest {
-
+	private getQuantifiedAssertion(start_row: number, start_col: number): QuantifiedAssertionTest {
 		let assertions: QuantifiedAssertionTest[] = this.student_util.getQuantifiedAssertions();
 		for (let a of assertions) {
 
-			// I thinkt this is enough to uniquely identify the assertion.
-			if (a.startRow == start_row && a.startCol == start_col && a.check == op)
+			// I think this is enough to uniquely identify the assertion.
+			if (a.startRow == start_row && a.startCol == start_col)
 				return a;
 
 
 		}
 		return null;
-
 	}
+
+	private  getConsistencyAssertion(start_row: number, start_col: number): ConsistencyAssertionTest {
+		let assertions = this.student_util.getConsistencyAssertions();
+		for (let a of assertions) {
+			// I think this is enough to uniquely identify the assertion.
+			if (a.startRow == start_row && a.startCol == start_col)
+				return a;
+		}
+		return null;
+	}
+
+	private getSatisfactionAssertion(start_row: number, start_col: number): SatisfiabilityAssertionTest {
+		let assertions = this.student_util.getSatisfactionAssertions();
+		for (let a of assertions) {
+			// I think this is enough to uniquely identify the assertion.
+			if (a.startRow == start_row && a.startCol == start_col)
+				return a;
+		}
+		return null;
+	}
+
 
 	private isInstructorAuthored(p: Predicate | string): boolean {
 
@@ -679,6 +687,10 @@ export class ConceptualMutator {
 
 	/// How would this even work?
 	protected mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) { }
+
+	// TODO: THIS IS VERY HARD.
+	protected mutateToConsistencyAssertion(a: ConsistencyAssertionTest) { }
+
 
 	protected mutateToTest(t: Test) { } // Not implemented yet, very HARD.
 
