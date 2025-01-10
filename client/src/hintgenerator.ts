@@ -87,6 +87,15 @@ export class HintGenerator {
 
 		}
 
+		// TODO: WHAT IF NOT CONSISTENT, BUT THE FAILING TESTS ARE 
+		// EITHER AMBIGUOUS OR NOT SUPPORTED.
+
+		/// I think we can give *more* feedback here.
+
+		/////////////////////////////////////////////////////////
+
+
+
 		// Step 3: Tests may fail for one of two reasons -- 
 		// a test ERROR vs a test FAIL. We need to distinguish between these two cases.
 
@@ -233,6 +242,8 @@ export class HintGenerator {
 		// IF there are no inconsistent tests, everything is good right?
 		if (mutator.inconsistent_tests.length == 0) {
 			// SP: TODO: Figure out what we should do here.
+			this.forgeOutput.appendLine(`🐸 The remaining tests seem consistent with the problem, but may test 
+				behavior that is not clearly defined in the problem specification.`);
 			return [];
 		}
 
@@ -470,7 +481,19 @@ export class HintGenerator {
 		this.logger.log_payload(payload, LogLevel.INFO, event);
 
 		// Step 2. Download the autograder tests.
-		const autograderTests = await this.getAutograderTests(testFileName);
+		let autograderTests = await this.getAutograderTests(testFileName);
+
+
+		//// TODO: Remove. A hack because I'm lazy for testing ///
+
+
+		// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
+
+		autograderTests = autograderTests.replace(/(is theorem)/g, "is checked");
+
+		/////
+
+
 
 		// Step 3. Run the mutant against the autograder tests.
 		const ag_meta = await this.runTestsAgainstModel(autograderTests, mutant);

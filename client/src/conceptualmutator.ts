@@ -140,7 +140,7 @@ export class ConceptualMutator {
 	num_mutations: number = 0;
 
 	wheat_util: ForgeUtil;
-	student_util: ForgeUtil;
+	//student_util: ForgeUtil;
 	full_source_util: ForgeUtil;
 
 	mutant: HydratedPredicate[] = [];
@@ -164,11 +164,11 @@ export class ConceptualMutator {
 		public max_mutations: number = 200) {
 
 		this.wheat_util = new ForgeUtil(wheat);
-		this.student_util = new ForgeUtil(student_tests);
+		//this.student_util = new ForgeUtil(student_tests);
 		this.full_source_util = new ForgeUtil(source_text);
 
 		this.wheat_util.processSpec();
-		this.student_util.processSpec();
+		//this.student_util.processSpec();
 		this.full_source_util.processSpec();
 		this.inconsistent_tests = [];
 		this.skipped_tests = [];
@@ -366,7 +366,7 @@ export class ConceptualMutator {
 			}
 			else if (testType == "satisfiability_assertion") {
 				// let start_row = testData.startRow;
-				// let start_col = testData.startCol;
+				// let start_col = testData.startColumn;
 				// const a = this.getSatisfactionAssertion(start_row, start_col);
 				// if (a == null) {
 				// 	this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
@@ -444,7 +444,7 @@ export class ConceptualMutator {
 
 	private getExampleByName(name: string): Example {
 
-		let examples = this.student_util.getExamples();
+		let examples = this.full_source_util.getExamples();
 		for (let e of examples) {
 			if (e.name == name) {
 				return e;
@@ -454,10 +454,10 @@ export class ConceptualMutator {
 	}
 
 	private getAssertion(start_row: number, start_col: number): AssertionTest {
-		let assertions = this.student_util.getAssertions();
+		let assertions = this.full_source_util.getAssertions();
 		for (let a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
-			if (a.startRow == start_row && a.startCol == start_col)
+			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
 		}
 		return null;
@@ -465,11 +465,11 @@ export class ConceptualMutator {
 
 
 	private getQuantifiedAssertion(start_row: number, start_col: number): QuantifiedAssertionTest {
-		let assertions: QuantifiedAssertionTest[] = this.student_util.getQuantifiedAssertions();
+		let assertions: QuantifiedAssertionTest[] = this.full_source_util.getQuantifiedAssertions();
 		for (let a of assertions) {
 
 			// I think this is enough to uniquely identify the assertion.
-			if (a.startRow == start_row && a.startCol == start_col)
+			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
 
 
@@ -478,20 +478,20 @@ export class ConceptualMutator {
 	}
 
 	private  getConsistencyAssertion(start_row: number, start_col: number): ConsistencyAssertionTest {
-		let assertions = this.student_util.getConsistencyAssertions();
+		let assertions = this.full_source_util.getConsistencyAssertions();
 		for (let a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
-			if (a.startRow == start_row && a.startCol == start_col)
+			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
 		}
 		return null;
 	}
 
 	private getSatisfactionAssertion(start_row: number, start_col: number): SatisfiabilityAssertionTest {
-		let assertions = this.student_util.getSatisfactionAssertions();
+		let assertions = this.full_source_util.getSatisfactionAssertions();
 		for (let a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
-			if (a.startRow == start_row && a.startCol == start_col)
+			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
 		}
 		return null;
@@ -588,7 +588,7 @@ export class ConceptualMutator {
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
 
-		let test_name = `${rel}_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
+		let test_name = `${rel}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 		if (!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
 			return;
@@ -613,7 +613,7 @@ export class ConceptualMutator {
 		let rel = a.check;
 		let disj = (a.disj) ? "disj" : "";
 
-		let test_name = `${rel}_quantified_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
+		let test_name = `${rel}_quantified_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 
 		if(!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
@@ -683,7 +683,7 @@ export class ConceptualMutator {
 		let isConsistent : boolean = a.consistent;
 		let consistency_prefix = isConsistent ? "consistent" : "inconsistent"
 
-		let test_name = `${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startCol}]`;
+		let test_name = `${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 		if (!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(a.name,`Assertion does not directly test a predicate from the assignment statement.`));
 			return;
