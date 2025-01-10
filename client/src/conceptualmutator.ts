@@ -21,12 +21,8 @@ class SkippedTest {
 	constructor(public test: string, public reason: string) { }
 }
 
-function xor(a: boolean, b: boolean): boolean {
-	return (a && !b) || (!a && b);
-};
 
-// TODO: These feel like something I should be able to get 
-// AWAY from using.
+// TODO: These feel like something I should be able to get AWAY from using.
 function isAssertionTest(t: any): t is AssertionTest {
 	return t && typeof t === 'object' && 'prop' in t && 'pred' in t && !(t as QuantifiedAssertionTest).quantifier;
 }
@@ -37,6 +33,10 @@ function isQuantifiedAssertionTest(t: any): t is QuantifiedAssertionTest {
 
 function isExample(t: any): t is Example {
 	return t && (typeof t === 'object') && ('testExpr' in t);
+}
+
+function isConsistencyAssertionTest(t: any): t is ConsistencyAssertionTest {
+	return t && (typeof t === 'object') && ('consistent' in t);
 }
 
 
@@ -963,20 +963,23 @@ export class ConceptualMutator {
 
 	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
 
+		// If NOT instructor authored, then it is NOT a test of inclusion.
+
 		if (isAssertionTest(t)) {
 
 			let a = t as AssertionTest;
-			let rhs = a.prop;
-			let lhs = a.pred;
-			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
+			let p = a.pred;
+			let rel = a.check;
+
+			return this.isInstructorAuthored(p) && (rel === "sufficient");
 
 		} else if (isQuantifiedAssertionTest(t)) {
 
 			let qa = t as QuantifiedAssertionTest;
+			let p = qa.pred;
+			let rel = qa.check;
+			return this.isInstructorAuthored(p) && (rel === "sufficient");
 
-			let rhs = qa.prop;
-			let lhs = qa.pred;
-			return this.isInstructorAuthored(rhs) && !this.isInstructorAuthored(lhs);
 		} else if (isExample(t)) {
 
 			let e = t as Example;
@@ -997,6 +1000,13 @@ export class ConceptualMutator {
 			// If it is a positive example, then it is a test of inclusion.
 			return !negativeExample;
 		}
+		else if (isConsistencyAssertionTest(t)) {
+
+			let ca = t as ConsistencyAssertionTest;
+			let p = ca.pred;
+			let isConsistent = ca.consistent;
+			return this.isInstructorAuthored(p) && isConsistent;
+		}
 
 		return false;
 	}
@@ -1005,16 +1015,17 @@ export class ConceptualMutator {
 
 		if (isAssertionTest(t)) {
 			let a = t as AssertionTest;
-			let rhs = a.prop;
-			let lhs = a.pred;
-			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
+			let p = a.pred;
+			let rel = a.check;
+
+			return this.isInstructorAuthored(p) && (rel === "necessary");
+
 		}
 		else if (isQuantifiedAssertionTest(t)) {
-
 			let qa = t as QuantifiedAssertionTest;
-			let rhs = qa.prop;
-			let lhs = qa.pred;
-			return !this.isInstructorAuthored(rhs) && this.isInstructorAuthored(lhs);
+			let p = qa.pred;
+			let rel = qa.check;
+			return this.isInstructorAuthored(p) && (rel === "necessary");
 		} else if (isExample(t)) {
 
 			let e = t as Example;
@@ -1032,6 +1043,13 @@ export class ConceptualMutator {
 			if (this.isInstructorAuthored(p_i) && negativeExample) {
 				return true;
 			}
+		}
+		else if (isConsistencyAssertionTest(t)) {
+
+			let ca = t as ConsistencyAssertionTest;
+			let p = ca.pred;
+			let isConsistent = ca.consistent;
+			return this.isInstructorAuthored(p) && !isConsistent;
 		}
 
 		return false;
