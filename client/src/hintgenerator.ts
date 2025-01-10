@@ -26,6 +26,9 @@ const MAX_HINT = 3;
 
 const NOT_ENABLED_MESSAGE = "Sorry! Toadus Ponens is not available for this assignment. Please contact course staff if you believe this is an error.";
 const CONSISTENCY_MESSAGE = `🎉 Your tests are all consistent with the assignment specification! 🎉 Just because your tests are consistent, however, does not mean they thoroughly explore the problem space.`;
+const ANALYZED_CONSISTENCY_MESSAGE = `🎉 Analyzed tests are all consistent with the assignment specification!
+										 However, the tests we could not analyze are either 
+										 inconsistent with or test behavior not specified by the problem statement.`;
 
 export class HintGenerator {
 
@@ -36,6 +39,9 @@ export class HintGenerator {
 	forgeOutput: vscode.OutputChannel;
 
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
+	public AMBIGUOUS_TEST_MESSAGE = `Analyzed test(s) examine behaviors that are either ambiguous or not clearly defined in the problem specification.
+	They are not necessarily incorrect, but I cannot provide feedback around them. If you disagree with this assessment, and believe that these test(s) do deal with behavior explicitly described in the problem specification,
+	please fill out this form: ${this.formurl}`;
 
 	mutationStrategy: string;
 	thoroughnessStrategy: string;
@@ -81,6 +87,7 @@ export class HintGenerator {
 			if (this.thoroughnessStrategy == "Off") {
 				return CONSISTENCY_MESSAGE;
 			}
+			this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
 			// Otherwise, generate feedback around thoroughness.
 			const thoroughness_candidates = await this.generateThoroughnessFeedback(w, studentTests, w_o, testFileName, source_text);
 			return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
@@ -146,7 +153,6 @@ export class HintGenerator {
 					}
 					this.forgeOutput.appendLine(`🐸 Since none of the analyzed tests are obviously
 					inconsistent with the problem specification, I will now analyze the thoroughness of your test-suite. ⌛`);
-
 					const thoroughness_candidates = await this.generateThoroughnessFeedback(w, studentTests, w_o, testFileName, source_text);
 					return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
 				}
@@ -165,12 +171,21 @@ export class HintGenerator {
 
 				const hints = await this.runComprehensiveStrategy(w, w_o, source_text, studentTests, testFileName);
 
-				if (hints.length > 0 || this.thoroughnessStrategy == "Off") {
+				//// THis is hacky ///
+				const hintSet = new Set(hints);
+				const noHint = hintSet.size == 0;
+				const onlyAmbiguous = hintSet.size == 1 && hintSet.has(this.AMBIGUOUS_TEST_MESSAGE);
+				const meaningfulHints = !noHint && !onlyAmbiguous;
+
+				if (meaningfulHints || this.thoroughnessStrategy == "Off") {
 					return this.generateHintFromCandidates(hints);
 				}
-				// TODO: THere is a question here, however, of what we should do if there are NO
-				// hints. This means that some tests are (i)nconsistent and we cant give feedback)
-				// OR that some tests are ambiguous (and so we can't give feedback).
+				else if (onlyAmbiguous) {
+					this.forgeOutput.appendLine(this.AMBIGUOUS_TEST_MESSAGE);
+				}
+				else {
+					this.forgeOutput.appendLine(ANALYZED_CONSISTENCY_MESSAGE);
+				}
 
 				// Now we need to generate feedback around thoroughness,
 				// but this may be complicated since some tests may be ambiguous.
@@ -350,7 +365,7 @@ export class HintGenerator {
 
 	}
 
-
+	
 	recordAmbiguousTest(testFileName: string, studentTests: string, forge_output: string): string {
 		const payload = {
 
@@ -359,9 +374,7 @@ export class HintGenerator {
 			"testFile": testFileName
 		};
 		this.logger.log_payload(payload, LogLevel.INFO, Event.AMBIGUOUS_TEST);
-		return `Analyzed test(s) examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-		They are not necessarily incorrect, but I cannot provide feedback around them. If you disagree with this assessment, and believe that these test(s) do deal with behavior explicitly described in the problem specification,
-		please fill out this form: ${this.formurl}`;
+		return this.AMBIGUOUS_TEST_MESSAGE;
 
 	}
 
@@ -563,7 +576,7 @@ export class HintGenerator {
 
 	async generateThoroughnessFeedback(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string): Promise<string[]> {
 
-		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
+
 		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite.`);
 		this.forgeOutput.show();
 
