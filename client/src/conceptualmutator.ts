@@ -237,7 +237,7 @@ export class ConceptualMutator {
 
 				let pred = ca.pred;
 				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
-				
+
 				this.constrainPredicateByExclusion(pred, exp);
 			}
 		}
@@ -264,9 +264,7 @@ export class ConceptualMutator {
 
 		for (let e of examples) {
 			if (this.isTestOfExclusion(e)) {
-
-				// Ensure the mutant does not
-				// accept the example.
+				// Ensure the mutant does not accept the example.
 				this.mutateAwayExample(e);
 			}
 		}
@@ -277,38 +275,29 @@ export class ConceptualMutator {
 				// THIS HAS TO CHANGE
 
 				// Build the predicate under test from the assertion.
-				// pred => prop
-				let lhs = a.pred;
-				let rhs = a.prop;
+				let pred = a.pred;
+				let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 
-				// If it is a test of exclusion, then we
-				// know that the lhs is from the wheat.
-				this.constrainPredicateByInclusion(lhs, rhs);
+				// If it is a test of exclusion, then we know it is
+				// exp is necessary for <pred>
+				// So we want to 
+				this.constrainPredicateByInclusion(pred, exp);
 			}
 		}
 
 		for (let qa of quantifiedAssertions) {
 			if (this.isTestOfExclusion(qa)) {
 
-
-				/// TODO: THis has to change.
-
-				// Build the predicate under test from the quantified assertion.
-				let lhs = qa.pred;
-				let rhs = qa.prop;
-				let rel = qa.check;
+				let pred = qa.pred;
+				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
+				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
 
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
-				const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
+				const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
 
-				// If it is a test of exclusion, then we
-				// know that the lhs is from the wheat.
-
-				// BUT IS THIS RIGHT? TODO: WHAT ABOUT THE EXACT ARGUMENTS TO EACH PREDICATE?
-				// THESE ARE NOT THE CALL PARAMS.
-				this.constrainPredicateByInclusion(lhs, rhs, quantifiedPrefix);
+				this.constrainPredicateByInclusion(pred, exp, quantifiedPrefix, pred_args);
 
 			}
 		}
@@ -635,7 +624,7 @@ export class ConceptualMutator {
 		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
-		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
+		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
 
 		this.inconsistent_tests.push(test_name);
 		if (rel === "necessary") {
@@ -750,9 +739,6 @@ export class ConceptualMutator {
 		let pred = a.pred;
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
-
-	
-
 		const assertionAsExpr = (rel === "necessary") ?
 								 `(${pred}) implies (${exp})` 
 								 : `(${exp}) implies (${pred})`;
@@ -776,7 +762,7 @@ export class ConceptualMutator {
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
 		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
 		const disj = (a.disj) ? "disj" : "";
-		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} `;
+		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
 
 
 		const quantifiedAssertionAsExpr =  (rel === "necessary") ?
