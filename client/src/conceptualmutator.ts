@@ -234,9 +234,11 @@ export class ConceptualMutator {
 
 		for (let ca of consistencyAssertions) {
 			if(this.isTestOfInclusion(ca)) {
-				// TODO: IS THIS RIGHT? IDK.
-				// THIS COULD EASILY MAKE SOMETHIGN UNSAT.
-				this.mutateAwayConsistencyAssertion(ca);
+
+				let pred = ca.pred;
+				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
+				
+				this.constrainPredicateByExclusion(pred, exp);
 			}
 		}
 
@@ -272,6 +274,8 @@ export class ConceptualMutator {
 		for (let a of assertions) {
 			if (this.isTestOfExclusion(a)) {
 
+				// THIS HAS TO CHANGE
+
 				// Build the predicate under test from the assertion.
 				// pred => prop
 				let lhs = a.pred;
@@ -285,6 +289,10 @@ export class ConceptualMutator {
 
 		for (let qa of quantifiedAssertions) {
 			if (this.isTestOfExclusion(qa)) {
+
+
+				/// TODO: THis has to change.
+
 				// Build the predicate under test from the quantified assertion.
 				let lhs = qa.pred;
 				let rhs = qa.prop;
@@ -306,9 +314,11 @@ export class ConceptualMutator {
 		}
 
 		for (let ca of consistencyAssertions) {
-			if(!this.isTestOfExclusion(ca)) {
-				// TODO: FILL THIS IN. IDK WHAT TO DO HERE.
-				throw new Error("Not implemented yet.");
+			if(this.isTestOfExclusion(ca)) {
+				// So we want to MUTATE TO the consistency assertion.
+				let pred = ca.pred;
+				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
+				this.constrainPredicateByExclusion(pred, exp); // Exclude exp from pred.
 			}
 		}
 
@@ -787,6 +797,8 @@ export class ConceptualMutator {
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let isConsistent : boolean = a.consistent;
 
+		// TODO: Shouldn't isCOnsistent ALWAYS be true
+		// for us to mutate away (i.e. - test of inclusion)?
 
 		// If isconsistent, then they believe pred & exp is SAT.
 		// So exclude exp from pred.
@@ -796,6 +808,8 @@ export class ConceptualMutator {
 		}
 		// If inconsistent, then they believe pred & exp is can never be SAT.
 		// So ease pred to allow exp.
+
+		// How can you get to this one?
 		else {
 			this.easePredicate(pred, exp);
 		}
