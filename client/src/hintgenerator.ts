@@ -141,7 +141,7 @@ export class HintGenerator {
 
 				if (non_ambiguous_failures == 0 && this.thoroughnessStrategy != "Off") {
 
-					if(ambiguous_failures > 0) {
+					if (ambiguous_failures > 0) {
 						this.forgeOutput.appendLine(`🚨: Some analyzed tests examine behavior not specified by the problem statement.`);
 					}
 					this.forgeOutput.appendLine(`🐸 Since none of the analyzed tests are obviously
@@ -156,16 +156,16 @@ export class HintGenerator {
 			}
 
 			else if (this.mutationStrategy == "Comprehensive") {
-			// The comprehensive strategy is high performance and low granularity.
-			// It generates a single conceptual mutant that is consistent with all failing tests.
-			// It then generates feedback around this single mutant.
+				// The comprehensive strategy is high performance and low granularity.
+				// It generates a single conceptual mutant that is consistent with all failing tests.
+				// It then generates feedback around this single mutant.
 
 
 
 
 				const hints = await this.runComprehensiveStrategy(w, w_o, source_text, studentTests, testFileName);
 
-				if(hints.length > 0 || this.thoroughnessStrategy == "Off") {
+				if (hints.length > 0 || this.thoroughnessStrategy == "Off") {
 					return this.generateHintFromCandidates(hints);
 				}
 				// TODO: THere is a question here, however, of what we should do if there are NO
@@ -249,16 +249,22 @@ export class HintGenerator {
 		// is consistent with all failing tests.
 		mutator.mutateToFailingTests();
 
+		let inconsistent_tests = mutator.inconsistent_tests;
+		let n = inconsistent_tests.length;
 		// These are the tests used to generate feedback.
-		const assessed_tests = mutator.inconsistent_tests.join("\n");
-		// These are the tests that Toadus Ponens could not analyze.
-		const skipped_tests = "Could not analyze the following tests:\n"+ mutator.get_skipped_tests_as_string();
+		const assessed_tests = inconsistent_tests.join("\n");
 
-		this.forgeOutput.appendLine(skipped_tests);
+		const skipped_test_count = mutator.skipped_tests.length;
+		if (skipped_test_count > 0) {
+			// These are the tests that Toadus Ponens could not analyze.
+			const skipped_tests = "Could not analyze the following tests:\n" + mutator.get_skipped_tests_as_string();
+			this.forgeOutput.appendLine(skipped_tests);
+		}
+
 
 
 		// IF there are no inconsistent tests, everything is good right?
-		if (mutator.inconsistent_tests.length == 0) {
+		if (inconsistent_tests.length == 0) {
 
 			this.forgeOutput.appendLine(`🐸 The remaining tests seem consistent with the problem,
 				 but may test behavior that is not clearly defined in the problem specification.
@@ -284,8 +290,8 @@ export class HintGenerator {
 
 			hints = await this.tryGetHintsFromMutantFailures(
 				testFileName,
-				mutant, 
-				mutator.student_tests, 
+				mutant,
+				mutator.student_tests,
 				mutator.forge_output);
 		}
 		catch (e) {
@@ -441,11 +447,11 @@ export class HintGenerator {
 		const graderName = path.parse(testFileName.replace('.test.frg', '.grader')).base;
 		const graderURI = `${HintGenerator.WHEATSTORE}/${graderName}`;
 		let f = await this.downloadFile(graderURI);
-		
-		//// TODO: Remove. A hack because I'm lazy for testing ///
-			// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
 
-			f = f.replace(/(is theorem)/g, "is checked");
+		//// TODO: Remove. A hack because I'm lazy for testing ///
+		// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
+
+		f = f.replace(/(is theorem)/g, "is checked");
 		///
 		return f;
 	}
@@ -555,7 +561,7 @@ export class HintGenerator {
 		return await this.tryGetPassingHintsFromAutograderOutput(ag_output, testFileName);
 	}
 
-	async generateThoroughnessFeedback(wheat : string, student_tests : string, forge_output : string, test_file_name : string, source_text :string) : Promise<string[]> {
+	async generateThoroughnessFeedback(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string): Promise<string[]> {
 
 		this.forgeOutput.appendLine(CONSISTENCY_MESSAGE);
 		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite.`);
@@ -603,7 +609,7 @@ export class HintGenerator {
 			const thoroughness_hints = await this.tryGetHintsFromMutantPasses(inclusion_mutator.test_file_name, mutantOfInclusion, inclusion_mutator.student_tests);
 
 			// All those tests covered by negative test cases (and all positive tests)
-			const negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(exclusion_mutator.test_file_name, mutantOfExclusion, exclusion_mutator.student_tests);				
+			const negative_covered_hints_and_pos = await this.tryGetHintsFromMutantPasses(exclusion_mutator.test_file_name, mutantOfExclusion, exclusion_mutator.student_tests);
 
 			// (in theory) all positive test cases. TODO: There may be scenarios were this is buggy, so we need to think about it.
 			const positive_test_hints = await this.tryGetHintsFromMutantPasses(null_mutator.test_file_name, vaccuousMutant, null_mutator.student_tests);
