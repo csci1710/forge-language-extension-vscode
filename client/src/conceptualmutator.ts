@@ -736,6 +736,33 @@ export class ConceptualMutator {
 	protected mutateAwayAssertion(a: AssertionTest) {
 
 
+		////// THIS IS ACTUALLY BROKEN
+		/// HOW CAN YOU CONSTRAINT A PREDICATE BY A
+		/// PREDICATE THAT REFERENCES ITSELF.
+
+		// e.g.
+		// 	pred isDirectedTree_inner_1
+		//  {
+
+		//  edges.~edges in iden 
+		//  lone edges.Node - Node.edges 
+		//  no (^edges & iden) 
+		//  lone Node or Node in edges.Node + Node.edges 
+
+		
+		// }
+
+		// pred generated_ivtqn
+		// {
+		//   ( (no Node)) implies (isDirectedTree) 
+		// }
+
+		// pred isDirectedTree
+		//  {
+		//   (isDirectedTree_inner_1 and (not  (generated_ivtqn))) 
+		// }
+
+
 		let pred = a.pred;
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;

@@ -418,7 +418,13 @@ export class HintGenerator {
 	private async getAutograderTests(testFileName: string): Promise<string> {
 		const graderName = path.parse(testFileName.replace('.test.frg', '.grader')).base;
 		const graderURI = `${HintGenerator.WHEATSTORE}/${graderName}`;
-		return await this.downloadFile(graderURI);
+		let f = await this.downloadFile(graderURI);
+		
+		//// TODO: Remove. A hack because I'm lazy for testing ///
+			// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
+			f = f.replace(/(is theorem)/g, "is checked");
+		///
+		return f;
 	}
 
 	private async getHintMap(testFileName: string): Promise<any> {
@@ -481,17 +487,10 @@ export class HintGenerator {
 		this.logger.log_payload(payload, LogLevel.INFO, event);
 
 		// Step 2. Download the autograder tests.
-		let autograderTests = await this.getAutograderTests(testFileName);
+		const autograderTests = await this.getAutograderTests(testFileName);
 
 
-		//// TODO: Remove. A hack because I'm lazy for testing ///
 
-
-		// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
-
-		autograderTests = autograderTests.replace(/(is theorem)/g, "is checked");
-
-		/////
 
 
 
