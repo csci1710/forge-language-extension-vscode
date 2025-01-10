@@ -344,7 +344,6 @@ export class ConceptualMutator {
 				continue;
 			}
 
-			//// Now we go through EACH test type.
 			const testName = testData.name;
 			const testType = testData.type;
 
@@ -378,17 +377,6 @@ export class ConceptualMutator {
 				}
 				this.mutateToAssertion(a);
 			}
-			else if (testType == "satisfiability_assertion") {
-				// let start_row = testData.startRow;
-				// let start_col = testData.startColumn;
-				// const a = this.getSatisfactionAssertion(start_row, start_col);
-				// if (a == null) {
-				// 	this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
-				// 	continue;
-				// }
-				// this.mutateToSatisfiabilityAssertion(a);
-				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze sat/unsat assertions.`));
-			}
 			else if (testType == "consistency_assertion") {
 				let start_row = testData.startRow;
 				let start_col = testData.startCol;
@@ -398,6 +386,9 @@ export class ConceptualMutator {
 					continue;
 				}
 				this.mutateToConsistencyAssertion(a);
+			}
+			else if (testType == "satisfiability_assertion") {
+				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze sat/unsat assertions.`));
 			}
 			else if (testType == "test-expect") {
 				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze test expects.`));
@@ -535,8 +526,6 @@ export class ConceptualMutator {
 		return `${name}_inner_${this.num_mutations}`;
 	}
 
-
-
 	///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
 	protected easePredicate(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
@@ -565,11 +554,7 @@ export class ConceptualMutator {
 		const newName_i = this.getNewName(i);
 
 		p_i.name = newName_i;
-
-
 		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (${e}))`;
-
-		// New i = old i AND s.
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
@@ -585,7 +570,6 @@ export class ConceptualMutator {
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
 
-
 		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (not  (${e})))`;
 		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
@@ -594,8 +578,6 @@ export class ConceptualMutator {
 
 
 	/////////////////// MUTATION OPERATIONS TO CONSISTENCY ////////////////////////////////
-
-
 
 	protected mutateToAssertion(a: AssertionTest) {
 		let pred = a.pred;
@@ -608,11 +590,8 @@ export class ConceptualMutator {
 			return;
 		}
 
-
-
 		this.inconsistent_tests.push(test_name);
 
-		// i.e. believe pred => exp
 		if (rel === "necessary") {
 			this.constrainPredicateByInclusion(pred, exp);
 		}
@@ -620,7 +599,6 @@ export class ConceptualMutator {
 			this.easePredicate(pred, exp);
 		}
 	}
-
 
 	protected mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
 		let pred = a.pred;
@@ -738,63 +716,8 @@ export class ConceptualMutator {
 	}
 
 
-	////////////////// MUTATION OPERATIONS TO INCONSISTENCY (AKA REMOVE) /////////////////////////////////////
-
-
-	///////////// TODO: THESE NEED TO BE MODIFIED TO WORK WITH EXPRESSIONS IN ASSERTIONS /////////////
-
-	/**
-	 * 
-	 * Excludes the assertions behavior from the mutant.
-	 */
-	protected mutateAwayAssertion(a: AssertionTest) {
-
-
-		////// THIS IS ACTUALLY BROKEN
-		/// HOW CAN YOU CONSTRAINT A PREDICATE BY A
-		/// PREDICATE THAT REFERENCES ITSELF.
-
-		// e.g.
-		// 	pred isDirectedTree_inner_1
-		//  {
-
-		//  edges.~edges in iden 
-		//  lone edges.Node - Node.edges 
-		//  no (^edges & iden) 
-		//  lone Node or Node in edges.Node + Node.edges 
-
-
-		// }
-
-		// pred generated_ivtqn
-		// {
-		//   ( (no Node)) implies (isDirectedTree) 
-		// }
-
-		// pred isDirectedTree
-		//  {
-		//   (isDirectedTree_inner_1 and (not  (generated_ivtqn))) 
-		// }
-
-
-		let pred = a.pred;
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let rel = a.check;
-		const assertionAsExpr = (rel === "necessary") ?
-			`(${pred}) implies (${exp})`
-			: `(${exp}) implies (${pred})`;
-
-		const predicateName = this.randomNameGenerator();
-
-		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
-
-		this.mutant.push(new_mutation_predicate);
-
-		// Now exclude this from the predicate.
-		this.constrainPredicateByExclusion(pred, predicateName);
-	}
-
-
+	////////////////// MUTATION OPERATIONS TO INCONSISTENCY /////////////////////////////////////
+	// TODO: This is a very naive implementation. We should be able to do better.
 	protected mutateAwayExample(e: Example) {
 
 		// BUT ONLY IF THIS IS A POSITIVE EXAMPLE.
@@ -827,8 +750,8 @@ export class ConceptualMutator {
 	///////////////////////////////////////////////////////////////////////////////////
 
 
-	// TODO: Make this better. This is far too verbose, and is from
-	// the original implementation.
+	// TODO: Make this better. This is far too verbose, and is from the original Toadus.
+	// As a result, this may not work with all example types.
 	protected exampleToPredicate(e: Example): HydratedPredicate {
 
 		const exampleName = e.name;
@@ -956,19 +879,15 @@ export class ConceptualMutator {
 
 		// If NOT instructor authored, then it is NOT a test of inclusion.
 		if (isAssertionTest(t)) {
-
 			let a = t as AssertionTest;
 			let p = a.pred;
 			let rel = a.check;
 			return this.isInstructorAuthored(p) && (rel === "sufficient");
-
 		} else if (isQuantifiedAssertionTest(t)) {
-
 			let qa = t as QuantifiedAssertionTest;
 			let p = qa.pred;
 			let rel = qa.check;
 			return this.isInstructorAuthored(p) && (rel === "sufficient");
-
 		} else if (isExample(t)) {
 
 			let e = t as Example;
@@ -1042,12 +961,6 @@ export class ConceptualMutator {
 		}
 
 		return false;
-	}
-
-	private randomNameGenerator(): string {
-		// Generates a random predicate name starting with p and then 5 random characters.
-		let randomName = 'generated_' + Math.random().toString(36).substring(2, 7);
-		return randomName;
 	}
 }
 

@@ -422,6 +422,7 @@ export class HintGenerator {
 		
 		//// TODO: Remove. A hack because I'm lazy for testing ///
 			// Replace all instances of 'is theorem' with 'is checked' in the autograder tests.
+
 			f = f.replace(/(is theorem)/g, "is checked");
 		///
 		return f;
