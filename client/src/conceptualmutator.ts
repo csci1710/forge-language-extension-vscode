@@ -96,7 +96,7 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
 	for (let i = fromRow; i <= toRow; i++) {
 		let line = lines[i - 1];
 		if (i == fromRow) {
-			if(sameRow) {
+			if (sameRow) {
 				block += line.substring(fromColumn - 1, toColumn + 1);
 			}
 			else {
@@ -222,18 +222,32 @@ export class ConceptualMutator {
 
 		for (let a of assertions) {
 			if (this.isTestOfInclusion(a)) {
-				this.mutateAwayAssertion(a);
+
+				// So the assertion is:
+				// e implies p
+				// So we want to exclude e from p.
+				let pred = a.pred;
+				let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+				this.constrainPredicateByExclusion(pred, exp);
 			}
 		}
 
 		for (let qa of quantifiedAssertions) {
 			if (this.isTestOfInclusion(qa)) {
-				this.mutateAwayQuantifiedAssertion(qa);
+
+				let pred = qa.pred;
+				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
+				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
+				const quantifier = "all";
+				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
+				const disj = (qa.disj) ? "disj" : "";
+				const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
+				this.constrainPredicateByExclusion(pred, exp, quantifiedPrefix, pred_args);
 			}
 		}
 
 		for (let ca of consistencyAssertions) {
-			if(this.isTestOfInclusion(ca)) {
+			if (this.isTestOfInclusion(ca)) {
 
 				let pred = ca.pred;
 				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
@@ -303,7 +317,7 @@ export class ConceptualMutator {
 		}
 
 		for (let ca of consistencyAssertions) {
-			if(this.isTestOfExclusion(ca)) {
+			if (this.isTestOfExclusion(ca)) {
 				// So we want to MUTATE TO the consistency assertion.
 				let pred = ca.pred;
 				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
@@ -323,7 +337,7 @@ export class ConceptualMutator {
 
 		let w_os = this.forge_output.split("\n");
 		for (let w_o of w_os) {
-			
+
 			const testData = getFailingTestData(w_o);
 
 			if (testData == undefined) {
@@ -334,7 +348,7 @@ export class ConceptualMutator {
 			const testName = testData.name;
 			const testType = testData.type;
 
-			if(testType == "example") {
+			if (testType == "example") {
 				let e = this.getExampleByName(testName);
 				if (e == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
@@ -389,7 +403,7 @@ export class ConceptualMutator {
 				this.skipped_tests.push(new SkippedTest(testName, `Cannot analyze test expects.`));
 			}
 			else if (testName != "") {
-					this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
+				this.skipped_tests.push(new SkippedTest(testName, `Unsupported test type.`));
 			}
 		}
 		return this.num_mutations;
@@ -477,7 +491,7 @@ export class ConceptualMutator {
 		return null;
 	}
 
-	private  getConsistencyAssertion(start_row: number, start_col: number): ConsistencyAssertionTest {
+	private getConsistencyAssertion(start_row: number, start_col: number): ConsistencyAssertionTest {
 		let assertions = this.full_source_util.getConsistencyAssertions();
 		for (let a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
@@ -523,7 +537,7 @@ export class ConceptualMutator {
 
 
 
-///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
+	///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
 	protected easePredicate(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 
@@ -590,7 +604,7 @@ export class ConceptualMutator {
 
 		let test_name = `${rel}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 		if (!this.isInstructorAuthored(pred)) {
-			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
+			this.skipped_tests.push(new SkippedTest(test_name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
@@ -615,8 +629,8 @@ export class ConceptualMutator {
 
 		let test_name = `${rel}_quantified_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 
-		if(!this.isInstructorAuthored(pred)) {
-			this.skipped_tests.push(new SkippedTest(test_name,`Assertion does not directly test a predicate from the assignment statement.`));
+		if (!this.isInstructorAuthored(pred)) {
+			this.skipped_tests.push(new SkippedTest(test_name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
@@ -654,7 +668,7 @@ export class ConceptualMutator {
 
 		// Ensure p_i is in the wheat.
 		if (!this.isInstructorAuthored(p_i)) {
-			this.skipped_tests.push(new SkippedTest(e.name,`Example does not directly test a predicate (or its negation) from the assignment statement.`));
+			this.skipped_tests.push(new SkippedTest(e.name, `Example does not directly test a predicate (or its negation) from the assignment statement.`));
 			return;
 		}
 
@@ -680,19 +694,19 @@ export class ConceptualMutator {
 
 		let pred = a.pred;
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let isConsistent : boolean = a.consistent;
+		let isConsistent: boolean = a.consistent;
 		let consistency_prefix = isConsistent ? "consistent" : "inconsistent"
 
 		let test_name = `${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
 		if (!this.isInstructorAuthored(pred)) {
-			this.skipped_tests.push(new SkippedTest(a.name,`Assertion does not directly test a predicate from the assignment statement.`));
+			this.skipped_tests.push(new SkippedTest(a.name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
 		this.inconsistent_tests.push(test_name);
 		// If isconsistent, then they believe pred & exp is SAT.
 		// SO WE need to EASE the predicate to ALLOW the expression.
-		if(isConsistent) {
+		if (isConsistent) {
 			this.easePredicate(pred, exp);
 		}
 		// If inconsistent, then they believe pred & exp is can never be SAT.
@@ -703,7 +717,7 @@ export class ConceptualMutator {
 
 
 
-	 }
+	}
 
 	private mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) {
 		/// How would this even work?
@@ -749,7 +763,7 @@ export class ConceptualMutator {
 		//  no (^edges & iden) 
 		//  lone Node or Node in edges.Node + Node.edges 
 
-		
+
 		// }
 
 		// pred generated_ivtqn
@@ -767,9 +781,9 @@ export class ConceptualMutator {
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		let rel = a.check;
 		const assertionAsExpr = (rel === "necessary") ?
-								 `(${pred}) implies (${exp})` 
-								 : `(${exp}) implies (${pred})`;
-		
+			`(${pred}) implies (${exp})`
+			: `(${exp}) implies (${pred})`;
+
 		const predicateName = this.randomNameGenerator();
 
 		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, assertionAsExpr);
@@ -779,56 +793,6 @@ export class ConceptualMutator {
 		// Now exclude this from the predicate.
 		this.constrainPredicateByExclusion(pred, predicateName);
 	}
-
-
-	protected mutateAwayQuantifiedAssertion(a: QuantifiedAssertionTest) {
-		let pred = a.pred;
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let rel = a.check;
-		const quantifier = "all";
-		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
-		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
-		const disj = (a.disj) ? "disj" : "";
-		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
-
-
-		const quantifiedAssertionAsExpr =  (rel === "necessary") ?
-		  `${quantifiedPrefix} ((${pred}${pred_args}) implies (${exp}))` 
-		: `${quantifiedPrefix} ((${exp}) implies (${pred}${pred_args}))`;
-
-
-		// TODO: Check -- is this okay, since we push the quantification
-		// *into* the new predicate? Or is this much more complicated.
-		const predicateName = this.randomNameGenerator();
-		let new_mutation_predicate = new HydratedPredicate(predicateName, {}, quantifiedAssertionAsExpr);
-		this.mutant.push(new_mutation_predicate);
-		this.constrainPredicateByExclusion(pred, predicateName);
-	}
-
-	protected mutateAwayConsistencyAssertion(a: ConsistencyAssertionTest) {
-		let pred = a.pred;
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let isConsistent : boolean = a.consistent;
-
-		// TODO: Shouldn't isCOnsistent ALWAYS be true
-		// for us to mutate away (i.e. - test of inclusion)?
-
-		// If isconsistent, then they believe pred & exp is SAT.
-		// So exclude exp from pred.
-
-		if(isConsistent) {
-			this.constrainPredicateByExclusion(pred, exp);
-		}
-		// If inconsistent, then they believe pred & exp is can never be SAT.
-		// So ease pred to allow exp.
-
-		// How can you get to this one?
-		else {
-			this.easePredicate(pred, exp);
-		}
-	}
-
-
 
 
 	protected mutateAwayExample(e: Example) {
@@ -991,13 +955,11 @@ export class ConceptualMutator {
 	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
 
 		// If NOT instructor authored, then it is NOT a test of inclusion.
-
 		if (isAssertionTest(t)) {
 
 			let a = t as AssertionTest;
 			let p = a.pred;
 			let rel = a.check;
-
 			return this.isInstructorAuthored(p) && (rel === "sufficient");
 
 		} else if (isQuantifiedAssertionTest(t)) {
