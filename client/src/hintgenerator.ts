@@ -86,16 +86,6 @@ export class HintGenerator {
 			return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
 
 		}
-
-		// TODO: WHAT IF NOT CONSISTENT, BUT THE FAILING TESTS ARE 
-		// EITHER AMBIGUOUS OR NOT SUPPORTED.
-
-		/// I think we can give *more* feedback here.
-
-		/////////////////////////////////////////////////////////
-
-
-
 		// Step 3: Tests may fail for one of two reasons -- 
 		// a test ERROR vs a test FAIL. We need to distinguish between these two cases.
 
@@ -110,12 +100,10 @@ export class HintGenerator {
 			return noTestFound;
 		}
 
-		// Step 4: Some tests *have* fail against the wheat.
+		// Step 4: Some tests *have* failed against the wheat.
 		// Now there are two possibilities here -- the failing tests explore
 		// ambiguous/undefined behavior, or they are inconsistent with the problem specification.
 		// In order to determine this, we need to generate a conceptual mutant.
-
-
 
 		// An intesting question is: Can we *first* run comprehensive -- but if the mutant is 
 		// not satisfiable, then run per test? This would be a hybrid strategy.
@@ -134,16 +122,36 @@ export class HintGenerator {
 
 
 				let composite_hint = "";
+				let non_ambiguous_failures = 0;
+				let ambiguous_failures = 0;
 				// Now we need to choose a hint per test. But what about ambiguous tests? This is where it happens?
 				for (const test in per_test_hints) {
 
 					let hint = this.generateHintFromCandidates(per_test_hints[test]);
 					if (hint == "") {
+						ambiguous_failures++;
 						hint = this.recordAmbiguousTest(testFileName, studentTests, w_o);
+					}
+					else {
+						non_ambiguous_failures++;
 					}
 
 					composite_hint += `\n${test} : ${hint}\n`;
 				}
+
+				if (non_ambiguous_failures == 0 && this.thoroughnessStrategy != "Off") {
+
+					if(ambiguous_failures > 0) {
+						this.forgeOutput.appendLine(`🚨: Some analyzed tests examine behavior not specified by the problem statement.`);
+					}
+					this.forgeOutput.appendLine(`🐸 Since none of the analyzed tests are obviously
+					inconsistent with the problem specification, I will now analyze the thoroughness of your test-suite. ⌛`);
+
+					const thoroughness_candidates = await this.generateThoroughnessFeedback(w, studentTests, w_o, testFileName, source_text);
+					return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
+				}
+
+
 				return composite_hint;
 			}
 
@@ -153,12 +161,22 @@ export class HintGenerator {
 			// It then generates feedback around this single mutant.
 
 
-			// TODO: THere is a question here, however, of what we should do if there are NO
-			// hints. This means that some tests are (i)nconsistent and we cant give feedback)
-			// OR that some tests are ambiguous (and so we can't give feedback).
+
 
 				const hints = await this.runComprehensiveStrategy(w, w_o, source_text, studentTests, testFileName);
-				return this.generateHintFromCandidates(hints);
+
+				if(hints.length > 0 || this.thoroughnessStrategy == "Off") {
+					return this.generateHintFromCandidates(hints);
+				}
+				// TODO: THere is a question here, however, of what we should do if there are NO
+				// hints. This means that some tests are (i)nconsistent and we cant give feedback)
+				// OR that some tests are ambiguous (and so we can't give feedback).
+
+				// Now we need to generate feedback around thoroughness,
+				// but this may be complicated since some tests may be ambiguous.
+				// OR incorrect but not analyzable.
+				const thoroughness_candidates = await this.generateThoroughnessFeedback(w, studentTests, w_o, testFileName, source_text);
+				return this.generateThoroughnessFeedbackFromCandidates(thoroughness_candidates);
 			}
 			else {
 				return "Something was wrong in the extension settings. toadusponens.feedbackStrategy must be either 'Comprehensive' or 'Per Test'";
@@ -241,11 +259,15 @@ export class HintGenerator {
 
 		// IF there are no inconsistent tests, everything is good right?
 		if (mutator.inconsistent_tests.length == 0) {
-			// SP: TODO: Figure out what we should do here.
-			this.forgeOutput.appendLine(`🐸 The remaining tests seem consistent with the problem, but may test 
-				behavior that is not clearly defined in the problem specification.`);
+
+			this.forgeOutput.appendLine(`🐸 The remaining tests seem consistent with the problem,
+				 but may test behavior that is not clearly defined in the problem specification.
+				 You may want to change settings to 'Per Test' to get individual feedback around these tests.`);
+
+			// SP: TODO: Figure out what we should do here. 
 			return [];
 		}
+
 
 		this.forgeOutput.appendLine(`🐸 Step 2: The following ${mutator.inconsistent_tests.length} test(s) MAY be inconsistent with the problem specification:\n ${assessed_tests}`);
 		this.forgeOutput.appendLine(`Analyzing these tests further ⌛`);
@@ -443,7 +465,6 @@ export class HintGenerator {
 
 
 	private async tryGetFailingHintsFromAutograderOutput(ag_output: string, testFileName: string): Promise<string[]> {
-
 		if (ag_output == "") {
 			return [];
 		}
