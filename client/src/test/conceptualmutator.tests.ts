@@ -1,83 +1,89 @@
-// import { Mutator } from '../mutator';
-// import { removeForgeComments } from '../forge-utilities';
-// import { strict as assert, strictEqual } from 'assert';
+import { ConceptualMutator } from '../conceptualmutator';
+import { removeForgeComments } from '../forge-utilities';
+import { strict as assert, strictEqual } from 'assert';
 
 // // TODO: This is duplicated, find a better place to put it.
-// export function combineTestsWithModel(wheatText: string, tests: string): string {
-//     const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
-//     const hashlang_decl = "#lang";
+export function combineTestsWithModel(wheatText: string, tests: string): string {
+    const TEST_SEPARATOR = "//// Do not edit anything above this line ////"
+    const hashlang_decl = "#lang";
 
-//     if (tests.includes(TEST_SEPARATOR)) {
-//         const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
-//         tests = tests.substring(startIndex).trim();
-//     }
-//     tests = tests.replace(hashlang_decl, "// #lang");
+    if (tests.includes(TEST_SEPARATOR)) {
+        const startIndex = tests.indexOf(TEST_SEPARATOR) + TEST_SEPARATOR.length;
+        tests = tests.substring(startIndex).trim();
+    }
+    tests = tests.replace(hashlang_decl, "// #lang");
 
-//     var combined = wheatText + "\n" + tests;
-//     combined = removeForgeComments(combined);
+    var combined = wheatText + "\n" + tests;
+    combined = removeForgeComments(combined);
 
-//     return combined;
+    return combined;
 
-// }
+}
 
-// function removeWhitespace(str: string): string {
-//     return str.replace(/\s/g, '');
-// }
-
-
-// const DIRTREE_INFO = {
-
-//     wheat: `#lang forge
-
-//                 option run_sterling off
-
-//                 sig Node {edges: set Node}
-
-//                 pred isDirectedTree {
-//                     edges.~edges in iden
-//                     lone edges.Node - Node.edges 
-//                     no (^edges & iden)
-//                     lone Node or Node in edges.Node + Node.edges 
-//                 }`,
-//     filename: "dirTree.frg",
-// }
+function removeWhitespace(str: string): string {
+    return str.replace(/\s/g, '');
+}
 
 
+const DIRTREE_INFO = {
+
+    wheat: `#lang forge
+
+                option run_sterling off
+
+                sig Node {edges: set Node}
+
+                pred isDirectedTree {
+                    edges.~edges in iden
+                    lone edges.Node - Node.edges 
+                    no (^edges & iden)
+                    lone Node or Node in edges.Node + Node.edges 
+                }`,
+    filename: "dirTree.frg",
+}
 
 
-// // mutator constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
-// describe('Mutator to Misunderstanding', () => {
-//     it(' : mutate to Misunderstanding carries out no mutations if there are no wheat failures.', () => {
 
-//         const tests = `
-      
-//           #lang forge
+/*
 
-//         open "${DIRTREE_INFO.filename}"
-//         //// Do not edit anything above this line ////
+		test expect {
+			injective : {isDirectedTree implies } is theorem
+			injective_insufficient : {(edges.~edges in iden) and !isDirectedTree} is sat
+		
+			root : {isDirectedTree implies (lone edges.Node - Node.edges) } is theorem
+			loopless : {isDirectedTree implies (no (^edges & iden))} is theorem
+			connected : {isDirectedTree implies (lone Node or Node in edges.Node + Node.edges) } is theorem
+		}
+			*/
+
+
+// mutator constructor(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text : string) {
+describe('Conceptual Mutator', () => {
+    it(' : mutate to Misunderstanding carries out no mutations if there are no wheat failures.', () => {
+
+        const tests = `
+          #lang forge
+
+			open "${DIRTREE_INFO.filename}"
+			//// Do not edit anything above this line ////
      
-//       test expect {
-//         injective : {isDirectedTree implies (edges.~edges in iden)} is theorem
-//         injective_insufficient : {(edges.~edges in iden) and !isDirectedTree} is sat
-      
-//         root : {isDirectedTree implies (lone edges.Node - Node.edges) } is theorem
-//         loopless : {isDirectedTree implies (no (^edges & iden))} is theorem
-//         connected : {isDirectedTree implies (lone Node or Node in edges.Node + Node.edges) } is theorem
-//       }
-      
-//       example twoNodeTree is isDirectedTree for {
-//         Node = \`Node1 + \`Node2
-//         edges = \`Node1->\`Node2
-//       }
-//       `;
-//         const forge_output = "";
-//         const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
 
-//         const mutator = new Mutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
-//         mutator.mutateToStudentMisunderstanding();
-//         assert.strictEqual(removeWhitespace(mutator.mutant), removeWhitespace(DIRTREE_INFO.wheat));
-//     });
+			assert (edges.~edges in iden) is necessary for isDirectedTree
+      
+			example twoNodeTree is isDirectedTree for {
+				Node = \`Node1 + \`Node2
+				edges = \`Node1->\`Node2
+			}
+      	`;
+        const forge_output = "";
+        const source_text = combineTestsWithModel(DIRTREE_INFO.wheat, tests);
+		const mutator = new ConceptualMutator(DIRTREE_INFO.wheat, tests, forge_output, DIRTREE_INFO.filename, source_text);
+		mutator.mutateToFailingTests();
 
+		let mutant_as_string = mutator.getMutantAsString();
+        assert.strictEqual(removeWhitespace(mutant_as_string), removeWhitespace(DIRTREE_INFO.wheat));
+    });
+});
 
 
 //     it(' : mutate to Misunderstanding ignores test expects for mutations.', () => {
