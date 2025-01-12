@@ -242,7 +242,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
+				let pred_args = qa.predArgs ? get_text_from_syntaxnode(qa.predArgs, this.source_text) : "";
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
@@ -309,7 +309,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
+				let pred_args = qa.predArgs ? get_text_from_syntaxnode(qa.predArgs, this.source_text) : "";
 
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
@@ -618,7 +618,7 @@ export class ConceptualMutator {
 		}
 
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
+		const pred_args = a.predArgs ? get_text_from_syntaxnode(a.predArgs, this.source_text) : "";
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
 		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
