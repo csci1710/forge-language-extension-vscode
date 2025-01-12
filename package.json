@@ -202,7 +202,7 @@
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
-		"forge-toadus-parser": "1.1.0",
+		"forge-toadus-parser": "^1.1.1",
 		"glob": "^8.1.0",
 		"ts-node": "^10.9.2",
 		"vscode-languageserver": "^9.0.1",

@@ -91,30 +91,41 @@ class HydratedPredicate {
 	}
 }
 
-
+/*
+    Row numbers are 1-indexed.
+    Column numbers are 0-indexed.
+*/
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
-	let lines = text.split("\n");
-	let block = "";
-	const sameRow = fromRow == toRow;
-	for (let i = fromRow; i <= toRow; i++) {
-		let line = lines[i - 1];
-		if (i == fromRow) {
-			if (sameRow) {
-				block += line.substring(fromColumn - 1, toColumn + 1);
-			}
-			else {
-				block += line.substring(fromColumn - 1);
-			}
-		} else if (i == toRow) {
-			block += line.substring(0, toColumn + 1); // DO WE NEED TO ADD 1?
-		} else {
-			block += line;
-		}
-		if (i < toRow) {
+    let lines = text.split("\n");
+    let block = "";
+    const sameRow = fromRow == toRow;
+
+    for (let i = fromRow; i <= toRow; i++) {
+        let line = lines[i - 1]; // Row numbers are 1-indexed, so adjust by subtracting 1
+
+        if (i == fromRow) {
+            if (sameRow) {
+                // If the block is within the same row, take the substring from fromColumn to toColumn
+                block += line.substring(fromColumn, toColumn + 1);
+            } else {
+                // If the block spans multiple rows, take the substring from fromColumn to the end of the line
+                block += line.substring(fromColumn);
+            }
+        } else if (i == toRow) {
+            // For the last row, take the substring from the start of the line to toColumn
+            block += line.substring(0, toColumn + 1);
+        } else {
+            // For rows in between, take the whole line
+            block += line;
+        }
+
+        // Add a newline character if it's not the last row
+        if (i < toRow) {
             block += "\n";
         }
-	}
-	return block;
+    }
+
+    return block;
 }
 
 
