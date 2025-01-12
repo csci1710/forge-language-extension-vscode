@@ -143,6 +143,14 @@
                         {
                             "match": "\\b(sufficient)\\b",
                             "name": "keyword.language.sufficient.forge"
+                        },
+                        {
+                            "match": "\\b(consistent)\\b",
+                            "name": "keyword.language.consistent.forge"
+                        },
+                        {
+                            "match": "\\b(inconsistent)\\b",
+                            "name": "keyword.language.inconsistent.forge"
                         }
                     ]
                 },
@@ -226,6 +234,10 @@
                         {
                             "match": "\\b(exactly)\\b",
                             "name": "keyword.control.exactly.forge"
+                        },
+                        {
+                            "match": "\\b(with)\\b",
+                            "name": "keyword.control.with.forge"
                         }
                     ]
                 }
