@@ -53,6 +53,7 @@ function getExprFromBracesIfAny(s: string): string {
 }
 
 
+// TODO: Check how params get constructed here!
 class HydratedPredicate {
 	constructor(
 		public name: string,
@@ -106,14 +107,14 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
         if (i == fromRow) {
             if (sameRow) {
                 // If the block is within the same row, take the substring from fromColumn to toColumn
-                block += line.substring(fromColumn, toColumn + 1);
+                block += line.substring(fromColumn, toColumn);
             } else {
                 // If the block spans multiple rows, take the substring from fromColumn to the end of the line
                 block += line.substring(fromColumn);
             }
         } else if (i == toRow) {
             // For the last row, take the substring from the start of the line to toColumn
-            block += line.substring(0, toColumn + 1);
+            block += line.substring(0, toColumn);
         } else {
             // For rows in between, take the whole line
             block += line;
@@ -189,6 +190,10 @@ export class ConceptualMutator {
 		this.inconsistent_tests = [];
 		this.skipped_tests = [];
 
+
+
+
+
 		// TODO: Maybe this should keep track of the passing and failing tests rather than the calling code.
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
@@ -216,6 +221,8 @@ export class ConceptualMutator {
 		this.mutant = this.full_source_util.getPreds().map(predicateToHydratedPredicate);
 	}
 
+
+	
 
 	/**
 	 * Mutate to remove belief.
@@ -253,7 +260,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.predArgs ? get_text_from_syntaxnode(qa.predArgs, this.source_text) : "";
+				let pred_args = this.getPredArgs(qa.predArgs);
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
@@ -320,7 +327,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.predArgs ? get_text_from_syntaxnode(qa.predArgs, this.source_text) : "";
+				let pred_args = this.getPredArgs(qa.predArgs);
 
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
@@ -629,7 +636,7 @@ export class ConceptualMutator {
 		}
 
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		const pred_args = a.predArgs ? get_text_from_syntaxnode(a.predArgs, this.source_text) : "";
+		const pred_args = this.getPredArgs(a.predArgs); 
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
 		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
@@ -977,6 +984,15 @@ export class ConceptualMutator {
 		}
 
 		return false;
+	}
+
+	
+	private getPredArgs(predArgs : SyntaxNode | undefined) : string {
+		if (!predArgs) {
+			return "";
+		}
+
+		return '[' + get_text_from_syntaxnode(predArgs, this.source_text) + ']'
 	}
 }
 
