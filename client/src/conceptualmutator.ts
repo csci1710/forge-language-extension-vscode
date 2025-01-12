@@ -204,6 +204,14 @@ export class ConceptualMutator {
 			let body = get_text_from_syntaxnode(body_block, source_text);
 			let params_text = get_text_from_syntaxnode(p.params, source_text);
 
+			// If the first character of params is '[' and the last character is ']',
+			// we should remove the brackets.
+			// This is hacky and I chalk it up to BAD parsing.
+			if (params_text.startsWith("[") && params_text.endsWith("]")) {
+				params_text = params_text.substring(1, params_text.length - 1);
+			}
+
+
 			let params = {};
 			let param_strings = params_text.split(",");
 
