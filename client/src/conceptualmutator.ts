@@ -107,7 +107,9 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
 		} else {
 			block += line;
 		}
-		block += "\n";
+		if (i < toRow) {
+            block += "\n";
+        }
 	}
 	return block;
 }
@@ -522,7 +524,7 @@ export class ConceptualMutator {
 
 
 	private getNewName(name: string) {
-		this.num_mutations++;
+
 		return `${name}_inner_${this.num_mutations}`;
 	}
 
@@ -533,7 +535,7 @@ export class ConceptualMutator {
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
 		}
-
+		this.num_mutations++;
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
 		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} or (${e}))`;
@@ -546,11 +548,11 @@ export class ConceptualMutator {
 
 	protected constrainPredicateByInclusion(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
 		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
-
+				this.num_mutations++;
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something went wrong, please contact the instructor.`);
 		}
-
+		this.num_mutations++;
 		const newName_i = this.getNewName(i);
 
 		p_i.name = newName_i;
@@ -566,7 +568,7 @@ export class ConceptualMutator {
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
 		}
-
+		this.num_mutations++;
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
 
