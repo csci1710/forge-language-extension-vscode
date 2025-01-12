@@ -24,7 +24,10 @@ class SkippedTest {
 
 // TODO: These feel like something I should be able to get AWAY from using.
 function isAssertionTest(t: any): t is AssertionTest {
-	return t && typeof t === 'object' && 'prop' in t && 'pred' in t && !(t as QuantifiedAssertionTest).quantifier;
+	return t && typeof t === 'object' && 
+			'prop' in t && 'pred' in t 
+			&& !(t as QuantifiedAssertionTest).quantifier
+			&& !(t as ConsistencyAssertionTest).consistent;
 }
 
 function isQuantifiedAssertionTest(t: any): t is QuantifiedAssertionTest {
