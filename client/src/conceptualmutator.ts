@@ -1,5 +1,4 @@
-import { get } from 'http';
-import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
+import { combineTestsWithModel } from './forge-utilities';
 import { getFailingTestData } from './forge-utilities';
 
 
@@ -1002,18 +1001,23 @@ export class ConceptualMutator {
 
 	private getTestName(t: AssertionTest | Example | QuantifiedAssertionTest | ConsistencyAssertionTest): string {
 
-		// Here, we should get the LINE offset.
+		// The problem here is that
+		// 1. We remove comments in the 'source_text' but not in the 'student_tests'
+		// 2. The student test has stuff above the '//// Do not edit anything above this line ////' line.
+		// As a result, we generate a version of the student tests as it would
+		// appear in the source text, and then we can use that to get the row number.
+		const winnowed_student_tests = combineTestsWithModel("", this.student_tests);
 		
-		// That is, the line number of the test in the test file (this.studenttests)
-		// rather than the line number of the test in the full source file (this.sourcetext)
-
 		
-		const fullSourceLines = this.source_text.split('\n').length;
-		const studentTestLines = this.student_tests.split('\n').length;
-		const rowNumberOffset = Math.max(fullSourceLines - studentTestLines, 0);
+		// Check if winnowed_student_tests is a substring of this.student_tests
+		let rowNumberOffset = 0;
+		if (this.source_text.includes(winnowed_student_tests)) {
+			const index = this.source_text.indexOf(winnowed_student_tests);
+			const prefix = this.source_text.substring(0, index);
+			rowNumberOffset = prefix.split('\n').length;
 
-		/// This isn't quite right. There are ALSO lines in the student tests that are not in the source text.
-
+		}
+		// I think this is still broken because of COMMENTS.
 
 		function correctRowNumber(row: number) : number{
 			let new_number = row - rowNumberOffset;
