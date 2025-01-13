@@ -731,9 +731,6 @@ export class ConceptualMutator {
 		else {
 			this.constrainPredicateByExclusion(pred, exp);
 		}
-
-
-
 	}
 
 	private mutateToSatisfiabilityAssertion(a: SatisfiabilityAssertionTest) {
