@@ -453,11 +453,11 @@ export class ConceptualMutator {
 		const sigDecls = this.hydrateSigs();
 		const sigs = sigDecls.join("\n\n");
 
-
-		// TODO: ALSO NEED TO HYDRATE FUNCTIONS.
+		const functionDecls = this.hydrateFunctions();
+		const fns = functionDecls.join("\n\n");
 
 		const predicates = predStrings.join("\n\n");
-		return `${PREFIX}\n${sigs}\n\n${predicates}`;
+		return `${PREFIX}\n${sigs}\n\n${fns}\n\n${predicates}`;
 
 	}
 
@@ -479,10 +479,22 @@ export class ConceptualMutator {
 		});
 
 		return sigStrings;
-
-
 	}
 
+	/**
+	 * Not ideal. This is a low fidelity solution.
+	 * @returns A list of functions as strings.
+	 */
+	private hydrateFunctions(): string[] {
+		const functions: Function[] = this.full_source_util.getFunctions();
+		const functionStrings = functions.map((f) => {
+			const name = f.name;
+			const body = get_text_from_syntaxnode(f, this.source_text);
+			return body;
+		});
+
+		return functionStrings;
+	}
 
 
 	private getExampleByName(name: string): Example {
