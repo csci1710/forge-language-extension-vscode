@@ -35,7 +35,7 @@ export class RacketProcess {
 		this.racketKilledManually = false;
 
 		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
-		return this.childProcess
+		return this.childProcess;
 	}
 
 
@@ -73,24 +73,26 @@ export class RacketProcess {
 				range: errLocation['range'],
 				message: `Forge Evaluation Error: ${errLocation['line']}`,
 				source: 'Racket'
-			}
+			};
 		}
 
 		this.userFacingOutput.appendLine(text);
 
 		const textLines = text.split(/[\n\r]/);
 
-		let errorList = textLines.map((line) => this.matchForgeError(line)).filter((x) => x != null);
-		let diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
+		const errorList = textLines.map((line) => this.matchForgeError(line)).filter((x) => x != null);
+		const diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
 
 		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
 
 
-		let linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
-		let colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
+		const linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
+		const colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
 		this.showFileWithOpts(fileURI.fsPath, linenum, colnum);
 	}
 
+
+	// TODO: Do these have to change?
 	matchForgeError(line: string): Object | null {
 
 		/* There are multiple types of errors that can be thrown by Forge.*/

@@ -89,11 +89,10 @@
 					"type": "string",
 					"enum": [
 						"Off",
-						"Partial",
-						"Full"
+						"On"
 					],
 					"default": "Partial",
-					"description": "Determines the level of thoroughness feedback given by Toadus Ponens. Full offers more accurate thoroughness feedback, but is experimental and may be buggy."
+					"description": "Determines the level of thoroughness feedback given by Toadus Ponens."
 				}
 			}
 		},
@@ -132,7 +131,7 @@
 			{
 				"command": "forge.halp",
 				"title": "Ask Toadus Ponens!",
-				"icon": "./client/images/toadus.png"
+				"icon": "./client/images/toadus.svg"
 			},
 			{
 				"command": "forge.openDocumentation",

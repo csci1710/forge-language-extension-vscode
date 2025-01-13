@@ -69,7 +69,7 @@ export const quantified_assertion_regex = 	/:(\d+):(\d+) \(span (\d+)\)\] Test q
 export const assertion_regex = 				/:(\d+):(\d+) \(span (\d+)\)\] Test (\w+)_assertion_for_(\w+)_([^\s\\]*) failed./;
 export const consistency_assertion_regex =  /:(\d+):(\d+) \(span (\d+)\)\] Failed test (consistent|inconsistent)_assertion_for_(\w+)_([^\s\\]*)/;
 export const satisfaction_assertion_regex = /:(\d+):(\d+) \(span (\d+)\)\] Failed test (sat|unsat|forge_error)_assertion_([^\s\\]*)/;
-export const test_regex = 					/Failed test (\w+)\.|Theorem (\w+) failed/;
+export const test_regex = 					/Failed test (\w+)\.|Theorem (\w+) failed|Test (\w+) failed\./;
 
 export class TestData {
 
@@ -178,7 +178,9 @@ export function getFailingTestData(o: string): TestData {
 		if (match == null) {
 			return undefined;
 		}
-		let test_name = (match[1]) ? match[1] : match[2];
+
+		let test_name = (match[1]) ? match[1] : (match[2]) ? match[2] : match[3];
+
 		return new TestData(test_name,
 							"test-expect",
 							 -1,
