@@ -42,10 +42,21 @@ function isConsistencyAssertionTest(t: any): t is ConsistencyAssertionTest {
 	return t && (typeof t === 'object') && ('consistent' in t);
 }
 
+function isTestExpect(t: any): t is Test {
+	return t && (typeof t === 'object') && ('name' in t) && ('check' in t);
+}
+
+function isSatisfiabilityAssertionTest(t: any): t is SatisfiabilityAssertionTest {
+	return t && (typeof t === 'object') && ('check' in t)
+			&& !isTestExpect(t) && !isConsistencyAssertionTest(t)
+			&& !isAssertionTest(t) && !isQuantifiedAssertionTest(t);
+}
+
+
 
 function getExprFromBracesIfAny(s: string): string {
 
-	let scleaned = s.trim();
+	const scleaned = s.trim();
 	if (scleaned.startsWith("{") && scleaned.endsWith("}")) {
 		return scleaned.substring(1, scleaned.length - 1);
 	}
@@ -64,8 +75,8 @@ class HydratedPredicate {
 	}
 
 	declParams(): string {
-		let paramStrings = [];
-		for (let [name, type] of Object.entries(this.params)) {
+		const paramStrings = [];
+		for (const [name, type] of Object.entries(this.params)) {
 			paramStrings.push(`${name}: ${type}`);
 		}
 
@@ -73,13 +84,13 @@ class HydratedPredicate {
 			return "";
 		}
 
-		let paramStringsJoined = paramStrings.join(", ");
+		const paramStringsJoined = paramStrings.join(", ");
 		return "[" + paramStringsJoined + "]";
 	}
 
 	callParams(): string {
-		let paramStrings = [];
-		for (let [name, type] of Object.entries(this.params)) {
+		const paramStrings = [];
+		for (const [name, type] of Object.entries(this.params)) {
 			paramStrings.push(name);
 		}
 
@@ -87,7 +98,7 @@ class HydratedPredicate {
 			return "";
 		}
 
-		let paramStringsJoined = paramStrings.join(", ");
+		const paramStringsJoined = paramStrings.join(", ");
 		return "[" + paramStringsJoined + "]";
 	}
 }
@@ -97,12 +108,12 @@ class HydratedPredicate {
     Column numbers are 0-indexed.
 */
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
-    let lines = text.split("\n");
+    const lines = text.split("\n");
     let block = "";
     const sameRow = fromRow == toRow;
 
     for (let i = fromRow; i <= toRow; i++) {
-        let line = lines[i - 1]; // Row numbers are 1-indexed, so adjust by subtracting 1
+        const line = lines[i - 1]; // Row numbers are 1-indexed, so adjust by subtracting 1
 
         if (i == fromRow) {
             if (sameRow) {
@@ -136,10 +147,10 @@ function get_text_from_syntaxnode(b: SyntaxNode, text: string): string {
 		return "";
 	}
 
-	let fromRow = b.startRow;
-	let toRow = b.endRow;
-	let fromColumn = b.startColumn;
-	let toColumn = b.endColumn;
+	const fromRow = b.startRow;
+	const toRow = b.endRow;
+	const fromColumn = b.startColumn;
+	const toColumn = b.endColumn;
 
 	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
@@ -154,10 +165,10 @@ function get_text_from_syntaxnode(b: SyntaxNode, text: string): string {
 export class ConceptualMutator {
 	skipped_tests: SkippedTest[];
 	inconsistent_tests: string[];
-	num_mutations: number = 0;
+	num_mutations = 0;
 
 	wheat_util: ForgeUtil;
-	//student_util: ForgeUtil;
+	student_util: ForgeUtil;
 	full_source_util: ForgeUtil;
 
 	mutant: HydratedPredicate[] = [];
@@ -197,11 +208,11 @@ export class ConceptualMutator {
 		// TODO: Maybe this should keep track of the passing and failing tests rather than the calling code.
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
-			let name = p.name;
-			let body_block: Block = p.body;
+			const name = p.name;
+			const body_block: Block = p.body;
 
 
-			let body = get_text_from_syntaxnode(body_block, source_text);
+			const body = get_text_from_syntaxnode(body_block, source_text);
 			let params_text = get_text_from_syntaxnode(p.params, source_text);
 
 			// If the first character of params is '[' and the last character is ']',
@@ -212,13 +223,13 @@ export class ConceptualMutator {
 			}
 
 
-			let params = {};
-			let param_strings = params_text.split(",");
+			const params = {};
+			const param_strings = params_text.split(",");
 
 
 
-			for (let param_string of param_strings) {
-				let [name, type] = param_string.split(":");
+			for (const param_string of param_strings) {
+				const [name, type] = param_string.split(":");
 				if (name && type) {
 					params[name.trim()] = type.trim();
 				}
@@ -238,37 +249,37 @@ export class ConceptualMutator {
 	 */
 	public mutateToExcludeInclusionTests(): number {
 
-		let assertions = this.full_source_util.getAssertions();
-		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
-		let examples = this.full_source_util.getExamples();
-		let consistencyAssertions = this.full_source_util.getConsistencyAssertions();
+		const assertions = this.full_source_util.getAssertions();
+		const quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
+		const examples = this.full_source_util.getExamples();
+		const consistencyAssertions = this.full_source_util.getConsistencyAssertions();
 
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
-		for (let e of examples) {
+		for (const e of examples) {
 			if (this.isTestOfInclusion(e)) {
 				this.mutateAwayExample(e);
 			}
 		}
 
-		for (let a of assertions) {
+		for (const a of assertions) {
 			if (this.isTestOfInclusion(a)) {
 
 				// So the assertion is:
 				// e implies p
 				// So we want to exclude e from p.
-				let pred = a.pred;
-				let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+				const pred = a.pred;
+				const exp = get_text_from_syntaxnode(a.prop, this.source_text);
 				this.constrainPredicateByExclusion(pred, exp);
 			}
 		}
 
-		for (let qa of quantifiedAssertions) {
+		for (const qa of quantifiedAssertions) {
 			if (this.isTestOfInclusion(qa)) {
 
-				let pred = qa.pred;
-				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = this.getPredArgs(qa.predArgs);
+				const pred = qa.pred;
+				const exp = get_text_from_syntaxnode(qa.prop, this.source_text);
+				const pred_args = this.getPredArgs(qa.predArgs);
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
@@ -277,11 +288,11 @@ export class ConceptualMutator {
 			}
 		}
 
-		for (let ca of consistencyAssertions) {
+		for (const ca of consistencyAssertions) {
 			if (this.isTestOfInclusion(ca)) {
 
-				let pred = ca.pred;
-				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
+				const pred = ca.pred;
+				const exp = get_text_from_syntaxnode(ca.prop, this.source_text);
 
 				this.constrainPredicateByExclusion(pred, exp);
 			}
@@ -300,28 +311,28 @@ export class ConceptualMutator {
 		// First mutate to vaccuity.
 		this.mutateToVaccuity();
 
-		let assertions = this.full_source_util.getAssertions();
-		let quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
-		let examples = this.full_source_util.getExamples();
-		let consistencyAssertions = this.full_source_util.getConsistencyAssertions();
+		const assertions = this.full_source_util.getAssertions();
+		const quantifiedAssertions = this.full_source_util.getQuantifiedAssertions();
+		const examples = this.full_source_util.getExamples();
+		const consistencyAssertions = this.full_source_util.getConsistencyAssertions();
 
 		// TODO: Here we have to also think about the test expects. Deal with that later.
 
-		for (let e of examples) {
+		for (const e of examples) {
 			if (this.isTestOfExclusion(e)) {
 				// Ensure the mutant does not accept the example.
 				this.mutateAwayExample(e);
 			}
 		}
 
-		for (let a of assertions) {
+		for (const a of assertions) {
 			if (this.isTestOfExclusion(a)) {
 
 				// THIS HAS TO CHANGE
 
 				// Build the predicate under test from the assertion.
-				let pred = a.pred;
-				let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+				const pred = a.pred;
+				const exp = get_text_from_syntaxnode(a.prop, this.source_text);
 
 				// If it is a test of exclusion, then we know it is
 				// exp is necessary for <pred>
@@ -330,12 +341,12 @@ export class ConceptualMutator {
 			}
 		}
 
-		for (let qa of quantifiedAssertions) {
+		for (const qa of quantifiedAssertions) {
 			if (this.isTestOfExclusion(qa)) {
 
-				let pred = qa.pred;
-				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = this.getPredArgs(qa.predArgs);
+				const pred = qa.pred;
+				const exp = get_text_from_syntaxnode(qa.prop, this.source_text);
+				const pred_args = this.getPredArgs(qa.predArgs);
 
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
@@ -347,11 +358,11 @@ export class ConceptualMutator {
 			}
 		}
 
-		for (let ca of consistencyAssertions) {
+		for (const ca of consistencyAssertions) {
 			if (this.isTestOfExclusion(ca)) {
 				// So we want to MUTATE TO the consistency assertion.
-				let pred = ca.pred;
-				let exp = get_text_from_syntaxnode(ca.prop, this.source_text);
+				const pred = ca.pred;
+				const exp = get_text_from_syntaxnode(ca.prop, this.source_text);
 				this.constrainPredicateByExclusion(pred, exp); // Exclude exp from pred.
 			}
 		}
@@ -366,8 +377,8 @@ export class ConceptualMutator {
 	 */
 	public mutateToFailingTests(): number {
 
-		let w_os = this.forge_output.split("\n");
-		for (let w_o of w_os) {
+		const w_os = this.forge_output.split("\n");
+		for (const w_o of w_os) {
 
 			const testData = getFailingTestData(w_o);
 
@@ -379,7 +390,7 @@ export class ConceptualMutator {
 			const testType = testData.type;
 
 			if (testType == "example") {
-				let e = this.getExampleByName(testName);
+				const e = this.getExampleByName(testName);
 				if (e == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
 					continue;
@@ -387,8 +398,8 @@ export class ConceptualMutator {
 				this.mutateToExample(e);
 			}
 			else if (testType == "quantified_assertion") {
-				let start_row = testData.startRow;
-				let start_col = testData.startCol;
+				const start_row = testData.startRow;
+				const start_col = testData.startCol;
 
 				const a = this.getQuantifiedAssertion(start_row, start_col);
 				if (a == null) {
@@ -399,8 +410,8 @@ export class ConceptualMutator {
 			}
 			else if (testType == "assertion") {
 
-				let start_row = testData.startRow;
-				let start_col = testData.startCol;
+				const start_row = testData.startRow;
+				const start_col = testData.startCol;
 				const a = this.getAssertion(start_row, start_col);
 				if (a == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
@@ -409,8 +420,8 @@ export class ConceptualMutator {
 				this.mutateToAssertion(a);
 			}
 			else if (testType == "consistency_assertion") {
-				let start_row = testData.startRow;
-				let start_col = testData.startCol;
+				const start_row = testData.startRow;
+				const start_col = testData.startCol;
 				const a = this.getConsistencyAssertion(start_row, start_col);
 				if (a == null) {
 					this.skipped_tests.push(new SkippedTest(testName, `Could not find in source.`));
@@ -436,20 +447,20 @@ export class ConceptualMutator {
 
 	public getMutantAsString(): string {
 
-		let predStrings = this.mutant.map((p) => {
-			let declParams = p.declParams();
-			let body = p.body;
+		const predStrings = this.mutant.map((p) => {
+			const declParams = p.declParams();
+			const body = p.body;
 			return `pred ${p.name}${declParams}\n {\n ${body} \n}`;
 		});
 
-		let PREFIX = "#lang forge\n option run_sterling off\n";
-		let sigDecls = this.hydrateSigs();
-		let sigs = sigDecls.join("\n\n");
+		const PREFIX = "#lang forge\n option run_sterling off\n";
+		const sigDecls = this.hydrateSigs();
+		const sigs = sigDecls.join("\n\n");
 
 
 		// TODO: ALSO NEED TO HYDRATE FUNCTIONS.
 
-		let predicates = predStrings.join("\n\n");
+		const predicates = predStrings.join("\n\n");
 		return `${PREFIX}\n${sigs}\n\n${predicates}`;
 
 	}
@@ -461,12 +472,12 @@ export class ConceptualMutator {
 	 */
 	private hydrateSigs(): string[] {
 
-		let sigs: Sig[] = this.full_source_util.getSigs();
-		let sigStrings = sigs.map((s) => {
-			let name = s.name;
+		const sigs: Sig[] = this.full_source_util.getSigs();
+		const sigStrings = sigs.map((s) => {
+			const name = s.name;
 
 			// I think this is the '' low fidelity '' solution for now.
-			let body = get_text_from_syntaxnode(s, this.source_text);
+			const body = get_text_from_syntaxnode(s, this.source_text);
 
 			return body;
 		});
@@ -480,8 +491,8 @@ export class ConceptualMutator {
 
 	private getExampleByName(name: string): Example {
 
-		let examples = this.full_source_util.getExamples();
-		for (let e of examples) {
+		const examples = this.full_source_util.getExamples();
+		for (const e of examples) {
 			if (e.name == name) {
 				return e;
 			}
@@ -490,8 +501,8 @@ export class ConceptualMutator {
 	}
 
 	private getAssertion(start_row: number, start_col: number): AssertionTest {
-		let assertions = this.full_source_util.getAssertions();
-		for (let a of assertions) {
+		const assertions = this.full_source_util.getAssertions();
+		for (const a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
 			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
@@ -501,8 +512,8 @@ export class ConceptualMutator {
 
 
 	private getQuantifiedAssertion(start_row: number, start_col: number): QuantifiedAssertionTest {
-		let assertions: QuantifiedAssertionTest[] = this.full_source_util.getQuantifiedAssertions();
-		for (let a of assertions) {
+		const assertions: QuantifiedAssertionTest[] = this.full_source_util.getQuantifiedAssertions();
+		for (const a of assertions) {
 
 			// I think this is enough to uniquely identify the assertion.
 			if (a.startRow == start_row && a.startColumn == start_col)
@@ -514,8 +525,8 @@ export class ConceptualMutator {
 	}
 
 	private getConsistencyAssertion(start_row: number, start_col: number): ConsistencyAssertionTest {
-		let assertions = this.full_source_util.getConsistencyAssertions();
-		for (let a of assertions) {
+		const assertions = this.full_source_util.getConsistencyAssertions();
+		for (const a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
 			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
@@ -524,8 +535,8 @@ export class ConceptualMutator {
 	}
 
 	private getSatisfactionAssertion(start_row: number, start_col: number): SatisfiabilityAssertionTest {
-		let assertions = this.full_source_util.getSatisfactionAssertions();
-		for (let a of assertions) {
+		const assertions = this.full_source_util.getSatisfactionAssertions();
+		for (const a of assertions) {
 			// I think this is enough to uniquely identify the assertion.
 			if (a.startRow == start_row && a.startColumn == start_col)
 				return a;
@@ -542,8 +553,8 @@ export class ConceptualMutator {
 
 		pname = pname.trim();
 
-		let wheat_predicates: Predicate[] = this.wheat_util.getPreds();
-		for (let wp of wheat_predicates) {
+		const wheat_predicates: Predicate[] = this.wheat_util.getPreds();
+		for (const wp of wheat_predicates) {
 			if (wp.name == pname) {
 				return true;
 			}
@@ -558,8 +569,8 @@ export class ConceptualMutator {
 	}
 
 	///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
-	protected easePredicate(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
-		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+	protected easePredicate(i: string, e: string, quantified_prefix = "", pred_args = ""): void {
+		const p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
@@ -567,16 +578,16 @@ export class ConceptualMutator {
 		this.num_mutations++;
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
-		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} or (${e}))`;
+		const new_i_body = `${quantified_prefix} (${newName_i}${pred_args} or (${e}))`;
 
-		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
+		const p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 
 	}
 
 
-	protected constrainPredicateByInclusion(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
-		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+	protected constrainPredicateByInclusion(i: string, e: string, quantified_prefix = "", pred_args = ""): void {
+		const p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 				this.num_mutations++;
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something went wrong, please contact the instructor.`);
@@ -585,14 +596,14 @@ export class ConceptualMutator {
 		const newName_i = this.getNewName(i);
 
 		p_i.name = newName_i;
-		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (${e}))`;
-		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
+		const new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (${e}))`;
+		const p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
 
-	protected constrainPredicateByExclusion(i: string, e: string, quantified_prefix: string = "", pred_args = ""): void {
+	protected constrainPredicateByExclusion(i: string, e: string, quantified_prefix = "", pred_args = ""): void {
 
-		let p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
+		const p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
 
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something is very wrong, please contact the instructor.`);
@@ -601,8 +612,8 @@ export class ConceptualMutator {
 		const newName_i = this.getNewName(i);
 		p_i.name = newName_i;
 
-		let new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (not  (${e})))`;
-		let p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
+		const new_i_body = `${quantified_prefix} (${newName_i}${pred_args} and (not  (${e})))`;
+		const p_i_prime = new HydratedPredicate(i, p_i.params, new_i_body);
 		this.mutant.push(p_i_prime);
 	}
 
@@ -611,11 +622,11 @@ export class ConceptualMutator {
 	/////////////////// MUTATION OPERATIONS TO CONSISTENCY ////////////////////////////////
 
 	protected mutateToAssertion(a: AssertionTest) {
-		let pred = a.pred;
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let rel = a.check;
+		const pred = a.pred;
+		const exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		const rel = a.check;
 
-		let test_name = `${rel}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+		const test_name = this.getTestName(a);
 		if (!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(test_name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
@@ -632,18 +643,18 @@ export class ConceptualMutator {
 	}
 
 	protected mutateToQuantifiedAssertion(a: QuantifiedAssertionTest) {
-		let pred = a.pred;
-		let rel = a.check;
-		let disj = (a.disj) ? "disj" : "";
+		const pred = a.pred;
+		const rel = a.check;
+		const disj = (a.disj) ? "disj" : "";
 
-		let test_name = `${rel}_quantified_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+		const test_name = this.getTestName(a);
 
 		if (!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(test_name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
 		}
 
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		const exp = get_text_from_syntaxnode(a.prop, this.source_text);
 		const pred_args = this.getPredArgs(a.predArgs); 
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
@@ -666,8 +677,8 @@ export class ConceptualMutator {
 
 		// Determine if positive or negative example.
 		// Find if testExpr
-		let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
-		let negativeExample = exampletestExpr.match(negationRegex);
+		const exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
+		const negativeExample = exampletestExpr.match(negationRegex);
 
 		// Pred under test
 		let p_i = exampletestExpr;
@@ -685,7 +696,7 @@ export class ConceptualMutator {
 
 
 		// Example to characteristic predicate.
-		let hp = this.exampleToPredicate(e);
+		const hp = this.exampleToPredicate(e);
 
 		this.mutant.push(hp);
 
@@ -701,12 +712,12 @@ export class ConceptualMutator {
 
 	protected mutateToConsistencyAssertion(a: ConsistencyAssertionTest) {
 
-		let pred = a.pred;
-		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		let isConsistent: boolean = a.consistent;
-		let consistency_prefix = isConsistent ? "consistent" : "inconsistent"
+		const pred = a.pred;
+		const exp = get_text_from_syntaxnode(a.prop, this.source_text);
+		const isConsistent: boolean = a.consistent;
+		const consistency_prefix = isConsistent ? "consistent" : "inconsistent";
 
-		let test_name = `${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+		const test_name = this.getTestName(a);
 		if (!this.isInstructorAuthored(pred)) {
 			this.skipped_tests.push(new SkippedTest(a.name, `Assertion does not directly test a predicate from the assignment statement.`));
 			return;
@@ -753,35 +764,28 @@ export class ConceptualMutator {
 
 		// BUT ONLY IF THIS IS A POSITIVE EXAMPLE.
 
-		let p = this.exampleToPredicate(e);
+		const p = this.exampleToPredicate(e);
 		this.mutant.push(p);
 
 		// Now, we want to exclude this assertion from rhs.
 		this.constrainPredicateByExclusion(e.name, p.name);
-
-
-
-		// AND IF IT IS A NEGATIVE EXAMPLE?
-		// WE COULD EASE THE PREDICATE TO INCLUDE THE NEGATION OF THE EXAMPLE.
+		// AND IF IT IS A NEGATIVE EXAMPLE? WE COULD EASE THE PREDICATE TO INCLUDE THE NEGATION OF THE EXAMPLE.
 
 	}
 
 
 
 	public get_skipped_tests_as_string(): string {
-		let skipped_test_strings = this.skipped_tests.map((s) => {
+		const skipped_test_strings = this.skipped_tests.map((s) => {
 			return `${s.test} : ${s.reason}`;
 		});
 		return skipped_test_strings.join("\n");
 	}
-
-
-
-
 	///////////////////////////////////////////////////////////////////////////////////
 
 
-	// TODO: Make this better. This is far too verbose, and is from the original Toadus.
+	// TODO: This needs to be really rewritten.
+	// This is far too verbose, and is from the original Toadus.
 	// As a result, this may not work with all example types.
 	protected exampleToPredicate(e: Example): HydratedPredicate {
 
@@ -806,23 +810,23 @@ export class ConceptualMutator {
 		function extractAssignments() {
 
 			function assignmentContinued(x: string) {
-				let t = x.replace(/\(/g, "").replace(/\)/g, "")
+				const t = x.replace(/\(/g, "").replace(/\)/g, "")
 					.replace(/\{/g, "").replace(/\}/g, "").trim();
 				return t.startsWith("`") || t.startsWith("->") || t.startsWith(",") || t.startsWith("+");
 			}
 
 
 			const lines = exampleBody.split('\n');
-			let expressions: string[] = [];
-			let assignments: Object[] = [];
+			const expressions: string[] = [];
+			const assignments: Object[] = [];
 
 			let currentAssignment = { variable: '', value: '' };
 			let isAssignmentContinued = false;
 
-			for (var l of lines) {
-				var line = l.trim();
+			for (const l of lines) {
+				const line = l.trim();
 				if (line == '') {
-					continue
+					continue;
 				}
 
 				isAssignmentContinued = assignmentContinued(line);
@@ -831,7 +835,7 @@ export class ConceptualMutator {
 				} else {
 					assignments.push({ ...currentAssignment });
 					if (/^\s*\w+\s*=/.test(line)) {
-						let parts = line.split('=');
+						const parts = line.split('=');
 						const lhs = parts[0].trim();
 						const rhs = parts[1].trim();
 						currentAssignment = { variable: lhs, value: rhs };
@@ -840,7 +844,7 @@ export class ConceptualMutator {
 						expressions.push(line);
 					}
 				}
-			};
+			}
 
 
 			if (isAssignmentContinued) {
@@ -852,11 +856,11 @@ export class ConceptualMutator {
 
 
 
-		let sigNames = this.full_source_util.getSigs().map((s: Sig) => s.name);
+		const sigNames = this.full_source_util.getSigs().map((s: Sig) => s.name);
 
 		function sigToExpr(assignment) {
 			const atom_name = assignment.variable;
-			var atom_rhs = assignment.value.replace(/`/g, '');
+			const atom_rhs = assignment.value.replace(/`/g, '');
 			const atom_rhs_list = atom_rhs
 				.replace(/\s+|\n|\r/g, '') // Replace all whitespace, newline, or return with empty string
 				.replace(/\+/g, ' ')
@@ -868,8 +872,8 @@ export class ConceptualMutator {
 			// Remove any duplicates
 			const atom_rhs_comma_sep = Array.from(atom_rhs_set).join(', ');
 
-			var quantifier = "";
-			var constraint = "";
+			let quantifier = "";
+			let constraint = "";
 			if (atom_rhs_comma_sep != '') {
 				quantifier = sigNames.includes(atom_name) ? `some disj ${atom_rhs_comma_sep} : ${atom_name} | {\n` : '';
 				constraint = `${atom_name} = ${atom_rhs}`;
@@ -892,8 +896,6 @@ export class ConceptualMutator {
 		const sigConstraints = sigExpressions.map(a => a.constraint).join("\n");
 		const sigAssignmentsPostfix = '}'.repeat(sigQuantifiers.length) + "\n";
 
-
-
 		const pred_body = `
 		${sigQuantifiersAsString}
 		${sigConstraints}
@@ -906,24 +908,24 @@ export class ConceptualMutator {
 
 
 
-	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
+	private isTestOfInclusion(t: AssertionTest | Example | QuantifiedAssertionTest | ConsistencyAssertionTest): boolean {
 
 		// If NOT instructor authored, then it is NOT a test of inclusion.
 		if (isAssertionTest(t)) {
-			let a = t as AssertionTest;
-			let p = a.pred;
-			let rel = a.check;
+			const a = t as AssertionTest;
+			const p = a.pred;
+			const rel = a.check;
 			return this.isInstructorAuthored(p) && (rel === "sufficient");
 		} else if (isQuantifiedAssertionTest(t)) {
-			let qa = t as QuantifiedAssertionTest;
-			let p = qa.pred;
-			let rel = qa.check;
+			const qa = t as QuantifiedAssertionTest;
+			const p = qa.pred;
+			const rel = qa.check;
 			return this.isInstructorAuthored(p) && (rel === "sufficient");
 		} else if (isExample(t)) {
 
-			let e = t as Example;
-			let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
-			let negativeExample = exampletestExpr.match(negationRegex);
+			const e = t as Example;
+			const exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
+			const negativeExample = exampletestExpr.match(negationRegex);
 
 			// Pred under test
 			let p_i = exampletestExpr;
@@ -941,36 +943,36 @@ export class ConceptualMutator {
 		}
 		else if (isConsistencyAssertionTest(t)) {
 
-			let ca = t as ConsistencyAssertionTest;
-			let p = ca.pred;
-			let isConsistent = ca.consistent;
+			const ca = t as ConsistencyAssertionTest;
+			const p = ca.pred;
+			const isConsistent = ca.consistent;
 			return this.isInstructorAuthored(p) && isConsistent;
 		}
 
 		return false;
 	}
 
-	private isTestOfExclusion(t: AssertionTest | Example | QuantifiedAssertionTest): boolean {
+	private isTestOfExclusion(t: AssertionTest | Example | QuantifiedAssertionTest | ConsistencyAssertionTest): boolean {
 
 		if (isAssertionTest(t)) {
-			let a = t as AssertionTest;
-			let p = a.pred;
-			let rel = a.check;
+			const a = t as AssertionTest;
+			const p = a.pred;
+			const rel = a.check;
 
 			return this.isInstructorAuthored(p) && (rel === "necessary");
 
 		}
 		else if (isQuantifiedAssertionTest(t)) {
-			let qa = t as QuantifiedAssertionTest;
-			let p = qa.pred;
-			let rel = qa.check;
+			const qa = t as QuantifiedAssertionTest;
+			const p = qa.pred;
+			const rel = qa.check;
 			return this.isInstructorAuthored(p) && (rel === "necessary");
 		} else if (isExample(t)) {
 
-			let e = t as Example;
+			const e = t as Example;
 
-			let exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
-			let negativeExample = exampletestExpr.match(negationRegex);
+			const exampletestExpr = getExprFromBracesIfAny(get_text_from_syntaxnode(e.testExpr, this.source_text));
+			const negativeExample = exampletestExpr.match(negationRegex);
 
 			// Pred under test
 			let p_i = exampletestExpr;
@@ -985,9 +987,9 @@ export class ConceptualMutator {
 		}
 		else if (isConsistencyAssertionTest(t)) {
 
-			let ca = t as ConsistencyAssertionTest;
-			let p = ca.pred;
-			let isConsistent = ca.consistent;
+			const ca = t as ConsistencyAssertionTest;
+			const p = ca.pred;
+			const isConsistent = ca.consistent;
 			return this.isInstructorAuthored(p) && !isConsistent;
 		}
 
@@ -1000,7 +1002,49 @@ export class ConceptualMutator {
 			return "";
 		}
 
-		return '[' + get_text_from_syntaxnode(predArgs, this.source_text) + ']'
+		return '[' + get_text_from_syntaxnode(predArgs, this.source_text) + ']';
 	}
+
+
+	private getTestName(t: AssertionTest | Example | QuantifiedAssertionTest | ConsistencyAssertionTest): string {
+
+		if (isAssertionTest(t)) {
+			const a = t as AssertionTest;
+			const pred = a.pred;
+			const rel = a.check;
+
+			
+			return `${rel}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+		}
+		else if (isQuantifiedAssertionTest(t)) {
+			const qa = t as QuantifiedAssertionTest;
+			return `${qa.check}_quantified_assertion_for_${qa.pred}[${qa.startRow}:${qa.startColumn}]`;
+		} else if (isExample(t)) {
+			const e = t as Example;
+			return e.name;
+		}
+		else if (isConsistencyAssertionTest(t)) {
+			const a = t as ConsistencyAssertionTest;
+			const pred = a.pred;
+			const exp = get_text_from_syntaxnode(a.prop, this.source_text);
+			const isConsistent: boolean = a.consistent;
+			const consistency_prefix = isConsistent ? "consistent" : "inconsistent";
+			return`${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+
+		}
+		else if (isSatisfiabilityAssertionTest(t)) {
+			const a = t as SatisfiabilityAssertionTest;
+			const check = a.check;
+			return `${check}_assertion[${a.startRow}:${a.startColumn}]`;
+
+		}
+		else if (isTestExpect(t)) {
+			const a = t as Test;
+			return t.name;
+		}
+
+		return "unknown_test";
+	}
+
 }
 
