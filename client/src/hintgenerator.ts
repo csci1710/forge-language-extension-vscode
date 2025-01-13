@@ -267,8 +267,8 @@ export class HintGenerator {
 		// is consistent with all failing tests.
 		mutator.mutateToFailingTests();
 
-		let inconsistent_tests = mutator.inconsistent_tests;
-		let n = inconsistent_tests.length;
+		const inconsistent_tests = mutator.inconsistent_tests;
+		const n = inconsistent_tests.length;
 		// These are the tests used to generate feedback.
 		const assessed_tests = inconsistent_tests.join("\n");
 

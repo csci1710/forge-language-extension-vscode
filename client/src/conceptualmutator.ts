@@ -142,16 +142,13 @@ function get_text_block(fromRow: number, toRow: number, fromColumn: number, toCo
 
 
 function get_text_from_syntaxnode(b: SyntaxNode, text: string): string {
-
 	if (!b) {
 		return "";
 	}
-
 	const fromRow = b.startRow;
 	const toRow = b.endRow;
 	const fromColumn = b.startColumn;
 	const toColumn = b.endColumn;
-
 	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
 
@@ -1008,17 +1005,36 @@ export class ConceptualMutator {
 
 	private getTestName(t: AssertionTest | Example | QuantifiedAssertionTest | ConsistencyAssertionTest): string {
 
+		// Here, we should get the LINE offset.
+		
+		// That is, the line number of the test in the test file (this.studenttests)
+		// rather than the line number of the test in the full source file (this.sourcetext)
+
+		
+		const fullSourceLines = this.source_text.split('\n').length;
+		const studentTestLines = this.student_tests.split('\n').length;
+		const rowNumberOffset = Math.max(fullSourceLines - studentTestLines, 0);
+
+
+		function correctRowNumber(row: number) : number{
+			let new_number = row - rowNumberOffset;
+			if (new_number < 0) {
+				new_number = 0;
+			}
+			return new_number;
+		}
+
 		if (isAssertionTest(t)) {
 			const a = t as AssertionTest;
-			const pred = a.pred;
 			const rel = a.check;
-
+			const row = correctRowNumber(a.startRow);
 			
-			return `${rel}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+			return `${rel}_assertion_for_${a.pred}[${row}:${a.startColumn}]`;
 		}
 		else if (isQuantifiedAssertionTest(t)) {
 			const qa = t as QuantifiedAssertionTest;
-			return `${qa.check}_quantified_assertion_for_${qa.pred}[${qa.startRow}:${qa.startColumn}]`;
+			const row = correctRowNumber(qa.startRow);
+			return `${qa.check}_quantified_assertion_for_${qa.pred}[${row}:${qa.startColumn}]`;
 		} else if (isExample(t)) {
 			const e = t as Example;
 			return e.name;
@@ -1029,18 +1045,20 @@ export class ConceptualMutator {
 			const exp = get_text_from_syntaxnode(a.prop, this.source_text);
 			const isConsistent: boolean = a.consistent;
 			const consistency_prefix = isConsistent ? "consistent" : "inconsistent";
-			return`${consistency_prefix}_assertion_for_${pred}[${a.startRow}:${a.startColumn}]`;
+			const row = correctRowNumber(a.startRow);
+			return`${consistency_prefix}_assertion_for_${pred}[${row}:${a.startColumn}]`;
 
 		}
 		else if (isSatisfiabilityAssertionTest(t)) {
 			const a = t as SatisfiabilityAssertionTest;
 			const check = a.check;
-			return `${check}_assertion[${a.startRow}:${a.startColumn}]`;
+			const row = correctRowNumber(a.startRow);
+			return `${check}_assertion[${row}:${a.startColumn}]`;
 
 		}
 		else if (isTestExpect(t)) {
 			const a = t as Test;
-			return t.name;
+			return a.name;
 		}
 
 		return "unknown_test";
