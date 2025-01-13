@@ -53,6 +53,7 @@ function getExprFromBracesIfAny(s: string): string {
 }
 
 
+// TODO: Check how params get constructed here!
 class HydratedPredicate {
 	constructor(
 		public name: string,
@@ -91,30 +92,41 @@ class HydratedPredicate {
 	}
 }
 
-
+/*
+    Row numbers are 1-indexed.
+    Column numbers are 0-indexed.
+*/
 function get_text_block(fromRow: number, toRow: number, fromColumn: number, toColumn: number, text: string): string {
-	let lines = text.split("\n");
-	let block = "";
-	const sameRow = fromRow == toRow;
-	for (let i = fromRow; i <= toRow; i++) {
-		let line = lines[i - 1];
-		if (i == fromRow) {
-			if (sameRow) {
-				block += line.substring(fromColumn - 1, toColumn + 1);
-			}
-			else {
-				block += line.substring(fromColumn - 1);
-			}
-		} else if (i == toRow) {
-			block += line.substring(0, toColumn + 1); // DO WE NEED TO ADD 1?
-		} else {
-			block += line;
-		}
-		if (i < toRow) {
+    let lines = text.split("\n");
+    let block = "";
+    const sameRow = fromRow == toRow;
+
+    for (let i = fromRow; i <= toRow; i++) {
+        let line = lines[i - 1]; // Row numbers are 1-indexed, so adjust by subtracting 1
+
+        if (i == fromRow) {
+            if (sameRow) {
+                // If the block is within the same row, take the substring from fromColumn to toColumn
+                block += line.substring(fromColumn, toColumn);
+            } else {
+                // If the block spans multiple rows, take the substring from fromColumn to the end of the line
+                block += line.substring(fromColumn);
+            }
+        } else if (i == toRow) {
+            // For the last row, take the substring from the start of the line to toColumn
+            block += line.substring(0, toColumn);
+        } else {
+            // For rows in between, take the whole line
+            block += line;
+        }
+
+        // Add a newline character if it's not the last row
+        if (i < toRow) {
             block += "\n";
         }
-	}
-	return block;
+    }
+
+    return block;
 }
 
 
@@ -178,6 +190,10 @@ export class ConceptualMutator {
 		this.inconsistent_tests = [];
 		this.skipped_tests = [];
 
+
+
+
+
 		// TODO: Maybe this should keep track of the passing and failing tests rather than the calling code.
 
 		function predicateToHydratedPredicate(p: Predicate): HydratedPredicate {
@@ -187,6 +203,14 @@ export class ConceptualMutator {
 
 			let body = get_text_from_syntaxnode(body_block, source_text);
 			let params_text = get_text_from_syntaxnode(p.params, source_text);
+
+			// If the first character of params is '[' and the last character is ']',
+			// we should remove the brackets.
+			// This is hacky and I chalk it up to BAD parsing.
+			if (params_text.startsWith("[") && params_text.endsWith("]")) {
+				params_text = params_text.substring(1, params_text.length - 1);
+			}
+
 
 			let params = {};
 			let param_strings = params_text.split(",");
@@ -205,6 +229,8 @@ export class ConceptualMutator {
 		this.mutant = this.full_source_util.getPreds().map(predicateToHydratedPredicate);
 	}
 
+
+	
 
 	/**
 	 * Mutate to remove belief.
@@ -242,7 +268,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
+				let pred_args = this.getPredArgs(qa.predArgs);
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
 				const disj = (qa.disj) ? "disj" : "";
@@ -309,7 +335,7 @@ export class ConceptualMutator {
 
 				let pred = qa.pred;
 				let exp = get_text_from_syntaxnode(qa.prop, this.source_text);
-				let pred_args = qa.pred_args ? get_text_from_syntaxnode(qa.pred_args, this.source_text) : "";
+				let pred_args = this.getPredArgs(qa.predArgs);
 
 				const quantifier = "all";
 				const quantDecls = get_text_from_syntaxnode(qa.quantDecls, this.source_text);
@@ -618,7 +644,7 @@ export class ConceptualMutator {
 		}
 
 		let exp = get_text_from_syntaxnode(a.prop, this.source_text);
-		const pred_args = a.pred_args ? get_text_from_syntaxnode(a.pred_args, this.source_text) : "";
+		const pred_args = this.getPredArgs(a.predArgs); 
 		const quantifier = "all";
 		const quantDecls = get_text_from_syntaxnode(a.quantDecls, this.source_text);
 		const quantifiedPrefix = `${quantifier} ${disj} ${quantDecls} | `;
@@ -966,6 +992,15 @@ export class ConceptualMutator {
 		}
 
 		return false;
+	}
+
+	
+	private getPredArgs(predArgs : SyntaxNode | undefined) : string {
+		if (!predArgs) {
+			return "";
+		}
+
+		return '[' + get_text_from_syntaxnode(predArgs, this.source_text) + ']'
 	}
 }
 
