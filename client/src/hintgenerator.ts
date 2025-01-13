@@ -101,8 +101,8 @@ export class HintGenerator {
 
 		// First, we deal with test errors.
 		// We look for patterns in the output to check if any tests actually failed.
-
-		const failingTestNames = getFailingTestsData(w_o).map((testData) => testData.name);
+		const failingTests = getFailingTestsData(w_o);
+		const failingTestNames = failingTests.map((testData) => testData.name);
 
 		// If not, just return a message that we found a runtime or syntax error in the tests.
 		if (failingTestNames.length == 0) {
@@ -490,7 +490,8 @@ export class HintGenerator {
 		if (ag_output == "") {
 			return [];
 		}
-		const tNames = getFailingTestsData(ag_output).map((testData) => testData.name);
+		const failingTests = getFailingTestsData(ag_output);
+		const tNames = failingTests.map((testData) => testData.name);
 		const hint_map = await this.getHintMap(testFileName);
 
 		const issues = tNames.filter((tName) => !(tName in hint_map));

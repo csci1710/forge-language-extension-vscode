@@ -1,6 +1,6 @@
 import { get } from 'http';
 import { example_regex, assertion_regex, quantified_assertion_regex, } from './forge-utilities';
-import { test_regex, getFailingTestData } from './forge-utilities';
+import { getFailingTestData } from './forge-utilities';
 
 
 import {
@@ -1011,6 +1011,8 @@ export class ConceptualMutator {
 		const fullSourceLines = this.source_text.split('\n').length;
 		const studentTestLines = this.student_tests.split('\n').length;
 		const rowNumberOffset = Math.max(fullSourceLines - studentTestLines, 0);
+
+		/// This isn't quite right. There are ALSO lines in the student tests that are not in the source text.
 
 
 		function correctRowNumber(row: number) : number{
