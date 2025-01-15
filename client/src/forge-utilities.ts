@@ -244,6 +244,9 @@ function compareVersions(version1: string, version2: string): number {
 
 export async function ensureForgeVersion(minVersion: string, error_reporter: (s: string) => void) {
 
+
+	return ;
+
 	const filePath = tempFile();
 	const emptyForgeFile = `
 	#lang forge
