@@ -232,15 +232,6 @@ export async function activate(context: ExtensionContext) {
 	}
 
 
-
-
-
-
-
-
-
-
-
 		try {
 			let p = racket.runFile(filepath, stdoutListener, stderrListener, exitListener);
 			await p;

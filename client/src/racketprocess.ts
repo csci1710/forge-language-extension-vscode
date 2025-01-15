@@ -64,6 +64,11 @@ export class RacketProcess {
             });
 
             this.childProcess.on('exit', (code) => {
+
+				if (exitListener) {
+					exitListener(code);
+				}
+
                 if (code !== 0) {
                     vscode.window.showErrorMessage(`Racket process exited with code ${code}`);
                     reject(new Error(`Racket process exited with code ${code}`));
