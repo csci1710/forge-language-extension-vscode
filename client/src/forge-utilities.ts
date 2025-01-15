@@ -247,6 +247,7 @@ export async function ensureForgeVersion(minVersion: string, error_reporter: (s:
 	const filePath = tempFile();
 	const emptyForgeFile = `
 	#lang forge
+	option run_sterling off
 	test expect {
 
 		{} is sat
