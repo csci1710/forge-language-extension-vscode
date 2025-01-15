@@ -14,7 +14,7 @@ import {
 } from 'vscode-languageclient/node';
 
 import { Logger, LogLevel, Event } from "./logger";
-import {RacketProcess} from './racketprocess';
+import { RacketProcess } from './racketprocess';
 
 var os = require("os");
 import { v4 as uuidv4 } from 'uuid';
@@ -30,9 +30,8 @@ const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge 
 
 async function getUserId(context) {
 	const UID_KEY = "FORGE_UID";
-	
-	try
-	{
+
+	try {
 		var uid = await context.secrets.get(UID_KEY).toString();
 	}
 	catch {
@@ -83,14 +82,14 @@ export async function activate(context: ExtensionContext) {
 
 	let currentSettings = vscode.workspace.getConfiguration('forge');
 	let minSupportedVersion = String(currentSettings.get<string>('minVersion'));
-	await ensureForgeVersion(minSupportedVersion, (s : string) => vscode.window.showErrorMessage(s));
+	await ensureForgeVersion(minSupportedVersion, (s: string) => vscode.window.showErrorMessage(s));
 
 
 	// inspired by: https://github.com/GrandChris/TerminalRelativePath/blob/main/src/extension.ts
 	vscode.window.registerTerminalLinkProvider({
 		provideTerminalLinks: (context, token) => {
 
-			const matcher = racket.matchForgeError(context.line);
+			const matcher = RacketProcess.matchForgeError(context.line);
 			if (!matcher) {
 				return [];
 			} else {
@@ -121,12 +120,13 @@ export async function activate(context: ExtensionContext) {
 			}
 		},
 		handleTerminalLink: (link: any) => {
+			// const racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 			// todo: need to double check if line could be undefined or null
 			if (link.line !== undefined) {
-				racket.showFileWithOpts(link.filePath, link.line, link.column);
+				RacketProcess.showFileWithOpts(link.filePath, link.line, link.column);
 			}
 			else {
-				racket.showFileWithOpts(link.filePath, null, null);
+				RacketProcess.showFileWithOpts(link.filePath, null, null);
 			}
 		}
 	});
@@ -139,18 +139,20 @@ export async function activate(context: ExtensionContext) {
 	var logger = new Logger(userid);
 
 
-	let forgeDocs = vscode.commands.registerCommand('forge.openDocumentation', async() => {
-        
+	let forgeDocs = vscode.commands.registerCommand('forge.openDocumentation', async () => {
+
 		const DOCS_URL = 'https://csci1710.github.io/forge-documentation/home.html';
 		vscode.env.openExternal(vscode.Uri.parse(DOCS_URL))
-		.then((success) => {
-			if (!success) {
-				vscode.window.showErrorMessage(`Could not open Forge documentation from VS Code. It is available at ${DOCS_URL}`);
-			}
-		});
-    });
+			.then((success) => {
+				if (!success) {
+					vscode.window.showErrorMessage(`Could not open Forge documentation from VS Code. It is available at ${DOCS_URL}`);
+				}
+			});
+	});
 
-	const runFile = vscode.commands.registerCommand('forge.runFile', () => {
+	// Can this be an async function?
+	// If so, what are the implications?
+	const runFile = vscode.commands.registerCommand('forge.runFile', async () => {
 
 		let isLoggingEnabled = context.globalState.get<boolean>('forge.isLoggingEnabled', false);
 		const editor = vscode.window.activeTextEditor;
@@ -169,8 +171,7 @@ export async function activate(context: ExtensionContext) {
 		forgeOutput.show();
 
 		// always auto-save before any run
-		if (!editor?.document.save())
-		{
+		if (!editor?.document.save()) {
 			console.error(`Could not save ${filepath}`);
 			vscode.window.showErrorMessage(`Could not save ${filepath}`);
 			return null;
@@ -185,56 +186,67 @@ export async function activate(context: ExtensionContext) {
 
 
 		let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
+		let myStderr = '';
 
 		forgeOutput.appendLine(`Running file "${filepath}" ...`);
 
-///////////
 
-
-	let stdoutListener = (data: string) => {
-		const lst = data.toString().split(/[\n]/);
-		for (let i = 0; i < lst.length; i++) {
-			// this is a bit ugly but trying to avoid confusing students
-			if (lst[i] === 'Sterling running. Hit enter to stop service.') {
-				forgeOutput.appendLine('Sterling running. Hit "Continue" to stop service and continue execution.');
-			} else {
-				forgeOutput.appendLine(lst[i]);
+		let stdoutListener = (data: string) => {
+			const lst = data.toString().split(/[\n]/);
+			for (let i = 0; i < lst.length; i++) {
+				// this is a bit ugly but trying to avoid confusing students
+				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
+					forgeOutput.appendLine('Sterling running. Hit "Continue" to stop service and continue execution.');
+				} else {
+					forgeOutput.appendLine(lst[i]);
+				}
 			}
+		};
+
+
+		let stderrListener = (data: string) => {
+			myStderr += data;
 		}
-	};
 
-	let myStderr = '';
-
-	let stderrListener = (data: string) => {
-		myStderr += data;
-	}
-
-	let exitListener = (code: number) => {
-		if (!racket.racketKilledManually) {
-			if (myStderr != '') {
-				racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
+		let exitListener = (code: number) => {
+			if (!racket.racketKilledManually) {
+				if (myStderr != '') {
+					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
+				} else {
+					RacketProcess.showFileWithOpts(filepath, null, null);
+					racket.userFacingOutput.appendLine('Finished running.');
+				}
 			} else {
-				racket.showFileWithOpts(filepath, null, null);
-				racket.userFacingOutput.appendLine('Finished running.');
+				RacketProcess.showFileWithOpts(filepath, null, null);
+				racket.userFacingOutput.appendLine('Forge process terminated.');
 			}
-		} else {
-			racket.showFileWithOpts(filepath, null, null);
-			racket.userFacingOutput.appendLine('Forge process terminated.');
+
+
+			// Output *may* have user file path in it. Do we want this?
+			var payload = {
+				"output-errors": myStderr,
+				"runId": runId
+			}
+			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
 		}
-	
-	
-		// Output *may* have user file path in it. Do we want this?
-		var payload = {
-			"output-errors" : myStderr,
-			"runId" : runId 
-		}
-		logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
-	}
 
 
 		try {
 			let p = racket.runFile(filepath, stdoutListener, stderrListener, exitListener);
 			await p;
+
+			if (isLoggingEnabled && editor) {
+
+				const documentData = vscode.workspace.textDocuments.map((d) => {
+					const focusedDoc = (d === editor.document);
+					return textDocumentToLog(d, focusedDoc);
+				}).filter((data) => Object.keys(data).length > 0);
+	
+	
+				documentData['runId'] = runId;
+	
+				logger.log_payload(documentData, LogLevel.INFO, Event.FORGE_RUN);
+			}
 		}
 		catch {
 			const log = textDocumentToLog(editor.document, true);
@@ -246,30 +258,16 @@ export async function activate(context: ExtensionContext) {
 			console.error("Could not run Forge process.");
 			return null;
 		}
-
-
-
-
-		if (isLoggingEnabled && editor) {
-				 
-			const documentData = vscode.workspace.textDocuments.map((d) => {
-				const focusedDoc = (d === editor.document);
-				return textDocumentToLog(d, focusedDoc);
-			}).filter((data) => Object.keys(data).length > 0);
-			
-
-			documentData['runId'] = runId;
-
-			logger.log_payload(documentData, LogLevel.INFO, Event.FORGE_RUN);
-		}
 	});
 
 	const stopRun = vscode.commands.registerCommand('forge.stopRun', () => {
+		let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 		racket.kill(true);
 	});
 
 	const continueRun = vscode.commands.registerCommand('forge.continueRun', () => {
-		if (!racket.continueEval()){
+		let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
+		if (!racket.continueEval()) {
 			vscode.window.showErrorMessage('No active Forge process to continue.');
 		}
 	});
@@ -298,8 +296,8 @@ export async function activate(context: ExtensionContext) {
 			return;
 		}
 
-		
-		
+
+
 
 		const editor = vscode.window.activeTextEditor;
 
@@ -310,12 +308,12 @@ export async function activate(context: ExtensionContext) {
 		const document = editor.document;
 		const content = document.getText();
 		const fileName = document.fileName;
-		
+
 		if (fileName.endsWith('.test.frg')) {
 			var h = new HintGenerator(logger, halpOutput);
 			h.generateHints(content, fileName)
 				.then((result) => {
-					
+
 					try {
 						var documentData = textDocumentToLog(document, true);
 						documentData['halp_output'] = result;
@@ -328,7 +326,7 @@ export async function activate(context: ExtensionContext) {
 					finally {
 						halpOutput.appendLine('🐸 Toadus Ponens run ended 🐸');
 					}
-					
+
 				});
 		} else {
 			halpOutput.appendLine('❗🐸❗ I can only analyze test (.test.frg) files.');
@@ -336,7 +334,7 @@ export async function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
-								 forgeOutput, halpOutput,forgeDocs);
+		forgeOutput, halpOutput, forgeDocs);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 
@@ -386,6 +384,7 @@ export function deactivate(): Thenable<void> | undefined {
 	if (!client) {
 		return undefined;
 	}
+	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 	// kill racket process
 	racket.kill(false);
 	return client.stop();

@@ -64,17 +64,17 @@ export class RacketProcess {
             });
 
             this.childProcess.on('exit', (code) => {
-
 				if (exitListener) {
 					exitListener(code);
 				}
+				else if (code !== 0 && code !== 1) {
+					// I *think* this is because Racket exits with code 1 when there is a
+					// test failure.
+						vscode.window.showErrorMessage(`Racket process exited with code ${code}`);
+						reject(new Error(`Racket process exited with code ${code}`));
+				}
 
-                if (code !== 0) {
-                    vscode.window.showErrorMessage(`Racket process exited with code ${code}`);
-                    reject(new Error(`Racket process exited with code ${code}`));
-                } else {
-                    resolve();
-                }
+				resolve();
                 this.cleanup();
             });
         });
@@ -130,7 +130,7 @@ export class RacketProcess {
 
 		const textLines = text.split(/[\n\r]/);
 
-		const errorList = textLines.map((line) => this.matchForgeError(line)).filter((x) => x != null);
+		const errorList = textLines.map((line) => RacketProcess.matchForgeError(line)).filter((x) => x != null);
 		const diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
 
 		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
@@ -138,12 +138,12 @@ export class RacketProcess {
 
 		const linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
 		const colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
-		this.showFileWithOpts(fileURI.fsPath, linenum, colnum);
+		RacketProcess.showFileWithOpts(fileURI.fsPath, linenum, colnum);
 	}
 
 
 	// TODO: Do these have to change?
-	matchForgeError(line: string): Object | null {
+	static matchForgeError(line: string): Object | null {
 
 		/* There are multiple types of errors that can be thrown by Forge.*/
 		const testFailurePattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+) \(span (\d+)\)\]/;
@@ -222,7 +222,7 @@ export class RacketProcess {
 	}
 
 	// This does not support multiple lines
-	showFileWithOpts(filePath: string, line: number | null, column: number | null) {
+	static showFileWithOpts(filePath: string, line: number | null, column: number | null) {
 		if (line === null || column === null) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
 		} else {
