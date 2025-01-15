@@ -42,13 +42,12 @@ export class HintGenerator {
 	forgeOutput: vscode.OutputChannel;
 
 	formurl = "https://forms.gle/t2imxLGNC7Yqpo6GA"
-	public AMBIGUOUS_TEST_MESSAGE = `Analyzed test(s) examine behaviors that are either ambiguous or not clearly defined in the problem specification.
-	They are not necessarily incorrect, but I cannot provide feedback around them. If you disagree with this assessment, and believe that these test(s) do deal with behavior explicitly described in the problem specification,
-	please fill out this form: ${this.formurl}`;
+	public AMBIGUOUS_TEST_MESSAGE = `Analyzed test(s) examine behaviors that are not clearly defined in the problem specification. They are not necessarily incorrect, but I cannot provide feedback around them.\nIf you disagree with this, fill out this form: ${this.formurl}`;
 
 	mutationStrategy: string;
 	thoroughnessStrategy: string;
 
+	step_num : number = 0;
 
 	constructor(logger: Logger, output: vscode.OutputChannel) {
 		this.logger = logger;
@@ -75,7 +74,7 @@ export class HintGenerator {
 			return "";
 		}
 
-		this.forgeOutput.appendLine('🐸 Step 1: Analyzing your tests for validity...');
+		this.forgeOutput.appendLine(`🐸 Step ${++this.step_num}: Analyzing your tests for validity.`);
 
 
 		// Step 1: Download the wheat, and run the STUDENT tests against it.
@@ -127,7 +126,7 @@ export class HintGenerator {
 				const per_test_hints = await this.runPerTestStrategy(w, w_o, studentTests, testFileName, source_text);
 
 				// Now need to annotate per test hints with the test name.
-				this.forgeOutput.appendLine(`🐸 Step 2: I suspect that the following test(s) may be inconsistent with the problem specification.`);
+				this.forgeOutput.appendLine(`🐸 Step ${++this.step_num}: I suspect that the following test(s) may be inconsistent with the problem specification.`);
 				this.forgeOutput.appendLine(`Generating feedback around these tests ⌛`);
 
 
@@ -268,7 +267,7 @@ export class HintGenerator {
 		mutator.mutateToFailingTests();
 
 		const inconsistent_tests = mutator.inconsistent_tests;
-		const n = inconsistent_tests.length;
+
 		// These are the tests used to generate feedback.
 		const assessed_tests = inconsistent_tests.join("\n");
 
@@ -284,7 +283,7 @@ export class HintGenerator {
 		// IF there are no inconsistent tests, everything is good right?
 		if (inconsistent_tests.length == 0) {
 
-			this.forgeOutput.appendLine(`🐸 The remaining tests seem consistent with the problem,
+			this.forgeOutput.appendLine(`The remaining tests seem consistent with the problem,
 				 but may test behavior that is not clearly defined in the problem specification.
 				 You may want to change settings to 'Per Test' to get individual feedback around these tests.`);
 
@@ -293,8 +292,8 @@ export class HintGenerator {
 		}
 
 
-		this.forgeOutput.appendLine(`🐸 Step 2: The following ${mutator.inconsistent_tests.length} test(s) MAY be inconsistent with the problem specification:\n ${assessed_tests}`);
-		this.forgeOutput.appendLine(`Analyzing these tests further ⌛`);
+		this.forgeOutput.appendLine(`🐸 Step ${++this.step_num}: The following ${mutator.inconsistent_tests.length} test(s) MAY be inconsistent 
+										with the assignment specification:\n ${assessed_tests}\n\nAnalyzing these tests further ⌛\n`);
 
 
 		// So now we have a conceptual mutant that is consistent with all failing tests.
@@ -581,7 +580,7 @@ export class HintGenerator {
 	async generateThoroughnessFeedback(wheat: string, student_tests: string, forge_output: string, test_file_name: string, source_text: string): Promise<string[]> {
 
 
-		this.forgeOutput.appendLine(`🐸 Step 2: Assessing the thoroughness of your test-suite.`);
+		this.forgeOutput.appendLine(`🐸 Step ${++this.step_num}: Assessing the thoroughness of your test-suite.`);
 		this.forgeOutput.show();
 
 		/*
@@ -614,7 +613,7 @@ export class HintGenerator {
 		const tests_analyzed = num_inclusion_mutations + num_exclusion_mutations;
 
 		// There should be one mutation per considered, consistent test
-		this.forgeOutput.appendLine(`🐸 Step 3: Here are some ideas for scenarios NOT covered by the ${tests_analyzed} tests analyzed. ⌛\n`);
+		this.forgeOutput.appendLine(`🐸 Step ${++this.step_num}: Here are some ideas for scenarios NOT covered by the ${tests_analyzed} tests analyzed. ⌛\n`);
 		this.forgeOutput.show();
 		try {
 
