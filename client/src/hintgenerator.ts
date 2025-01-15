@@ -384,7 +384,9 @@ export class HintGenerator {
 	private async runTestsAgainstModel(tests: string, model: string): Promise<RunResult> {
 
 		const forgeEvalDiagnostics = vscode.languages.createDiagnosticCollection('Forge Eval');
-		const racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, this.forgeOutput);
+		const racket: RacketProcess = RacketProcess.getInstance(forgeEvalDiagnostics, this.forgeOutput);
+
+
 		const toRun = combineTestsWithModel(model, tests);
 		const LAUNCH_FAILURE_ERR = "Could not run Toadus Ponens process.";
 
@@ -394,30 +396,13 @@ export class HintGenerator {
 		const tempFilePath = tempFile();
 		try {
 			fs.writeFileSync(tempFilePath, toRun);
-			const r = racket.runFile(tempFilePath);
 
-			if (!r) {
-				vscode.window.showErrorMessage(LAUNCH_FAILURE_ERR);
-				console.error(LAUNCH_FAILURE_ERR);
-				runresult.stderr = LAUNCH_FAILURE_ERR;
-				return runresult;
-			}
+			let stdoutListener = (data: string) => { runresult.stdout += data; };
+			let stderrListener = (data: string) => { runresult.stderr += data; };
+			let promise = racket.runFile(tempFilePath,stdoutListener, stderrListener);
 
-			if (r?.stdout != null) {
-				r.stdout.on('data', (data: string) => {
-					runresult.stdout += data;
-				});
-			}
-
-			if (r?.stderr != null) {
-				r.stderr.on('data', (err: string) => {
-					runresult.stderr += err;
-				});
-			}
-
-			await new Promise((resolve) => {
-				r?.on('exit', resolve);
-			});
+			// Now we want to await the promise, but want different behavior based on the result.
+			await promise;
 
 		} catch (e) {
 			vscode.window.showErrorMessage(`Toadus Ponens run failed, perhaps be because VS Code did not have permission to write a file to your OS temp folder (${os.tmpdir()}). Consult the Toadus Ponens guide for how to modify this. Full error message : ${e}`);

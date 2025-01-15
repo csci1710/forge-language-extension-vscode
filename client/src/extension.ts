@@ -43,7 +43,7 @@ async function getUserId(context) {
 	return uid;
 }
 
-let racket: RacketProcess = new RacketProcess(forgeEvalDiagnostics, forgeOutput);
+
 
 
 function subscribeToDocumentChanges(context: vscode.ExtensionContext, myDiagnostics: vscode.DiagnosticCollection): void {
@@ -183,11 +183,69 @@ export async function activate(context: ExtensionContext) {
 			return;
 		}
 
+
+		let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
+
 		forgeOutput.appendLine(`Running file "${filepath}" ...`);
-		let racketProcess = racket.runFile(filepath);
 
-		if (!racketProcess) {
+///////////
 
+
+	let stdoutListener = (data: string) => {
+		const lst = data.toString().split(/[\n]/);
+		for (let i = 0; i < lst.length; i++) {
+			// this is a bit ugly but trying to avoid confusing students
+			if (lst[i] === 'Sterling running. Hit enter to stop service.') {
+				forgeOutput.appendLine('Sterling running. Hit "Continue" to stop service and continue execution.');
+			} else {
+				forgeOutput.appendLine(lst[i]);
+			}
+		}
+	};
+
+	let myStderr = '';
+
+	let stderrListener = (data: string) => {
+		myStderr += data;
+	}
+
+	let exitListener = (code: number) => {
+		if (!racket.racketKilledManually) {
+			if (myStderr != '') {
+				racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
+			} else {
+				racket.showFileWithOpts(filepath, null, null);
+				racket.userFacingOutput.appendLine('Finished running.');
+			}
+		} else {
+			racket.showFileWithOpts(filepath, null, null);
+			racket.userFacingOutput.appendLine('Forge process terminated.');
+		}
+	
+	
+		// Output *may* have user file path in it. Do we want this?
+		var payload = {
+			"output-errors" : myStderr,
+			"runId" : runId 
+		}
+		logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
+	}
+
+
+
+
+
+
+
+
+
+
+
+		try {
+			let p = racket.runFile(filepath, stdoutListener, stderrListener, exitListener);
+			await p;
+		}
+		catch {
 			const log = textDocumentToLog(editor.document, true);
 			log['error'] = 'Could not run Forge process.';
 			log['runId'] = runId;
@@ -197,48 +255,6 @@ export async function activate(context: ExtensionContext) {
 			console.error("Could not run Forge process.");
 			return null;
 		}
-
-		// :'Some tests failed. Reporting failures in order.'
-
-		racketProcess.stdout?.on('data', (data: string) => {
-			const lst = data.toString().split(/[\n]/);
-			for (let i = 0; i < lst.length; i++) {
-				// this is a bit ugly but trying to avoid confusing students
-				if (lst[i] === 'Sterling running. Hit enter to stop service.') {
-					forgeOutput.appendLine('Sterling running. Hit "Continue" to stop service and continue execution.');
-				} else {
-					forgeOutput.appendLine(lst[i]);
-				}
-			}
-		});
-
-		let myStderr = '';
-		racketProcess.stderr?.on('data', (err: string) => {
-			myStderr += err;
-		});
-
-		racketProcess.on('exit', (code: string) => {
-
-			if (!racket.racketKilledManually) {
-				if (myStderr != '') {
-					racket.sendEvalErrors(myStderr, fileURI, forgeEvalDiagnostics);
-				} else {
-					racket.showFileWithOpts(filepath, null, null);
-					racket.userFacingOutput.appendLine('Finished running.');
-				}
-			} else {
-				racket.showFileWithOpts(filepath, null, null);
-				racket.userFacingOutput.appendLine('Forge process terminated.');
-			}
-
-
-			// Output *may* have user file path in it. Do we want this?
-			var payload = {
-				"output-errors" : myStderr,
-				"runId" : runId 
-			}
-			logger.log_payload(payload, LogLevel.INFO, Event.FORGE_RUN_RESULT);
-		});
 
 
 
