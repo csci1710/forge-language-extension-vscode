@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Cope and Drag</title>
+
+    <!-- Include Bootstrap CSS, JQuery, etc -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" href="/css/diagramstyle.css">
+
+    <script src="https://marvl.infotech.monash.edu/webcola/extern/graphlib-dot.min.js"></script>
+    <!-- Full version -->
+    <script src="https://marvl.infotech.monash.edu/webcola/cola.min.js"></script>
+
+    <!-- Include d3 here -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <!-- Include your custom JavaScript file -->
+    <script src="/js/renderer.js" defer></script>
+    <script>
+        window.addEventListener('load', function () {
+
+            var width = <%- width %>, height = <%- height %>;
+            var nodes = <%- JSON.stringify(colaNodes) %>;
+            var edges = <%- JSON.stringify(colaEdges) %>;
+            var constraints = <%- JSON.stringify(colaConstraints) %>;
+            var groups = <%- JSON.stringify(colaGroups) %>;
+
+            if (width && height && nodes && edges && constraints && groups) {
+                setupLayout(d3, nodes, edges, constraints, groups, width, height);
+            } else {
+                console.error('Missing required data for layout');
+            }
+        });
+    </script>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        const config = {
+            startOnLoad: true,
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'cardinal' },
+            securityLevel: 'loose',
+        };
+        mermaid.initialize(config);
+
+        window.stateclick = function (i) {
+            // First, set the instance number's value to i
+            document.getElementById('instancenumber').value = i;
+            // Now submit the form
+            document.getElementById('controlsForm').submit();
+
+        };
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <h3 class="navbar-brand">Cope and Drag</h3>
+        <a href="https://github.com/sidprasad/copeanddrag/wiki"><button>Read the docs</button></a>
+       
+    </nav>
+
+    <div class="container-fluid">
+        <%- include('temporalminimap') %>
+
+        <div class="row">
+            <%- include('relationTable') %>
+            <%- include('diagramsvg') %>
+
+            <%- include('controls') %>
+        </div>
+        <div class="row">
+            
+        </div>
+    </div>
+
+</body>
+
+
+</html>

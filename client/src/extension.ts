@@ -4,6 +4,8 @@ import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, Diagnostic
 import { HintGenerator } from './hintgenerator';
 import { ensureForgeVersion } from './forge-utilities';
 
+import { CnDProcess } from './cndprocess';
+
 
 
 import {
@@ -333,6 +335,11 @@ export async function activate(context: ExtensionContext) {
 		}
 	});
 
+	// Launch the CnD server
+	let cndProcess = CnDProcess.getInstance();
+
+
+
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
 		forgeOutput, halpOutput, forgeDocs);
 
@@ -385,6 +392,10 @@ export function deactivate(): Thenable<void> | undefined {
 		return undefined;
 	}
 	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
+
+	let cnd = CnDProcess.getInstance();
+	cnd.kill();
+
 	// kill racket process
 	racket.kill(false);
 	return client.stop();
