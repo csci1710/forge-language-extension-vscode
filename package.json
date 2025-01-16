@@ -91,13 +91,13 @@
 						"Off",
 						"On"
 					],
-					"default": "Partial",
+					"default": "On",
 					"description": "Determines the level of thoroughness feedback given by Toadus Ponens."
 				},
 				"forge.launchCnD": {
 					"scope": "resource",
 					"type": "boolean",
-					"default": false,
+					"default": true,
 					"description": "Determines if the Cope and Drag server should be launched on activation."
 				}
 			}

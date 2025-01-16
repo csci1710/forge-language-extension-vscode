@@ -343,8 +343,6 @@ export async function activate(context: ExtensionContext) {
 		const cndProcess = CnDProcess.getInstance();
 	}
 
-
-
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
 		forgeOutput, halpOutput, forgeDocs);
 
