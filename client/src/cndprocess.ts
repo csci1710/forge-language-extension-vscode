@@ -1,50 +1,90 @@
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, execSync, ChildProcess } from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as tcpPortUsed from 'tcp-port-used';
 
 export class CnDProcess {
-    private static instance: CnDProcess | null = null;
-    private childProcess: ChildProcess | null = null;
-    private outputChannel: vscode.OutputChannel;
+	private static instance: CnDProcess | null = null;
+	private childProcess: ChildProcess | null = null;
+	private outputChannel: vscode.OutputChannel;
 
-    private constructor() {
-        this.outputChannel = vscode.window.createOutputChannel('Cope and Drag');
-        this.launchServer();
-    }
+	private constructor() {
+		const cndport = 3000;
 
-    public static getInstance(): CnDProcess {
-        if (!CnDProcess.instance) {
-            CnDProcess.instance = new CnDProcess();
-        }
-        return CnDProcess.instance;
-    }
+		this.outputChannel = vscode.window.createOutputChannel('Cope and Drag');
 
-    private launchServer(): void {
-        const serverPath = path.resolve(__dirname, '../../cnd/index.js');
-        this.childProcess = spawn('node', [serverPath], { shell: true });
+		this.checkPortAvailability(cndport).then((isAvailable) => {
 
-        this.childProcess.stdout?.on('data', (data) => {
-            this.outputChannel.appendLine(` ${data}`);
-        });
+			if (!this.checkNodeInstallation()) {
+				vscode.window.showErrorMessage('Could not launch Cope and Drag: Node.js is not installed. Please install Node.js and try again.');
+			} else if (!isAvailable) {
+				vscode.window.showErrorMessage('Could not launch Cope and Drag: Port 3000 is already in use.');
 
-        this.childProcess.stderr?.on('data', (data) => {
-            this.outputChannel.appendLine(`Error: ${data}`);
-        });
+			} else {
+				this.launchServer();
+			}
+		});
+	}
 
-        this.childProcess.on('close', (code) => {
-            this.outputChannel.appendLine(`CnD process exited with code ${code}`);
-        });
+	public static killInstanceIfExists() {
+		if(CnDProcess.instance) {
+			CnDProcess.instance.kill();
+			CnDProcess.instance = null;
+		}
+	}
 
-        // Ensure the process is killed on exit
-        process.on('exit', () => this.kill());
-        process.on('SIGINT', () => this.kill());
-        process.on('SIGTERM', () => this.kill());
-    }
+	public static getInstance(): CnDProcess {
+		if (!CnDProcess.instance) {
+			CnDProcess.instance = new CnDProcess();
+		}
+		return CnDProcess.instance;
+	}
 
-    public kill(): void {
-        if (this.childProcess) {
-            this.childProcess.kill();
-            this.childProcess = null;
-        }
-    }
+	private checkNodeInstallation(): boolean {
+		try {
+			execSync('node -v');
+			return true;
+		} catch (error) {
+			return false;
+		}
+	}
+
+	private async checkPortAvailability(port: number): Promise<boolean> {
+		try {
+			const inUse = await tcpPortUsed.check(port);
+			return !inUse;
+		} catch (error) {
+			vscode.window.showErrorMessage(`Error checking port ${port}: ${error.message}`);
+			throw error;
+		}
+	}
+
+	private launchServer(): void {
+		const serverPath = path.resolve(__dirname, '../../cnd/index.js');
+		this.childProcess = spawn('node', [serverPath], { shell: true });
+
+		this.childProcess.stdout?.on('data', (data) => {
+			this.outputChannel.appendLine(`CnD stdout: ${data}`);
+		});
+
+		this.childProcess.stderr?.on('data', (data) => {
+			this.outputChannel.appendLine(`CnD stderr: ${data}`);
+		});
+
+		this.childProcess.on('close', (code) => {
+			this.outputChannel.appendLine(`CnD process exited with code ${code}`);
+		});
+
+		// Ensure the process is killed on exit
+		process.on('exit', () => this.kill());
+		process.on('SIGINT', () => this.kill());
+		process.on('SIGTERM', () => this.kill());
+	}
+
+	public kill(): void {
+		if (this.childProcess) {
+			this.childProcess.kill();
+			this.childProcess = null;
+		}
+	}
 }

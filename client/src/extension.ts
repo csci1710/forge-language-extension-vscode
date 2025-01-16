@@ -335,8 +335,13 @@ export async function activate(context: ExtensionContext) {
 		}
 	});
 
-	// Launch the CnD server
-	let cndProcess = CnDProcess.getInstance();
+	// Check if the CnD server should be launched on activation
+	const config = vscode.workspace.getConfiguration('forge');
+	const launchCnD = config.get<boolean>('launchCnD', false);
+
+	if (launchCnD) {
+		const cndProcess = CnDProcess.getInstance();
+	}
 
 
 
@@ -393,8 +398,7 @@ export function deactivate(): Thenable<void> | undefined {
 	}
 	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 
-	let cnd = CnDProcess.getInstance();
-	cnd.kill();
+	CnDProcess.killInstanceIfExists();
 
 	// kill racket process
 	racket.kill(false);
