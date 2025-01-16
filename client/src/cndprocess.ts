@@ -1,11 +1,14 @@
 import { spawn, ChildProcess } from 'child_process';
+import * as vscode from 'vscode';
 import * as path from 'path';
 
 export class CnDProcess {
     private static instance: CnDProcess | null = null;
     private childProcess: ChildProcess | null = null;
+    private outputChannel: vscode.OutputChannel;
 
     private constructor() {
+        this.outputChannel = vscode.window.createOutputChannel('Cope and Drag');
         this.launchServer();
     }
 
@@ -21,15 +24,15 @@ export class CnDProcess {
         this.childProcess = spawn('node', [serverPath], { shell: true });
 
         this.childProcess.stdout?.on('data', (data) => {
-            console.log(`CnD stdout: ${data}`);
+            this.outputChannel.appendLine(` ${data}`);
         });
 
         this.childProcess.stderr?.on('data', (data) => {
-            console.error(`CnD stderr: ${data}`);
+            this.outputChannel.appendLine(`Error: ${data}`);
         });
 
         this.childProcess.on('close', (code) => {
-            console.log(`CnD process exited with code ${code}`);
+            this.outputChannel.appendLine(`CnD process exited with code ${code}`);
         });
 
         // Ensure the process is killed on exit
