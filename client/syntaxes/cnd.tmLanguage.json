@@ -7,9 +7,14 @@
             "include": "source.yaml"
         },
         {
-            "match": "\\b(keyword1|keyword2|keyword3)\\b",
-            "name": "keyword.control.cnd"
+            "match": "\\b(constraints)\\b",
+            "name": "keyword.constraints.cnd"
+        },
+        {
+            "match": "\\b(directives)\\b",
+            "name": "keyword.directives.cnd"
         }
+
     ],
     "repository": {},
     "scopeName": "source.cnd"
