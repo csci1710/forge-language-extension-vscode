@@ -99,7 +99,13 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Determines if the Cope and Drag server should be launched on activation."
-				}
+				},
+				"forge.toadusSource": {
+                    "scope": "resource",
+                    "type": "string",
+                    "default": "https://csci1710.github.io/2025/toadusponensfiles",
+                    "description": "URL used by Toadus Ponens."
+                }
 			}
 		},
 		"commands": [

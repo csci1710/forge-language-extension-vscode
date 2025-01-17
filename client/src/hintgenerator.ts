@@ -35,7 +35,12 @@ export class HintGenerator {
 	private SOMETHING_WENT_WRONG = "Something went wrong during Toadus Ponens analysis. While I will still make a best effort to provide useful feedback, consider examining your tests with course staff. You may find it useful to share the the VSCode Error log with them. You can access it as follows: Ctrl-shift-p or cmd-shift-p -> Search Show Logs -> Extension Host";
 	//static WHEATSTORE = "https://csci1710.github.io/2024/toadusponensfiles"; // TODO: This needs to change.
 
-	static WHEATSTORE = "https://sidprasad.github.io/dirtree/wheatstoremock";
+
+	    // Read WHEATSTORE URL from VS Code settings
+	static get WHEATSTORE(): string {
+		const config = vscode.workspace.getConfiguration('forge');
+		return config.get<string>('toadusSource', 'https://csci1710.github.io/2024/toadusponensfiles');
+	}
 
 	logger: Logger;
 	encryptor: SymmetricEncryptor = new SymmetricEncryptor();
