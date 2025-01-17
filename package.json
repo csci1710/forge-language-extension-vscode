@@ -38,6 +38,17 @@
 					"light": "./client/images/icon.png",
 					"dark": "./client/images/icon.png"
 				}
+			},
+			{
+				"id": "cnd",
+				"aliases": [
+					"CnD",
+					"Cope and Drag"
+				],
+				"extensions": [
+					".cnd"
+				],
+				"configuration": ".client/cnd-configuration.json"
 			}
 		],
 		"grammars": [
@@ -45,6 +56,11 @@
 				"language": "forge",
 				"scopeName": "source.forge",
 				"path": "./client/syntaxes/forge.tmLanguage.json"
+			},
+			{
+				"language": "cnd",
+				"scopeName": "source.cnd",
+				"path": "./client/syntaxes/cnd.tmLanguage.json"
 			}
 		],
 		"configuration": {
@@ -101,11 +117,11 @@
 					"description": "Determines if the Cope and Drag server should be launched on activation."
 				},
 				"forge.toadusSource": {
-                    "scope": "resource",
-                    "type": "string",
-                    "default": "https://csci1710.github.io/2025/toadusponensfiles",
-                    "description": "URL used by Toadus Ponens."
-                }
+					"scope": "resource",
+					"type": "string",
+					"default": "https://csci1710.github.io/2025/toadusponensfiles",
+					"description": "URL used by Toadus Ponens."
+				}
 			}
 		},
 		"commands": [
