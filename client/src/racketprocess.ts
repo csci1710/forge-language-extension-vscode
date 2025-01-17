@@ -3,15 +3,15 @@ import * as vscode from 'vscode';
 import { Diagnostic, DiagnosticCollection, DiagnosticSeverity } from 'vscode';
 
 
-
-
-
 export class RacketProcess {
 
-	private childProcess: ChildProcess | null;
-	public racketKilledManually: boolean;
-	public userFacingOutput: vscode.OutputChannel;
-	private evalDiagnostics: vscode.DiagnosticCollection;
+
+	private static instance: RacketProcess | null = null; // Singleton instance
+    private childProcess: ChildProcess | null;
+    public racketKilledManually: boolean;
+    public userFacingOutput: vscode.OutputChannel;
+    private evalDiagnostics: vscode.DiagnosticCollection;
+
 
 
 	constructor(evalDiagnostics: vscode.DiagnosticCollection, userFacingOutput: vscode.OutputChannel) {
@@ -21,21 +21,63 @@ export class RacketProcess {
 		this.racketKilledManually = false;
 	}
 
-
-	runFile(filePath: string): ChildProcess | null {
-
-		// always auto-save before any run
-		if (!vscode.window.activeTextEditor.document.save()) {
-			console.error(`Could not save ${filePath}`);
-			vscode.window.showErrorMessage(`Forge run failed. Could not save ${filePath}`);
-			return null;
+	// Singleton pattern to ensure only one instance
+	public static getInstance(evalDiagnostics: vscode.DiagnosticCollection, userFacingOutput: vscode.OutputChannel): RacketProcess {
+		if (!RacketProcess.instance) {
+			RacketProcess.instance = new RacketProcess(evalDiagnostics, userFacingOutput);
 		}
+		return RacketProcess.instance;
+	}
 
-		this.kill(false);
-		this.racketKilledManually = false;
 
-		this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
-		return this.childProcess
+	
+	runFile(filePath: string,
+			stdoutListener?: (data: string) => void,
+			stderrListener? : (data: string) => void,
+			exitListener? : (code: number) => void) : Promise<void>
+	{
+
+		return new Promise<void>((resolve, reject) => {
+            // Always auto-save before any run
+            if (!vscode.window.activeTextEditor?.document.save()) {
+                console.error(`Could not save ${filePath}`);
+                vscode.window.showErrorMessage(`Forge run failed. Could not save ${filePath}`);
+                reject(new Error(`Could not save ${filePath}`));
+                return;
+            }
+
+            this.kill(false);
+            this.racketKilledManually = false;
+
+            this.childProcess = spawn('racket', [`"${filePath}"`], { shell: true });
+
+            this.childProcess.stdout?.on('data', (data) => {
+                if (stdoutListener) {
+                    stdoutListener(data.toString());
+                }
+            });
+
+            this.childProcess.stderr?.on('data', (data) => {
+                if (stderrListener) {
+                    stderrListener(data.toString());
+                }
+            });
+
+            this.childProcess.on('exit', (code) => {
+				if (exitListener) {
+					exitListener(code);
+				}
+				else if (code !== 0 && code !== 1) {
+					// I *think* this is because Racket exits with code 1 when there is a
+					// test failure.
+						vscode.window.showErrorMessage(`Racket process exited with code ${code}`);
+						reject(new Error(`Racket process exited with code ${code}`));
+				}
+
+				resolve();
+                this.cleanup();
+            });
+        });
 	}
 
 
@@ -56,11 +98,19 @@ export class RacketProcess {
 
 	kill(manual: boolean) {
 		if (this.childProcess) {
-			this.childProcess.kill();
 			this.racketKilledManually = manual;
+            this.childProcess.kill();
+            this.cleanup();
 		}
 		this.childProcess = null;
 	}
+
+    private cleanup(): void {
+        if (this.childProcess) {
+            this.childProcess.removeAllListeners();
+            this.childProcess = null;
+        }
+    }
 
 		
 	sendEvalErrors(text: string, fileURI: vscode.Uri, diagnosticCollectionForgeEval: DiagnosticCollection) {
@@ -73,25 +123,27 @@ export class RacketProcess {
 				range: errLocation['range'],
 				message: `Forge Evaluation Error: ${errLocation['line']}`,
 				source: 'Racket'
-			}
+			};
 		}
 
 		this.userFacingOutput.appendLine(text);
 
 		const textLines = text.split(/[\n\r]/);
 
-		let errorList = textLines.map((line) => this.matchForgeError(line)).filter((x) => x != null);
-		let diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
+		const errorList = textLines.map((line) => RacketProcess.matchForgeError(line)).filter((x) => x != null);
+		const diagnostics: Diagnostic[] = errorList.map(errLocationToDiagnostic);
 
 		diagnosticCollectionForgeEval.set(fileURI, diagnostics);
 
 
-		let linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
-		let colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
-		this.showFileWithOpts(fileURI.fsPath, linenum, colnum);
+		const linenum = errorList.length > 0 ? errorList[0]['linenum'] : null;
+		const colnum = errorList.length > 0 ? errorList[0]['colnum'] : null;
+		RacketProcess.showFileWithOpts(fileURI.fsPath, linenum, colnum);
 	}
 
-	matchForgeError(line: string): Object | null {
+
+	// TODO: Do these have to change?
+	static matchForgeError(line: string): Object | null {
 
 		/* There are multiple types of errors that can be thrown by Forge.*/
 		const testFailurePattern = /[\\/]*?([^\\/\n\s]*\.frg):(\d+):(\d+) \(span (\d+)\)\]/;
@@ -170,7 +222,7 @@ export class RacketProcess {
 	}
 
 	// This does not support multiple lines
-	showFileWithOpts(filePath: string, line: number | null, column: number | null) {
+	static showFileWithOpts(filePath: string, line: number | null, column: number | null) {
 		if (line === null || column === null) {
 			vscode.commands.executeCommand('vscode.open', vscode.Uri.file(filePath));
 		} else {

@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "",
 	"license": "",
-	"version": "2.3.3",
+	"version": "3.0.2",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -89,12 +89,23 @@
 					"type": "string",
 					"enum": [
 						"Off",
-						"Partial",
-						"Full"
+						"On"
 					],
-					"default": "Partial",
-					"description": "Determines the level of thoroughness feedback given by Toadus Ponens. Full offers more accurate thoroughness feedback, but is experimental and may be buggy."
-				}
+					"default": "On",
+					"description": "Determines the level of thoroughness feedback given by Toadus Ponens."
+				},
+				"forge.launchCnD": {
+					"scope": "resource",
+					"type": "boolean",
+					"default": true,
+					"description": "Determines if the Cope and Drag server should be launched on activation."
+				},
+				"forge.toadusSource": {
+                    "scope": "resource",
+                    "type": "string",
+                    "default": "https://csci1710.github.io/2025/toadusponensfiles",
+                    "description": "URL used by Toadus Ponens."
+                }
 			}
 		},
 		"commands": [
@@ -132,7 +143,7 @@
 			{
 				"command": "forge.halp",
 				"title": "Ask Toadus Ponens!",
-				"icon": "./client/images/toadus.png"
+				"icon": "./client/images/toadus.svg"
 			},
 			{
 				"command": "forge.openDocumentation",
@@ -191,6 +202,7 @@
 	"devDependencies": {
 		"@types/mocha": "^8.2.2",
 		"@types/node": "^12.12.0",
+		"@types/tcp-port-used": "^1.0.4",
 		"@typescript-eslint/eslint-plugin": "^4.23.0",
 		"@typescript-eslint/parser": "^4.23.0",
 		"@vscode/vsce": "^2.24.0",
@@ -202,7 +214,9 @@
 		"@firebase/auth": "^0.21.0",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
+		"forge-toadus-parser": "^1.1.1",
 		"glob": "^8.1.0",
+		"tcp-port-used": "^1.0.2",
 		"ts-node": "^10.9.2",
 		"vscode-languageserver": "^9.0.1",
 		"vscode-languageserver-textdocument": "^1.0.11"
