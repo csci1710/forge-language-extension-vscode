@@ -1,10 +1,11 @@
 # Forge VSCode Extension
 
-This VSCode extension provides (a degree of) support for the Forge language. While formatted in terms of a language client and server, Forge does not have a language server. Rather, we invoke racket from the command line.
+This extension provides support for the [Forge](https://forge-fm.org/),
+a lightweight formal methods tool.
 
-The extension provides the following features:
 
-Syntax Highlighting
-Logging
-Error reporting
-Toadus Ponens, a tool that analyzes student tests
+Amongst other things, this extension provides support for:
+- Syntax highlighting
+- Toadus Ponens, a support tool for educational settings.
+- [Cope and Drag](https://github.com/sidprasad/copeanddrag) a lightweight
+diagramming tool.
