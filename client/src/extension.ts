@@ -4,6 +4,8 @@ import { workspace, ExtensionContext, Diagnostic, DiagnosticSeverity, Diagnostic
 import { HintGenerator } from './hintgenerator';
 import { ensureForgeVersion } from './forge-utilities';
 
+import { CnDProcess } from './cndprocess';
+
 
 
 import {
@@ -333,6 +335,14 @@ export async function activate(context: ExtensionContext) {
 		}
 	});
 
+	// Check if the CnD server should be launched on activation
+	const config = vscode.workspace.getConfiguration('forge');
+	const launchCnD = config.get<boolean>('launchCnD', false);
+
+	if (launchCnD) {
+		const cndProcess = CnDProcess.getInstance();
+	}
+
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
 		forgeOutput, halpOutput, forgeDocs);
 
@@ -385,6 +395,9 @@ export function deactivate(): Thenable<void> | undefined {
 		return undefined;
 	}
 	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
+
+	CnDProcess.killInstanceIfExists();
+
 	// kill racket process
 	racket.kill(false);
 	return client.stop();

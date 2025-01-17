@@ -316,7 +316,5 @@ export function combineTestsWithModel(wheatText: string, tests: string): string 
 	combined = combined.replace(/\t/g, " ");
 	combined = combined.replace(/\r/g, " ");
 
-
 	return combined;
-
 }
