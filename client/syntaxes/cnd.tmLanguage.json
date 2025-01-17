@@ -1,0 +1,16 @@
+{
+    "fileTypes": ["cnd"],
+    "name": "CND",
+    "scopeName": "source.cnd",
+    "patterns": [
+        {
+            "include": "source.yaml"
+        },
+        {
+            "match": "\\b(keyword1|keyword2|keyword3)\\b",
+            "name": "keyword.control.cnd"
+        }
+    ],
+    "repository": {},
+    "scopeName": "source.cnd"
+}
