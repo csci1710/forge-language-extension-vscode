@@ -391,14 +391,15 @@ export async function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
-	if (!client) {
-		return undefined;
-	}
-	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 
 	CnDProcess.killInstanceIfExists();
 
+	let racket = RacketProcess.getInstance(forgeEvalDiagnostics, forgeOutput);
 	// kill racket process
 	racket.kill(false);
+	if (!client) {
+		return undefined;
+	}
+
 	return client.stop();
 }

@@ -1,0 +1,21 @@
+{
+    "fileTypes": ["cnd"],
+    "name": "CND",
+    "scopeName": "source.cnd",
+    "patterns": [
+        {
+            "include": "source.yaml"
+        },
+        {
+            "match": "\\b(constraints)\\b",
+            "name": "keyword.constraints.cnd"
+        },
+        {
+            "match": "\\b(directives)\\b",
+            "name": "keyword.directives.cnd"
+        }
+
+    ],
+    "repository": {},
+    "scopeName": "source.cnd"
+}
