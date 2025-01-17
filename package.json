@@ -1,9 +1,9 @@
 {
 	"name": "forge-language-server",
 	"description": "Forge Language Server",
-	"author": "",
+	"author": "Siddhartha Prasad",
 	"license": "",
-	"version": "3.0.2",
+	"version": "3.1.0",
 	"repository": {
 		"type": "git",
 		"url": ""
