@@ -3,7 +3,7 @@
 	"description": "Forge Language Server",
 	"author": "Siddhartha Prasad",
 	"license": "",
-	"version": "3.1.1",
+	"version": "3.2.0",
 	"repository": {
 		"type": "git",
 		"url": ""
@@ -165,6 +165,10 @@
 				"command": "forge.openDocumentation",
 				"title": "Forge Docs",
 				"icon": "$(book)"
+			},
+			{
+				"command": "forge.killCnDProcess",
+				"title": "Kill Cope and Drag Process"
 			}
 		],
 		"menus": {
@@ -228,6 +232,7 @@
 	},
 	"dependencies": {
 		"@firebase/auth": "^0.21.0",
+		"execa": "^9.5.2",
 		"firebase": "^9.15.0",
 		"firebase-admin": "^11.4.1",
 		"forge-toadus-parser": "^1.1.1",

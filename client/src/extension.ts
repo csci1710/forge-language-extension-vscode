@@ -335,6 +335,12 @@ export async function activate(context: ExtensionContext) {
 		}
 	});
 
+	const killCnDProcessCommand = vscode.commands.registerCommand('forge.killCnDProcess', () => {
+        CnDProcess.killInstanceIfExists();
+        vscode.window.showInformationMessage('Cope and Drag process killed.');
+    });
+
+
 	// Check if the CnD server should be launched on activation
 	const config = vscode.workspace.getConfiguration('forge');
 	const launchCnD = config.get<boolean>('launchCnD', false);
@@ -344,7 +350,7 @@ export async function activate(context: ExtensionContext) {
 	}
 
 	context.subscriptions.push(runFile, stopRun, continueRun, enableLogging, disableLogging, halp, forgeEvalDiagnostics,
-		forgeOutput, halpOutput, forgeDocs);
+		forgeOutput, halpOutput, forgeDocs, killCnDProcessCommand);
 
 	subscribeToDocumentChanges(context, forgeEvalDiagnostics);
 
