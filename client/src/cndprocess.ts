@@ -1,7 +1,8 @@
-import { spawn, execSync, ChildProcess } from 'child_process';
+import { spawn, execSync, exec, ChildProcess } from 'child_process';
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as tcpPortUsed from 'tcp-port-used';
+import * as os from 'os';
 
 export class CnDProcess {
 	private static instance: CnDProcess | null = null;
@@ -27,7 +28,7 @@ export class CnDProcess {
 	}
 
 	public static killInstanceIfExists() {
-		if(CnDProcess.instance) {
+		if (CnDProcess.instance) {
 			CnDProcess.instance.kill();
 			CnDProcess.instance = null;
 		}
@@ -64,7 +65,7 @@ export class CnDProcess {
 
 	private launchServer(): void {
 		const serverPath = path.resolve(__dirname, '../../cnd/index.js');
-		this.childProcess = spawn('node', [serverPath], { shell: true });
+		this.childProcess = spawn('node', [serverPath]);
 
 		this.childProcess.stdout?.on('data', (data) => {
 			this.outputChannel.appendLine(`CnD stdout: ${data}`);
@@ -78,16 +79,49 @@ export class CnDProcess {
 			this.outputChannel.appendLine(`CnD process exited with code ${code}`);
 		});
 
+
+		this.childProcess.on('exit', (code) => {
+			this.outputChannel.appendLine(`CnD process exited with code ${code}`);
+		});
+
 		// Ensure the process is killed on exit
 		process.on('exit', () => this.kill());
 		process.on('SIGINT', () => this.kill());
 		process.on('SIGTERM', () => this.kill());
 	}
 
+
 	public kill(): void {
 		if (this.childProcess) {
-			console.log('Killing CnD process');
-			this.childProcess.kill();
+			console.log(`Killing CnD process, PID: ${this.childProcess.pid}.`);
+			const platform = os.platform();
+
+			if (platform === 'win32') {
+				// Use taskkill on Windows
+				// Use taskkill on Windows
+				try {
+					const result = execSync(`taskkill /PID ${this.childProcess.pid} /T /F`, { stdio: 'inherit' });
+					console.log('CnD process killed successfully on Windows');
+				} catch (error) {
+					console.error(`Failed to kill CnD process on Windows:`, error);
+				}
+			} else {
+				// Use SIGTERM on Unix-like systems
+				try {
+					this.childProcess.kill('SIGTERM');
+					console.log('Sent SIGTERM to CnD process, waiting for it to terminate...');
+
+					// Wait for a few seconds and then forcefully kill if still running
+					setTimeout(() => {
+						if (this.childProcess && !this.childProcess.killed) {
+							console.log('CnD process did not terminate, sending SIGKILL...');
+							this.childProcess.kill('SIGKILL');
+						}
+					}, 5000); // Wait for 5 seconds before sending SIGKILL
+				} catch (error) {
+					console.error(`Failed to kill CnD process:`, error);
+				}
+			}
 			this.childProcess = null;
 		}
 	}
