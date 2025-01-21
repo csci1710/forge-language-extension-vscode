@@ -42,9 +42,12 @@ export class CnDProcess {
 
 	private checkNodeInstallation(): boolean {
 		try {
-			execSync('node -v');
+			let x = execSync('node -v');
+			// Can I print the x value to the output channel?
+			this.outputChannel.appendLine(`Node version: ${x}`);
 			return true;
 		} catch (error) {
+			console.error(error);
 			return false;
 		}
 	}
@@ -83,6 +86,7 @@ export class CnDProcess {
 
 	public kill(): void {
 		if (this.childProcess) {
+			console.log('Killing CnD process');
 			this.childProcess.kill();
 			this.childProcess = null;
 		}
