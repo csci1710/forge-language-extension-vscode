@@ -119,7 +119,7 @@
 				"forge.toadusSource": {
 					"scope": "resource",
 					"type": "string",
-					"default": "https://sidprasad.github.io/dirtree/wheatstoremock/",
+					"default": "https://csci1710.github.io/2025/toadusponensfiles",
 					"description": "URL used by Toadus Ponens."
 				}
 			}
