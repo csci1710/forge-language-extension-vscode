@@ -9,7 +9,7 @@ import {
 	ConsistencyAssertionTest, Expr,
 	Formula
 } from "forge-toadus-parser";
-import G from 'glob';
+import {removeForgeComments} from "./forge-utilities";
 
 
 const negationRegex = /(not|!)\s*(\b\w+\b)/;
@@ -155,7 +155,31 @@ function get_text_from_syntaxnode(b: SyntaxNode, text: string): string {
 	return get_text_block(fromRow, toRow, fromColumn, toColumn, text);
 }
 
+function getForgeLangLevel(text: string): string {
+	const defaultLangLevel = "forge";
+	let langLevel = defaultLangLevel;
 
+
+	// TODO: First remove ALL comments.
+	let toSearch = removeForgeComments(text);
+
+	// Now find the first line that has a #lang directive.
+
+	const lines = toSearch.split("\n");
+	for (const line of lines) {
+		if (line.includes("#lang")) {
+			langLevel = line.trim();
+			break;
+		}
+	}
+
+	// And remove #lang from the langLevel.
+	langLevel = langLevel.replace("#lang", "").trim();
+
+
+
+	return langLevel;
+}
 
 /*
 	Mutates a Forge ``wheat'' (aka correct solution)
@@ -170,6 +194,9 @@ export class ConceptualMutator {
 	wheat_util: ForgeUtil;
 	student_util: ForgeUtil;
 	full_source_util: ForgeUtil;
+
+
+	private targetLangLevel = "forge";
 
 	mutant: HydratedPredicate[] = [];
 
@@ -190,6 +217,12 @@ export class ConceptualMutator {
 		public test_file_name: string,
 		public source_text: string,
 		public max_mutations: number = 200) {
+
+
+		// Check the target language level in the wheat
+		this.targetLangLevel = getForgeLangLevel(this.wheat);
+
+
 
 		this.wheat_util = new ForgeUtil(wheat);
 		//this.student_util = new ForgeUtil(student_tests);
@@ -489,7 +522,10 @@ export class ConceptualMutator {
 			return `pred ${p.name}${declParams}\n {\n ${body} \n}`;
 		});
 
-		const PREFIX = "#lang forge\n option run_sterling off\n";
+
+		// THIS IS A BUG!!! (COULD BE #lang forge\temporal OR #lang forge )
+
+		const PREFIX = `#lang ${this.targetLangLevel}\n option run_sterling off\n`;
 		const sigDecls = this.hydrateSigs();
 		const sigs = sigDecls.join("\n\n");
 
