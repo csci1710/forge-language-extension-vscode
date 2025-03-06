@@ -651,10 +651,14 @@ export class ConceptualMutator {
 		return false;
 	}
 
+	private getRandomAlphabet(): string {
+		const alphabet = "abcdefghijklmnopqrstuvwxyz";
+		return alphabet[Math.floor(Math.random() * alphabet.length)];
+	}
 
 	private getNewName(name: string) {
-
-		return `${name}_inner_${this.num_mutations}`;
+		// Just to ward off any potential name clashes.
+		return `${name}_inner_${this.num_mutations}_${this.getRandomAlphabet()}`;
 	}
 
 	///////// OPERATORS THAT EASE OR CONSTRAINT PREDICATES BY AN EXPRESSION ////////////////
@@ -677,7 +681,7 @@ export class ConceptualMutator {
 
 	protected constrainPredicateByInclusion(i: string, e: string, quantified_prefix = "", pred_args = ""): void {
 		const p_i: HydratedPredicate = this.mutant.find((p) => p.name == i);
-				this.num_mutations++;
+
 		if (!p_i) {
 			throw new Error(`Predicate ${i} not found! Something went wrong, please contact the instructor.`);
 		}
