@@ -176,6 +176,11 @@ function getForgeLangLevel(text: string): string {
 	// And remove #lang from the langLevel.
 	langLevel = langLevel.replace("#lang", "").trim();
 
+	// HACK
+	if (langLevel === "" || langLevel === "froglet" || langLevel === "forge/bsl") {
+		langLevel = defaultLangLevel;
+	}
+
 
 
 	return langLevel;
