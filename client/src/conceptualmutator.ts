@@ -744,7 +744,7 @@ export class ConceptualMutator {
 
 		// Ensure p_i is in the wheat.
 		if (!this.isInstructorAuthored(p_i)) {
-			this.skipped_tests.push(new SkippedTest(e.name, `Example does not directly test a predicate (or its negation) from the assignment statement.`));
+			this.skipped_tests.push(new SkippedTest(e.name, `Example either tests a parameterized predicate OR does not directly test a predicate (or its negation) from the assignment statement.`));
 			return;
 		}
 
