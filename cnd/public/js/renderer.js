@@ -1,14 +1,13 @@
 
+
 /** COnstants */
 const initialUnconstrainedIterations = 10; //unconstrained initial layout iterations
 const initialUserConstraintIterations = 100; // initial layout iterations with user-specified constraints
-const initialAllConstraintsIterations = 50; // initial layout iterations with all constraints including non-overlap
+const initialAllConstraintsIterations = 1000; // initial layout iterations with all constraints including non-overlap
 const gridSnapIterations = 5; // iterations of "grid snap", which pulls nodes towards grid cell centers - grid of size node[0].width - only really makes sense if all nodes have the same width and heigh
 const margin = 10;
 const dy_for_linespacing = 5; // Adjust for spacing between lines
 //////////
-
-
 
 
 
@@ -127,8 +126,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
     }
 
     function getNodeIndex(n) {
-
-        // Check if n is of type string
         const nodeId = typeof n === 'string' ? n : n.id;
         return nodes.findIndex(node => node.id === nodeId);
     }
@@ -139,27 +136,41 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         node.name = node.id;
     });
 
-
-    var color = d3.scaleOrdinal(d3.schemeCategory20);
     var svg_top = d3.select("#svg").call(zoom);
     var svg = d3.select(".zoomable");
 
     var colaLayout = cola.d3adaptor(d3)
-        //.convergenceThreshold(0.1) // TODO: What should we do here?
+        .convergenceThreshold(1e-3)
         .avoidOverlaps(true)
         .handleDisconnected(true)
         .size([width, height]);
 
     const min_sep = 50;
-    const default_node_width = 70;
+    const default_node_width = 100;
 
+    ///// Check whats up TODO ////
+    let scaleFactorInput = document.getElementById("scaleFactor");
+    let scaleFactor = scaleFactorInput ? parseFloat(scaleFactorInput.value) : 1;
 
+    if (scaleFactorInput) {
+        scaleFactorInput.addEventListener("change", function () {
+            scaleFactor = parseFloat(scaleFactorInput.value) / 5;
+
+            let linkLength = (min_sep + default_node_width) / scaleFactor;
+            console.log("Link length", linkLength);
+
+            colaLayout.linkDistance(linkLength);
+            colaLayout.start(
+                initialUnconstrainedIterations,
+                initialUserConstraintIterations,
+                initialAllConstraintsIterations,
+                gridSnapIterations)
+                .on("end", routeEdges);
+        });
+    }
 
     // TODO: Figure out WHEN to use flowLayout and when not to use it.
     // I think having directly above/ below makes it impossible to have flow layout 'y' *unless we have heirarchy*
-
-    // TODO: Need to think about this
-
 
     colaLayout
         .nodes(nodes)
@@ -169,23 +180,6 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .groupCompactness(1e-3)
         .symmetricDiffLinkLengths(min_sep + default_node_width);
 
-    // const anyCnD = (constraints.length > 0) || (groups.length > 0);
-
-    // if (!anyCnD) {
-    //     colaLayout
-    //         .flowLayout("y", 100);
-    // }
-
-    // colaLayout
-    //     .nodes(nodes)
-    //     .links(edges)
-    //     .constraints(constraints)
-    //     .groups(groups)
-    //     .groupCompactness(1e-3)
-    //     //.flowLayout("y", 100) // Adding this in causes an issue in terms of layout. This is in line with the DAGRE estimate
-    //     //.symmetricDiffLinkLengths(min_sep + default_node_width, 0.1);
-    //     //.jaccardLinkLengths(LINK_DISTANCE, 2);
-    //      // I *think* this is minimum link distance
 
     var lineFunction = d3.line()
         .x(function (d) { return d.x; })
@@ -193,7 +187,7 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .curve(d3.curveBasis);
 
     var routeEdges = function () {
-        
+
         try {
             colaLayout.prepareEdgeRouting(margin / 3);
             console.log("Routing edges for the nth time", ++edgeRouteIdx);
@@ -224,18 +218,25 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
             link.attr("d", function (d, i) {
 
-                var route = colaLayout.routeEdge(d);
-
-
-                // Get all edges between the two nodes, regardless of direction
-                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
-                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
-                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
-                });
-
-
-
                 let n = d.id;
+
+                try {
+                    var route = colaLayout.routeEdge(d);
+                } catch (e) {
+
+                    console.log("Error routing edge", d.id, `from ${d.source.id} to ${d.target.id}`);
+                    console.error(e);
+
+
+                    let runtimeMessages = document.getElementById("runtime_messages");
+                    let dismissableAlert = document.createElement("div");
+                    dismissableAlert.className = "alert alert-danger alert-dismissible fade show";
+                    dismissableAlert.setAttribute("role", "alert");
+                    dismissableAlert.innerHTML = `Runtime (WebCola) error when laying out an edge from ${d.source.id} to ${d.target.id}. You may have to click and drag these nodes slightly nodes to un-stick layout.`;
+                    runtimeMessages.appendChild(dismissableAlert);
+                    return lineFunction([{ x: d.source.x, y: d.source.y }, { x: d.target.x, y: d.target.y }]);
+                }
+
                 // This is a special case for group edges
                 if (n.startsWith("_g_")) {
                     let source = d.source;
@@ -257,14 +258,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
                     // Only one of source group and target group can be a group.
-
                     // Within source group, see if the target is the key
 
                     function closestPointOnRect(bounds, point) {
                         // Destructure the rectangle bounds
                         const { x, y, X, Y } = bounds;
-
-
 
                         // Calculate the rectangle's edges
                         const left = x;
@@ -322,6 +320,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                 }
 
 
+                // Get all edges between the two nodes, regardless of direction
+                const allEdgesBetweenSourceAndTarget = edges.filter(edge => {
+                    return (edge.source.id == d.source.id && edge.target.id == d.target.id) ||
+                        (edge.source.id == d.target.id && edge.target.id == d.source.id);
+                });
 
 
                 // If there are only two points in the route, get the midpoint of the route and add it to the route
@@ -588,7 +591,11 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .attr("y", function (d) { return -d.height * 0.5; }) // Center the icon vertically
         // I want to show some text on hover
         .append("title")
-        .text(function (d) { return d.name; });
+        .text(function (d) { return d.name; })
+        .on("error", function (d) {
+            d3.select(this).attr("xlink:href", "img/default.png"); // Replace with a default icon
+            console.error(`Failed to load icon for node ${d.id}: ${d.icon}`);
+        });
 
 
     // Add most specific type label
@@ -598,38 +605,40 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
         .text(function (d) { return d.mostSpecificType; });
 
 
-    var label = svg.selectAll(".label")
-        .data(nodes)
-        .enter().append("text")
-        .attr("class", "label")
-        .each(function (d) {
+    var label =
+        //svg.selectAll(".label")
+        //.data(nodes)
+        node.append("text")
+            //.enter().append("text")
+            .attr("class", "label")
+            .each(function (d) {
 
-            if (isHiddenNode(d)) {
-                return;
-            }
+                if (isHiddenNode(d)) {
+                    return;
+                }
 
-            let displayLabel = d.icon ? "" : d.name;
+                let displayLabel = d.icon ? "" : d.name;
 
 
-            // Append tspan for d.name
-            d3.select(this).append("tspan")
-                .attr("x", 0) // Align with the parent text element
-                .attr("dy", "0em") // Start at the same vertical position
-                .style("font-weight", "bold")
-                .text(displayLabel);
-
-            var y = 1; // Start from the next line for attributes
-
-            // Append tspans for each attribute
-            for (let key in d.attributes) {
+                // Append tspan for d.name
                 d3.select(this).append("tspan")
                     .attr("x", 0) // Align with the parent text element
-                    .attr("dy", `${y}em`) // Move each attribute to a new line
-                    .text(key + ": " + d.attributes[key]);
-                y += 1; // Increment for the next line
-            }
-        })
-        .call(colaLayout.drag);
+                    .attr("dy", "0em") // Start at the same vertical position
+                    .style("font-weight", "bold")
+                    .text(displayLabel);
+
+                var y = 1; // Start from the next line for attributes
+
+                // Append tspans for each attribute
+                for (let key in d.attributes) {
+                    d3.select(this).append("tspan")
+                        .attr("x", 0) // Align with the parent text element
+                        .attr("dy", `${y}em`) // Move each attribute to a new line
+                        .text(key + ": " + d.attributes[key]);
+                    y += 1; // Increment for the next line
+                }
+            })
+            .call(colaLayout.drag);
 
 
     // Helper function to calculate new position along the path
@@ -653,13 +662,23 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
 
 
     // Add a rectangle for each group and a label at the top of the group
+    const DISCONNECTED_NODE_GROUP = "_d_";
 
     var group = svg.selectAll(".group")
         .data(groups)
         .enter().append("rect")
-        .attr("class", "group")
+        .attr("class", function (d) {
+            return d.name.startsWith(DISCONNECTED_NODE_GROUP) ? "disconnectedNode" : "group";
+        })
         .attr("rx", 8).attr("ry", 8)
         .style("fill", function (d, i) {
+
+            // If d.name starts with "_d_", color it transparent
+            if (d.name.startsWith(DISCONNECTED_NODE_GROUP)) {
+                return "transparent";
+            }
+
+
             var targetNode = nodes[d.keyNode];
             return targetNode.color;
         })
@@ -704,8 +723,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
             .attr("y", function (d) { return d.bounds.y; });
 
         mostSpecificTypeLabel
-            .attr("x", function (d) { return d.x - d.width/2 + 5; })
-            .attr("y", function (d) { return d.y - (d.height/2) + 10 ; })
+            .attr("x", function (d) { return d.x - d.width / 2 + 5; })
+            .attr("y", function (d) { return d.y - (d.height / 2) + 10; })
             .raise();
 
 
@@ -740,15 +759,8 @@ function setupLayout(d3, nodes, edges, constraints, groups, width, height) {
                     let potentialTargetGroups = getContainingGroups(groups, target);
                     let potentialSourceGroups = getContainingGroups(groups, source);
 
-
                     let targetGroup = potentialTargetGroups.find(group => group.keyNode === sourceIndex);
                     let sourceGroup = potentialSourceGroups.find(group => group.keyNode === targetIndex);
-
-                    /*
-
-                        group has bounds, inner bounds AND padding.
-
-                    */
 
                     if (sourceGroup) {
                         source = sourceGroup;

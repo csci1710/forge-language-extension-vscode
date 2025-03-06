@@ -18777,7 +18777,7 @@ var $apply = __nccwpck_require__(33945);
 var $call = __nccwpck_require__(88093);
 var $reflectApply = __nccwpck_require__(31330);
 
-/** @type {import('./actualApply.ts')} */
+/** @type {import('./actualApply')} */
 module.exports = $reflectApply || bind.call($call, $apply);
 
 
@@ -18789,7 +18789,7 @@ module.exports = $reflectApply || bind.call($call, $apply);
 "use strict";
 
 
-/** @type {import('./functionApply.ts')} */
+/** @type {import('./functionApply')} */
 module.exports = Function.prototype.apply;
 
 
@@ -18801,7 +18801,7 @@ module.exports = Function.prototype.apply;
 "use strict";
 
 
-/** @type {import('./functionCall.ts')} */
+/** @type {import('./functionCall')} */
 module.exports = Function.prototype.call;
 
 
@@ -18819,7 +18819,7 @@ var $TypeError = __nccwpck_require__(73314);
 var $call = __nccwpck_require__(88093);
 var $actualApply = __nccwpck_require__(22639);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = function callBindBasic(args) {
 	if (args.length < 1 || typeof args[0] !== 'function') {
 		throw new $TypeError('a function is required');
@@ -18836,7 +18836,7 @@ module.exports = function callBindBasic(args) {
 "use strict";
 
 
-/** @type {import('./reflectApply.ts')} */
+/** @type {import('./reflectApply')} */
 module.exports = typeof Reflect !== 'undefined' && Reflect && Reflect.apply;
 
 
@@ -18855,7 +18855,7 @@ var callBindBasic = __nccwpck_require__(88705);
 /** @type {(thisArg: string, searchString: string, position?: number) => number} */
 var $indexOf = callBindBasic([GetIntrinsic('%String.prototype.indexOf%')]);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = function callBoundIntrinsic(name, allowMissing) {
 	// eslint-disable-next-line no-extra-parens
 	var intrinsic = /** @type {Parameters<typeof callBindBasic>[0][0]} */ (GetIntrinsic(name, !!allowMissing));
@@ -35902,11 +35902,11 @@ var desc = !!hasProtoAccessor && gOPD && gOPD(Object.prototype, /** @type {keyof
 var $Object = Object;
 var $getPrototypeOf = $Object.getPrototypeOf;
 
-/** @type {import('./get.ts')} */
+/** @type {import('./get')} */
 module.exports = desc && typeof desc.get === 'function'
 	? callBind([desc.get])
 	: typeof $getPrototypeOf === 'function'
-		? /** @type {import('./get.ts')} */ function getDunder(value) {
+		? /** @type {import('./get')} */ function getDunder(value) {
 			// eslint-disable-next-line eqeqeq
 			return $getPrototypeOf(value == null ? value : $Object(value));
 		}
@@ -38097,7 +38097,7 @@ exports["default"] = new Uint16Array(
 "use strict";
 
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 var $defineProperty = Object.defineProperty || false;
 if ($defineProperty) {
 	try {
@@ -38119,7 +38119,7 @@ module.exports = $defineProperty;
 "use strict";
 
 
-/** @type {import('./eval.ts')} */
+/** @type {import('./eval')} */
 module.exports = EvalError;
 
 
@@ -38131,7 +38131,7 @@ module.exports = EvalError;
 "use strict";
 
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = Error;
 
 
@@ -38143,7 +38143,7 @@ module.exports = Error;
 "use strict";
 
 
-/** @type {import('./range.ts')} */
+/** @type {import('./range')} */
 module.exports = RangeError;
 
 
@@ -38155,7 +38155,7 @@ module.exports = RangeError;
 "use strict";
 
 
-/** @type {import('./ref.ts')} */
+/** @type {import('./ref')} */
 module.exports = ReferenceError;
 
 
@@ -38167,7 +38167,7 @@ module.exports = ReferenceError;
 "use strict";
 
 
-/** @type {import('./syntax.ts')} */
+/** @type {import('./syntax')} */
 module.exports = SyntaxError;
 
 
@@ -38179,7 +38179,7 @@ module.exports = SyntaxError;
 "use strict";
 
 
-/** @type {import('./type.ts')} */
+/** @type {import('./type')} */
 module.exports = TypeError;
 
 
@@ -38191,7 +38191,7 @@ module.exports = TypeError;
 "use strict";
 
 
-/** @type {import('./uri.ts')} */
+/** @type {import('./uri')} */
 module.exports = URIError;
 
 
@@ -38203,7 +38203,7 @@ module.exports = URIError;
 "use strict";
 
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = Object;
 
 
@@ -45105,7 +45105,7 @@ var originalGetProto = __nccwpck_require__(91311);
 
 var getDunderProto = __nccwpck_require__(26669);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = reflectGetProto
 	? function getProto(O) {
 		// @ts-expect-error TS can't narrow inside a closure, for some reason
@@ -45135,7 +45135,7 @@ module.exports = reflectGetProto
 "use strict";
 
 
-/** @type {import('./gOPD.ts')} */
+/** @type {import('./gOPD')} */
 module.exports = Object.getOwnPropertyDescriptor;
 
 
@@ -45147,7 +45147,7 @@ module.exports = Object.getOwnPropertyDescriptor;
 "use strict";
 
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 var $gOPD = __nccwpck_require__(1174);
 
 if ($gOPD) {
@@ -46526,7 +46526,7 @@ module.exports = (flag, argv = process.argv) => {
 var origSymbol = typeof Symbol !== 'undefined' && Symbol;
 var hasSymbolSham = __nccwpck_require__(61114);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = function hasNativeSymbols() {
 	if (typeof origSymbol !== 'function') { return false; }
 	if (typeof Symbol !== 'function') { return false; }
@@ -46545,7 +46545,7 @@ module.exports = function hasNativeSymbols() {
 "use strict";
 
 
-/** @type {import('./shams.ts')} */
+/** @type {import('./shams')} */
 /* eslint complexity: [2, 18], max-statements: [2, 33] */
 module.exports = function hasSymbols() {
 	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
@@ -46602,7 +46602,7 @@ var call = Function.prototype.call;
 var $hasOwn = Object.prototype.hasOwnProperty;
 var bind = __nccwpck_require__(37564);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = bind.call(call, $hasOwn);
 
 
@@ -185329,7 +185329,7 @@ module.exports = zipObject;
 "use strict";
 
 
-/** @type {import('./abs.ts')} */
+/** @type {import('./abs')} */
 module.exports = Math.abs;
 
 
@@ -185341,7 +185341,7 @@ module.exports = Math.abs;
 "use strict";
 
 
-/** @type {import('./floor.ts')} */
+/** @type {import('./floor')} */
 module.exports = Math.floor;
 
 
@@ -185353,7 +185353,7 @@ module.exports = Math.floor;
 "use strict";
 
 
-/** @type {import('./isNaN.ts')} */
+/** @type {import('./isNaN')} */
 module.exports = Number.isNaN || function isNaN(a) {
 	return a !== a;
 };
@@ -185367,7 +185367,7 @@ module.exports = Number.isNaN || function isNaN(a) {
 "use strict";
 
 
-/** @type {import('./max.ts')} */
+/** @type {import('./max')} */
 module.exports = Math.max;
 
 
@@ -185379,7 +185379,7 @@ module.exports = Math.max;
 "use strict";
 
 
-/** @type {import('./min.ts')} */
+/** @type {import('./min')} */
 module.exports = Math.min;
 
 
@@ -185391,7 +185391,7 @@ module.exports = Math.min;
 "use strict";
 
 
-/** @type {import('./pow.ts')} */
+/** @type {import('./pow')} */
 module.exports = Math.pow;
 
 
@@ -185403,7 +185403,7 @@ module.exports = Math.pow;
 "use strict";
 
 
-/** @type {import('./round.ts')} */
+/** @type {import('./round')} */
 module.exports = Math.round;
 
 
@@ -185417,7 +185417,7 @@ module.exports = Math.round;
 
 var $isNaN = __nccwpck_require__(77044);
 
-/** @type {import('./sign.ts')} */
+/** @type {import('./sign')} */
 module.exports = function sign(number) {
 	if ($isNaN(number) || number === 0) {
 		return number;
@@ -201931,7 +201931,7 @@ var $TypeError = __nccwpck_require__(73314);
 * That node is also moved to the head of the list, so that if it's accessed again we don't need to traverse the whole list.
 * By doing so, all the recently used nodes can be accessed relatively quickly.
 */
-/** @type {import('./list.ts').listGetNode} */
+/** @type {import('./list.d.ts').listGetNode} */
 // eslint-disable-next-line consistent-return
 var listGetNode = function (list, key, isDelete) {
 	/** @type {typeof list | NonNullable<(typeof list)['next']>} */
@@ -201952,7 +201952,7 @@ var listGetNode = function (list, key, isDelete) {
 	}
 };
 
-/** @type {import('./list.ts').listGet} */
+/** @type {import('./list.d.ts').listGet} */
 var listGet = function (objects, key) {
 	if (!objects) {
 		return void undefined;
@@ -201960,28 +201960,28 @@ var listGet = function (objects, key) {
 	var node = listGetNode(objects, key);
 	return node && node.value;
 };
-/** @type {import('./list.ts').listSet} */
+/** @type {import('./list.d.ts').listSet} */
 var listSet = function (objects, key, value) {
 	var node = listGetNode(objects, key);
 	if (node) {
 		node.value = value;
 	} else {
 		// Prepend the new node to the beginning of the list
-		objects.next = /** @type {import('./list.ts').ListNode<typeof value, typeof key>} */ ({ // eslint-disable-line no-param-reassign, no-extra-parens
+		objects.next = /** @type {import('./list.d.ts').ListNode<typeof value, typeof key>} */ ({ // eslint-disable-line no-param-reassign, no-extra-parens
 			key: key,
 			next: objects.next,
 			value: value
 		});
 	}
 };
-/** @type {import('./list.ts').listHas} */
+/** @type {import('./list.d.ts').listHas} */
 var listHas = function (objects, key) {
 	if (!objects) {
 		return false;
 	}
 	return !!listGetNode(objects, key);
 };
-/** @type {import('./list.ts').listDelete} */
+/** @type {import('./list.d.ts').listDelete} */
 // eslint-disable-next-line consistent-return
 var listDelete = function (objects, key) {
 	if (objects) {
@@ -201989,13 +201989,13 @@ var listDelete = function (objects, key) {
 	}
 };
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = function getSideChannelList() {
 	/** @typedef {ReturnType<typeof getSideChannelList>} Channel */
 	/** @typedef {Parameters<Channel['get']>[0]} K */
 	/** @typedef {Parameters<Channel['set']>[1]} V */
 
-	/** @type {import('./list.ts').RootNode<V, K> | undefined} */ var $o;
+	/** @type {import('./list.d.ts').RootNode<V, K> | undefined} */ var $o;
 
 	/** @type {Channel} */
 	var channel = {
@@ -202060,8 +202060,8 @@ var $mapDelete = callBound('Map.prototype.delete', true);
 /** @type {<K, V>(thisArg: Map<K, V>) => number} */
 var $mapSize = callBound('Map.prototype.size', true);
 
-/** @type {import('./index.js')} */
-module.exports = !!$Map && /** @type {Exclude<import('./index.js'), false>} */ function getSideChannelMap() {
+/** @type {import('.')} */
+module.exports = !!$Map && /** @type {Exclude<import('.'), false>} */ function getSideChannelMap() {
 	/** @typedef {ReturnType<typeof getSideChannelMap>} Channel */
 	/** @typedef {Parameters<Channel['get']>[0]} K */
 	/** @typedef {Parameters<Channel['set']>[1]} V */
@@ -202135,9 +202135,9 @@ var $weakMapHas = callBound('WeakMap.prototype.has', true);
 /** @type {<K extends object, V>(thisArg: WeakMap<K, V>, key: K) => boolean} */
 var $weakMapDelete = callBound('WeakMap.prototype.delete', true);
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = $WeakMap
-	? /** @type {Exclude<import('./index.js'), false>} */ function getSideChannelWeakMap() {
+	? /** @type {Exclude<import('.'), false>} */ function getSideChannelWeakMap() {
 		/** @typedef {ReturnType<typeof getSideChannelWeakMap>} Channel */
 		/** @typedef {Parameters<Channel['get']>[0]} K */
 		/** @typedef {Parameters<Channel['set']>[1]} V */
@@ -202218,7 +202218,7 @@ var getSideChannelWeakMap = __nccwpck_require__(92870);
 
 var makeChannel = getSideChannelWeakMap || getSideChannelMap || getSideChannelList;
 
-/** @type {import('./index.js')} */
+/** @type {import('.')} */
 module.exports = function getSideChannel() {
 	/** @typedef {ReturnType<typeof getSideChannel>} Channel */
 
@@ -218702,6 +218702,10 @@ exports.copeToLayoutSpec = copeToLayoutSpec;
 const layoutspec_1 = __nccwpck_require__(26661);
 // Import js-yaml
 const yaml = __importStar(__nccwpck_require__(74281));
+const ORIENTATION_DIRECTIONS = ["above", "below", "left", "right", "directlyAbove", "directlyBelow", "directlyLeft", "directlyRight"];
+const CYCLIC_DIRECTIONS = ["clockwise", "counterclockwise"];
+const GROUP_TARGETS = ["domain", "range"];
+const DEFAULT_FIELD_APPLIES_TO = ["univ", "univ"];
 /*
 
 constraints:
@@ -218752,8 +218756,6 @@ function copeToLayoutSpec(s) {
     if (!s) {
         return layoutspec_1.DEFAULT_LAYOUT;
     }
-    // s is a string in YAML format (as above)
-    // I want to convert it to a LayoutSpec object, piece by piece.
     // First, parse the YAML
     let parsed = yaml.load(s);
     /*
@@ -218786,44 +218788,59 @@ function copeToLayoutSpec(s) {
         sigIcons: []
     };
     if (constraints) {
-        let { closures, clusterRelations, fieldDirectionConstraints, sigOrientationConstraints } = extractConstraints(constraints);
-        layoutSpec.closures = closures;
-        layoutSpec.groupBy = clusterRelations;
-        layoutSpec.fieldDirections = fieldDirectionConstraints;
-        layoutSpec.sigDirections = sigOrientationConstraints;
+        try {
+            let { closures, clusterRelations, fieldDirectionConstraints, sigOrientationConstraints } = extractConstraints(constraints);
+            layoutSpec.closures = closures;
+            layoutSpec.groupBy = clusterRelations;
+            layoutSpec.fieldDirections = fieldDirectionConstraints;
+            layoutSpec.sigDirections = sigOrientationConstraints;
+        }
+        catch (e) {
+            throw new Error("Error parsing constraints.\n" + e.message);
+        }
     }
     if (directives) {
-        let { sigIcons, sigColors, attributeFields, sigProjections, hideDisconnected, hideDisconnectedBuiltIns } = extractDirectives(directives);
-        layoutSpec.sigIcons = sigIcons;
-        layoutSpec.sigColors = sigColors;
-        layoutSpec.attributeFields = attributeFields;
-        layoutSpec.projections = sigProjections;
-        layoutSpec.hideDisconnected = hideDisconnected;
-        layoutSpec.hideDisconnectedBuiltIns = hideDisconnectedBuiltIns;
+        try {
+            let { sigIcons, sigColors, attributeFields, sigProjections, hideDisconnected, hideDisconnectedBuiltIns } = extractDirectives(directives);
+            layoutSpec.sigIcons = sigIcons;
+            layoutSpec.sigColors = sigColors;
+            layoutSpec.attributeFields = attributeFields;
+            layoutSpec.projections = sigProjections;
+            layoutSpec.hideDisconnected = hideDisconnected;
+            layoutSpec.hideDisconnectedBuiltIns = hideDisconnectedBuiltIns;
+        }
+        catch (e) {
+            throw new Error("Error parsing directives.\n" + e.message);
+        }
     }
     return layoutSpec;
 }
 function extractConstraints(constraints) {
     let closures = constraints.filter(c => c.cyclic)
         .map(c => {
+        let appliesTo = c.cyclic.appliesTo || DEFAULT_FIELD_APPLIES_TO;
         return {
             fieldName: c.cyclic.field,
-            direction: c.cyclic.direction || "clockwise"
+            direction: c.cyclic.direction || "clockwise",
+            appliesTo: appliesTo
         };
     });
     let clusterRelations = constraints.filter(c => c.group)
         .map(c => {
+        let groupOn = c.group.target || "range";
         return {
             fieldName: c.group.field,
-            groupOn: c.group.target
+            groupOn: groupOn,
         };
     });
     let orientationConstraints = constraints.filter(c => c.orientation).map(c => c.orientation);
     let fieldDirectionConstraints = orientationConstraints.filter(c => c.field)
         .map(c => {
+        let appliesTo = c.appliesTo || DEFAULT_FIELD_APPLIES_TO;
         return {
             fieldName: c.field,
-            directions: c.directions
+            directions: c.directions,
+            appliesTo: appliesTo
         };
     });
     let sigOrientationConstraints = orientationConstraints.filter(c => c.sigs)
@@ -218836,6 +218853,33 @@ function extractConstraints(constraints) {
             directions: c.directions
         };
     });
+    //////
+    for (let c of fieldDirectionConstraints) {
+        for (let d of c.directions) {
+            if (!ORIENTATION_DIRECTIONS.includes(d)) {
+                throw new Error("Invalid orientation direction: " + d + " for field " + c.fieldName + ".\nValid directions are: " + ORIENTATION_DIRECTIONS.join(", "));
+            }
+        }
+    }
+    for (let c of sigOrientationConstraints) {
+        for (let d of c.directions) {
+            if (!ORIENTATION_DIRECTIONS.includes(d)) {
+                throw new Error("Invalid orientation direction: " + d + " for sig " + c.sigName + ".\nValid directions are: " + ORIENTATION_DIRECTIONS.join(", "));
+            }
+        }
+    }
+    for (let c of closures) {
+        if (!CYCLIC_DIRECTIONS.includes(c.direction)) {
+            throw new Error("Invalid cyclic direction: " + c.direction + " for field " + c.fieldName + ".\nValid directions are: " + CYCLIC_DIRECTIONS.join(", "));
+        }
+    }
+    // Cluster relations
+    for (let c of clusterRelations) {
+        if (!GROUP_TARGETS.includes(c.groupOn)) {
+            throw new Error("Invalid group target: " + c.groupOn + " for field " + c.fieldName + ".\nValid targets are: " + GROUP_TARGETS.join(", "));
+        }
+    }
+    //////
     return {
         closures,
         clusterRelations,
@@ -218995,7 +219039,7 @@ const http = __importStar(__nccwpck_require__(58611));
 const alloy_instance_1 = __nccwpck_require__(80701);
 const layoutinstance_1 = __nccwpck_require__(11761);
 const graphtowebcola_1 = __nccwpck_require__(22994);
-const constraint_validator_1 = __nccwpck_require__(93342);
+const constraint_validator_1 = __nccwpck_require__(69156);
 const cope_parser_1 = __nccwpck_require__(2631);
 const layoutspec_1 = __nccwpck_require__(26661);
 const instanceToInst_1 = __nccwpck_require__(51502);
@@ -219013,6 +219057,9 @@ app.set('views', __nccwpck_require__.ab + "views");
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.engine('ejs', (__nccwpck_require__(47904).__express)).set('view engine', 'ejs');
+// This is a hack. I'm not sure
+// how to encode the version number.
+const version = "1.2.0";
 const secretKey = "cope-and-drag-logging-key";
 // Function to get or generate a persistent user ID using HMAC
 function getPersistentUserId() {
@@ -219028,9 +219075,6 @@ function getPersistentUserId() {
         return userId;
     }
 }
-// This is a hack. I'm not sure
-// how to encode the version number.
-const version = "1.1.2";
 const userId = getPersistentUserId();
 const logger = new logger_1.Logger(userId, version);
 function getFormContents(req) {
@@ -219107,6 +219151,12 @@ app.post('/', (req, res) => {
         }
         var instAsString = (0, instanceToInst_1.instanceToInst)(instances[instanceNumber]);
         var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
+        const constraintValidator = new constraint_validator_1.ConstraintValidator(layout);
+        const inconsistent_error = constraintValidator.validateConstraints();
+        if (inconsistent_error) {
+            // Conflict between constraints and instance
+            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
+        }
         let cl = new graphtowebcola_1.WebColaLayout(layout);
         var colaConstraints = cl.colaConstraints;
         var colaNodes = cl.colaNodes;
@@ -219114,14 +219164,6 @@ app.post('/', (req, res) => {
         var colaGroups = cl.groupDefinitions;
         var height = cl.FIG_HEIGHT;
         var width = cl.FIG_WIDTH;
-        const constraintValidator = new constraint_validator_1.ConstraintValidator(colaConstraints, colaNodes, colaGroups);
-        const inconsistent_error = constraintValidator.validateConstraints();
-        if (inconsistent_error) {
-            // Conflict between constraints and instance
-            throw new Error("The instance being visualized is inconsistent with layout constraints.<br><br> " + inconsistent_error);
-        }
-        // BUT ALSO, the moment there is an error we should not do the
-        // rest. E.g., get cola nodes, colka edges, etc.
     }
     catch (e) {
         error = e.message;
@@ -219161,7 +219203,7 @@ app.post('/', (req, res) => {
         source_content: "", //HACK
         sourceFileName: "",
         instAsString,
-        errors: error,
+        errors: error.replace(/\n/g, "<br>"),
         loggingEnabled
     });
 });
@@ -219220,13 +219262,7 @@ app.get('/example/:name', (req, res) => {
     let li = new layoutinstance_1.LayoutInstance(layoutSpec);
     //// It is not good hygiene to repeat code like this.
     var { layout, projectionData } = li.generateLayout(instances[instanceNumber], projections);
-    var instAsString = (0, instanceToInst_1.instanceToInst)(instances[instanceNumber]);
-    let cl = new graphtowebcola_1.WebColaLayout(layout);
-    let colaConstraints = cl.colaConstraints;
-    let colaNodes = cl.colaNodes;
-    let colaEdges = cl.colaEdges;
-    let colaGroups = cl.groupDefinitions;
-    const constraintValidator = new constraint_validator_1.ConstraintValidator(colaConstraints, colaNodes, colaGroups);
+    const constraintValidator = new constraint_validator_1.ConstraintValidator(layout);
     const error = constraintValidator.validateConstraints();
     if (error) {
         // TODO: THe reporting here should be more meaningful at some point.
@@ -219235,6 +219271,12 @@ app.get('/example/:name', (req, res) => {
         res.status(418).send(error);
         return;
     }
+    var instAsString = (0, instanceToInst_1.instanceToInst)(instances[instanceNumber]);
+    let cl = new graphtowebcola_1.WebColaLayout(layout);
+    let colaConstraints = cl.colaConstraints;
+    let colaNodes = cl.colaNodes;
+    let colaEdges = cl.colaEdges;
+    let colaGroups = cl.groupDefinitions;
     let height = cl.FIG_HEIGHT;
     let width = cl.FIG_WIDTH;
     res.render('diagram', {
@@ -219385,6 +219427,271 @@ exports.ColorPicker = ColorPicker;
 
 /***/ }),
 
+/***/ 69156:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ConstraintValidator = void 0;
+const cassowary_1 = __nccwpck_require__(4197);
+const lodash_1 = __nccwpck_require__(52356);
+const interfaces_1 = __nccwpck_require__(69068);
+/// TODO: Should examine LAYOUT CONSTRAINTS NOT COLA CONSTRAINTS
+class ConstraintValidator {
+    constructor(layout) {
+        this.minPadding = 15;
+        this.horizontallyAligned = [];
+        this.verticallyAligned = [];
+        this.layout = layout;
+        this.solver = new cassowary_1.SimplexSolver();
+        this.nodes = layout.nodes;
+        this.edges = layout.edges;
+        this.orientationConstraints = layout.constraints;
+        this.variables = {};
+        this.groups = layout.groups;
+        this.added_constraints = [];
+        this.error = null;
+    }
+    validateConstraints() {
+        // I think this works, but I need to test it
+        return this.validateGroupConstraints() || this.validatePositionalConstraints();
+    }
+    validatePositionalConstraints() {
+        this.nodes.forEach(node => {
+            let index = this.getNodeIndex(node.id);
+            this.variables[index] = {
+                x: new cassowary_1.Variable(`${node.id}_x`),
+                y: new cassowary_1.Variable(`${node.id}_y`),
+            };
+        });
+        for (let i = 0; i < this.orientationConstraints.length; i++) {
+            let constraint = this.orientationConstraints[i];
+            this.constraintToCassowary(constraint);
+            if (this.error) {
+                return this.error;
+            }
+        }
+        this.solver.solve();
+        // Now that the solver has solved, we can get an ALIGNMENT ORDER for the nodes.
+        let and_more_constraints = this.getAlignmentOrders();
+        // Now add THESE constraints to the layout constraints
+        this.layout.constraints = this.layout.constraints.concat(and_more_constraints);
+        return this.error;
+    }
+    validateGroupConstraints() {
+        // This identifies if there ARE any overlapping non-subgroups
+        let overlappingNonSubgroups = false;
+        this.groups.forEach(group => {
+            this.groups.forEach(otherGroup => {
+                // const groupIndex = this.getGroupIndex(group.name);
+                // const otherGroupIndex = this.getGroupIndex(otherGroup.name);
+                if (group.name === otherGroup.name || overlappingNonSubgroups) {
+                    return;
+                }
+                if (!this.isSubGroup(group, otherGroup) && !this.isSubGroup(otherGroup, group)) {
+                    let intersection = this.groupIntersection(group, otherGroup);
+                    overlappingNonSubgroups = intersection.length > 0;
+                    if (overlappingNonSubgroups) {
+                        let intersectingGroupNames = intersection.join(', ');
+                        this.error = `Layout not satisfiable! [ ${intersectingGroupNames} ] are in groups ${group.name} and ${otherGroup.name}, but neither group is contained in the other. Groups must be either nested or disjoint.`;
+                    }
+                }
+            });
+        });
+        return this.error;
+    }
+    getNodeIndex(nodeId) {
+        return this.nodes.findIndex(node => node.id === nodeId);
+    }
+    orientationConstraintToString(constraint) {
+        if ((0, interfaces_1.isTopConstraint)(constraint)) {
+            let tc = constraint;
+            return `ENSURE: ${tc.top.id} is above ${tc.bottom.id}`;
+        }
+        else if ((0, interfaces_1.isLeftConstraint)(constraint)) {
+            let lc = constraint;
+            return `ENSURE: ${lc.left.id} is to the left of ${lc.right.id}`;
+        }
+        else if ((0, interfaces_1.isAlignmentConstraint)(constraint)) {
+            let ac = constraint;
+            let axis = ac.axis;
+            let node1 = ac.node1;
+            let node2 = ac.node2;
+            if (axis === 'x') {
+                return `ENSURE: ${node1.id} is vertically aligned with ${node2.id}`;
+            }
+            else if (axis === 'y') {
+                return `ENSURE: ${node1.id} is horizontally aligned with ${node2.id}`;
+            }
+            return `ENSURE: ${node1.id} is aligned with ${node2.id} along the ${axis} axis`;
+        }
+        return `ENSURE: Unknown constraint type: ${constraint}`;
+    }
+    constraintToCassowary(constraint) {
+        try {
+            if ((0, interfaces_1.isTopConstraint)(constraint)) {
+                let tc = constraint;
+                let top = tc.top;
+                let bottom = tc.bottom;
+                let minDistance = tc.minDistance;
+                const topId = this.getNodeIndex(top.id);
+                const bottomId = this.getNodeIndex(bottom.id);
+                let topVar = this.variables[topId].y;
+                let bottomVar = this.variables[bottomId].y;
+                let lhs = new cassowary_1.Expression(topVar)
+                    .plus(new cassowary_1.Expression(minDistance));
+                let rhs = new cassowary_1.Expression(bottomVar);
+                this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.LEQ, rhs, cassowary_1.Strength.required));
+            }
+            else if ((0, interfaces_1.isLeftConstraint)(constraint)) {
+                let lc = constraint;
+                let left = lc.left;
+                let right = lc.right;
+                let minDistance = lc.minDistance;
+                const leftId = this.getNodeIndex(left.id);
+                const rightId = this.getNodeIndex(right.id);
+                let leftVar = this.variables[leftId].x;
+                let rightVar = this.variables[rightId].x;
+                let lhs = new cassowary_1.Expression(leftVar)
+                    .plus(new cassowary_1.Expression(minDistance));
+                let rhs = new cassowary_1.Expression(rightVar);
+                this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.LEQ, rhs, cassowary_1.Strength.required));
+            }
+            else if ((0, interfaces_1.isAlignmentConstraint)(constraint)) {
+                // This is trickier. We want to REGISTER alignment AS WELL.
+                let ac = constraint;
+                let axis = ac.axis;
+                let node1 = ac.node1;
+                let node2 = ac.node2;
+                const node1Id = this.getNodeIndex(node1.id);
+                const node2Id = this.getNodeIndex(node2.id);
+                let node1Var = this.variables[node1Id][axis];
+                let node2Var = this.variables[node2Id][axis];
+                let lhs = new cassowary_1.Expression(node1Var);
+                let rhs = new cassowary_1.Expression(node2Var);
+                this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.LEQ, rhs, cassowary_1.Strength.required));
+                this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.GEQ, rhs, cassowary_1.Strength.required));
+                // And register the alignment
+                if (axis === 'x') {
+                    this.verticallyAligned.push([node1, node2]);
+                }
+                else if (axis === 'y') {
+                    this.horizontallyAligned.push([node1, node2]);
+                }
+            }
+            else {
+                console.log(constraint, "Unknown constraint type");
+                this.error = "Unknown constraint type";
+            }
+            this.added_constraints.push(constraint);
+        }
+        catch (e) {
+            let previousConstraintList = this.added_constraints.map((c) => this.orientationConstraintToString(c));
+            let previousConstraintSet = new Set(previousConstraintList);
+            previousConstraintList = [...previousConstraintSet];
+            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
+            let currentConstraintString = this.orientationConstraintToString(constraint);
+            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
+            console.log(e);
+            return;
+        }
+    }
+    getAlignmentOrders() {
+        // Make sure the solver has solved
+        this.solver.solve();
+        // Now first, create the normalized groups.
+        this.horizontallyAligned = this.normalizeAlignment(this.horizontallyAligned);
+        this.verticallyAligned = this.normalizeAlignment(this.verticallyAligned);
+        let implicitAlignmentConstraints = [];
+        // Now we need to get the order of the nodes in each group
+        for (let i = 0; i < this.horizontallyAligned.length; i++) {
+            this.horizontallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].x.value - this.variables[this.getNodeIndex(b.id)].x.value);
+        }
+        this.horizontallyAligned.forEach((alignedLeftToRight) => {
+            for (let i = 0; i < alignedLeftToRight.length - 1; i++) {
+                let node1 = alignedLeftToRight[i];
+                let node2 = alignedLeftToRight[i + 1];
+                let lc = {
+                    left: node1,
+                    right: node2,
+                    minDistance: this.minPadding
+                };
+                implicitAlignmentConstraints.push(lc);
+            }
+        });
+        for (let i = 0; i < this.verticallyAligned.length; i++) {
+            this.verticallyAligned[i].sort((a, b) => this.variables[this.getNodeIndex(a.id)].y.value - this.variables[this.getNodeIndex(b.id)].y.value);
+        }
+        this.verticallyAligned.forEach((alignedTopToBottom) => {
+            for (let i = 0; i < alignedTopToBottom.length - 1; i++) {
+                let node1 = alignedTopToBottom[i];
+                let node2 = alignedTopToBottom[i + 1];
+                let tc = {
+                    top: node1,
+                    bottom: node2,
+                    minDistance: this.minPadding
+                };
+                implicitAlignmentConstraints.push(tc);
+            }
+        });
+        return implicitAlignmentConstraints;
+    }
+    normalizeAlignment(aligned) {
+        const merged = [];
+        /*
+        Initial Merging: The first loop iterates over each group in the aligned array and checks if it has any common elements with the existing groups in the merged array. If it does, it merges them.
+        */
+        for (const group of aligned) {
+            let mergedWithExisting = false;
+            for (const existing of merged) {
+                if (group.some(item => existing.includes(item))) {
+                    existing.push(...group.filter(item => !existing.includes(item)));
+                    mergedWithExisting = true;
+                    break;
+                }
+            }
+            if (!mergedWithExisting) {
+                merged.push([...group]);
+            }
+        }
+        // Final pass to ensure full transitive closure
+        let changed = true;
+        while (changed) {
+            changed = false;
+            for (let i = 0; i < merged.length; i++) {
+                for (let j = i + 1; j < merged.length; j++) {
+                    if (merged[i].some(item => merged[j].includes(item))) {
+                        merged[i].push(...merged[j].filter(item => !merged[i].includes(item)));
+                        merged.splice(j, 1);
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed)
+                    break;
+            }
+        }
+        return merged;
+    }
+    isSubGroup(subgroup, group) {
+        const sgElements = subgroup.nodeIds;
+        const gElements = group.nodeIds;
+        return sgElements.every((element) => gElements.includes(element));
+    }
+    groupIntersection(group1, group2) {
+        const g1Elements = group1.nodeIds;
+        const g2Elements = group2.nodeIds;
+        // Get elements that are in both groups
+        const commonElements = (0, lodash_1.intersection)(g1Elements, g2Elements);
+        return commonElements;
+    }
+}
+exports.ConstraintValidator = ConstraintValidator;
+
+
+/***/ }),
+
 /***/ 69068:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -219420,6 +219727,7 @@ const type_1 = __nccwpck_require__(45898);
 const projection_1 = __nccwpck_require__(36503);
 const alloy_graph_1 = __nccwpck_require__(72754);
 const colorpicker_1 = __nccwpck_require__(30959);
+const UNIVERSAL_TYPE = "univ";
 class LayoutInstance {
     constructor(layoutSpec) {
         this.hideThisEdge = "_h_";
@@ -219543,9 +219851,9 @@ class LayoutInstance {
     getFieldLayout(fieldId) {
         const fieldDirection = this._layoutSpec.fieldDirections.find((field) => field.fieldName === fieldId);
         if (fieldDirection) {
-            return fieldDirection.directions;
+            return fieldDirection;
         }
-        return [];
+        return undefined;
     }
     isAttributeField(fieldId) {
         const isAttributeRel = this._layoutSpec.attributeFields.find((field) => field.fieldName === fieldId);
@@ -219686,6 +219994,11 @@ class LayoutInstance {
         let mostSpecificType = allTypes[0];
         return mostSpecificType;
     }
+    getNodeTypes(node, a) {
+        let type = (0, alloy_instance_1.getAtomType)(a, node);
+        let allTypes = type.types.concat(UNIVERSAL_TYPE);
+        return allTypes;
+    }
     colorNodesByType(g, a) {
         let nodes = [...g.nodes()];
         let types = (0, alloy_instance_1.getInstanceTypes)(a);
@@ -219770,16 +220083,19 @@ class LayoutInstance {
         let projectionData = projectionResult.finalProjectionChoices;
         let g = (0, alloy_graph_1.generateGraph)(ai, this.hideDisconnected, this.hideDisconnectedBuiltIns);
         const attributes = this.generateAttributes(g);
-        const groups = this.generateGroups(g);
+        let groups = this.generateGroups(g);
         const colors = this.colorNodesByType(g, a);
         this.ensureNoExtraNodes(g, a);
+        let dcN = this.getDisconnectedNodes(g);
         let layoutNodes = g.nodes().map((nodeId) => {
             let type = (0, alloy_instance_1.getAtomType)(a, nodeId);
             let iconPath = this._sigIcons[type.id] ? this._sigIcons[type.id].path : this.DEFAULT_NODE_ICON_PATH;
             const nodeHeight = this._sigIcons[type.id] ? this._sigIcons[type.id].height : this.DEFAULT_NODE_HEIGHT;
             const nodeWidth = this._sigIcons[type.id] ? this._sigIcons[type.id].width : this.DEFAULT_NODE_WIDTH;
+            const allTypes = this.getNodeTypes(nodeId, a);
             const mostSpecificType = this.getMostSpecificType(nodeId, a);
             // TODO: ensure that iconPath exists
+            // Should we fallback to a default icon?
             let color = colors[nodeId];
             let nodeGroups = groups
                 .filter((group) => group.nodeIds.includes(nodeId))
@@ -219793,12 +220109,14 @@ class LayoutInstance {
                 icon: iconPath,
                 height: nodeHeight,
                 width: nodeWidth,
-                mostSpecificType: mostSpecificType
+                mostSpecificType: mostSpecificType,
+                types: allTypes
             };
         });
         let constraints = this.applySigConstraints(ai, layoutNodes);
+        ///// APPLYING THE CONSTRAINTS HERE, WE NEED TO FILTER ON TYPE //// aka APPLIESTO
         // Now we apply the closure constraints
-        let closureConstraints = this.applyClosureConstraints(g, layoutNodes, groups);
+        let closureConstraints = this.applyClosureConstraints(g, layoutNodes);
         // Append the closure constraints to the constraints
         constraints = constraints.concat(closureConstraints);
         // Now edges and relational constraints
@@ -219808,36 +220126,42 @@ class LayoutInstance {
             let source = layoutNodes.find((node) => node.id === edge.v);
             let target = layoutNodes.find((node) => node.id === edge.w);
             let relName = this.getRelationName(g, edge);
-            this.getFieldLayout(relName).forEach((direction) => {
-                if (direction === "left") {
-                    constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
-                }
-                else if (direction === "above") {
-                    constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
-                }
-                else if (direction === "right") {
-                    constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
-                }
-                else if (direction === "below") {
-                    constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
-                }
-                else if (direction === "directlyLeft") {
-                    constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
-                    constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyAbove") {
-                    constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
-                    constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyRight") {
-                    constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
-                    constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
-                }
-                else if (direction === "directlyBelow") {
-                    constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
-                    constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
-                }
-            });
+            let fieldLayout = this.getFieldLayout(relName);
+            let fieldDirections = fieldLayout ? fieldLayout.directions : [];
+            let appliesTo = fieldLayout ? fieldLayout.appliesTo : [];
+            let shouldApplyConstraints = this.appliesToEdge(edge, appliesTo, layoutNodes);
+            if (shouldApplyConstraints) {
+                fieldDirections.forEach((direction) => {
+                    if (direction === "left") {
+                        constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
+                    }
+                    else if (direction === "above") {
+                        constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction === "right") {
+                        constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
+                    }
+                    else if (direction === "below") {
+                        constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
+                    }
+                    else if (direction === "directlyLeft") {
+                        constraints.push(this.leftConstraint(target.id, source.id, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyAbove") {
+                        constraints.push(this.topConstraint(target.id, source.id, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyRight") {
+                        constraints.push(this.leftConstraint(source.id, target.id, this.minSepWidth, layoutNodes));
+                        constraints.push(this.ensureSameYConstraint(target.id, source.id, layoutNodes));
+                    }
+                    else if (direction === "directlyBelow") {
+                        constraints.push(this.topConstraint(source.id, target.id, this.minSepHeight, layoutNodes));
+                        constraints.push(this.ensureSameXConstraint(target.id, source.id, layoutNodes));
+                    }
+                });
+            }
             let e = {
                 source: source,
                 target: target,
@@ -219849,17 +220173,23 @@ class LayoutInstance {
         });
         // Filter out all edges that are hidden
         layoutEdges = layoutEdges.filter((edge) => !edge.id.startsWith(this.hideThisEdge));
+        // And now make sure that all the disconnected nodes (as identified)
+        // have some padding around them.
+        let dcnGroups = dcN.map((node) => {
+            return this.singletonGroup(node);
+        });
+        groups = groups.concat(dcnGroups);
         let layout = { nodes: layoutNodes, edges: layoutEdges, constraints: constraints, groups: groups };
         return { layout, projectionData };
     }
-    applyClosureConstraints(g, layoutNodes, groups) {
+    applyClosureConstraints(g, layoutNodes) {
         const closures = this.getClosures();
         let constraints = closures.map((closure) => {
-            return this.applyClosureConstraintWithoutACentroid(g, layoutNodes, closure.fieldName, closure.direction, groups);
+            return this.applyClosureConstraint(g, layoutNodes, closure.fieldName, closure.direction, closure.appliesTo);
         });
         return constraints.flat();
     }
-    applyClosureConstraintWithoutACentroid(g, layoutNodes, relName, direction, groups) {
+    applyClosureConstraint(g, layoutNodes, relName, direction, appliesTo) {
         let direction_mult = 0;
         if (direction === "clockwise") {
             direction_mult = 1;
@@ -219867,8 +220197,10 @@ class LayoutInstance {
         else if (direction === "counterclockwise") {
             direction_mult = -1; // IS THIS RIGHT OR THE OTHER WAY?
         }
+        // And now we filter out unrelated nodes here I think?
         let relationEdges = g.edges().filter(edge => {
-            return this.getRelationName(g, edge) === relName;
+            return (this.getRelationName(g, edge) === relName)
+                && this.appliesToEdge(edge, appliesTo, layoutNodes);
         });
         if (relationEdges.length === 0) {
             return [];
@@ -219880,62 +220212,79 @@ class LayoutInstance {
             const minRadius = 100; // Example fixed distance. This needs to change.
             // One thing we dont have here is PREVENTING FRAGMENTS FROM OVERLAPPING
             const angleStep = (direction_mult * 2 * Math.PI) / relatedNodes.length;
-            //let index = 0;
-            // There is actually more to do here. if they are laid out, the nodes must
-            // ALSO not be to the left or right one another.
-            // What this means is an alternative impl, where it has to do with 'x', 'y'.
-            // So in order:
-            /*
-
-
-                we have 5 nodes we need to arrange in a regular shape (with min distance 100)
-
-                - First lay them all out in reference to a centroid.
-
-
-                - Then in order, determine which nodes are to the left/right of one another.
-
-                // For instance, if we start from the left. The first node should be to the left of the second node, and NOT above it.
-
-                // But, this changes every 90 degrees. So the angle matters.
-
-                // If the angle is between 0 and 90: each node should be to the left and below the next node.
-                // If the angle is between 90 and 180: each node should be to the left of and above the next node.
-                // If the angle is between 180 and 270: each node should be to the right of and above the next node.
-                // If the angle is between 270 and 360: each node should be to the right of and below the next node.
-
-                // However, there are phase transitions right? Rather, we might want to maintain this for things like say, a square.
-
-            */
+            // TODO: Perhaps we should lay out ALL nodes along the circle, 
+            // and then use the relative positions to determine the constraints
+            // of EACH node to ALL other nodes in the fragment.
+            // So first lay out all nodes in the fragment
+            let fragmentNodePositions = {};
             for (var i = 0; i < relatedNodes.length; i++) {
-                let next_node_idx = (i + 1) % relatedNodes.length;
-                let node = relatedNodes[i];
-                let next_node = relatedNodes[next_node_idx];
-                // Get the angle between the two nodes
-                let current_node_theta = i * angleStep;
-                let next_node_theta = next_node_idx * angleStep;
-                // This is a notional computation, where 
-                // we assume a circle of radius minRadius
-                let current_node_x = minRadius * Math.cos(current_node_theta);
-                let current_node_y = minRadius * Math.sin(current_node_theta);
-                let next_node_x = minRadius * Math.cos(next_node_theta);
-                let next_node_y = minRadius * Math.sin(next_node_theta);
-                // Now we need to determine the direction of the nodes
-                // relative to one another.
-                if (current_node_x > next_node_x) {
-                    constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
-                }
-                // HMM. Should this be <= or just an else?
-                else {
-                    constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
-                }
-                if (current_node_y > next_node_y) {
-                    constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
-                }
-                else {
-                    constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
+                let theta = i * angleStep;
+                let x = minRadius * Math.cos(theta);
+                let y = minRadius * Math.sin(theta);
+                fragmentNodePositions[relatedNodes[i]] = { x: x, y: y };
+            }
+            // Now we determine the constraints
+            // TODO: Is this a better approach?
+            // Should we have some SIGMA (ALIGN IF WITHIN SIGMA OF EACH OTHER)
+            for (var i = 0; i < relatedNodes.length; i++) {
+                for (var j = 0; j < relatedNodes.length; j++) {
+                    if (i !== j) {
+                        let node1 = relatedNodes[i];
+                        let node2 = relatedNodes[j];
+                        let node1_pos = fragmentNodePositions[node1];
+                        let node2_pos = fragmentNodePositions[node2];
+                        if (node1_pos.x > node2_pos.x) {
+                            constraints.push(this.leftConstraint(node2, node1, this.minSepWidth, layoutNodes));
+                        }
+                        else if (node1_pos.x < node2_pos.x) {
+                            constraints.push(this.leftConstraint(node1, node2, this.minSepWidth, layoutNodes));
+                        }
+                        else {
+                            // If they are on the same x-axis, we need to ensure that they are not on top of each other
+                            constraints.push(this.ensureSameXConstraint(node1, node2, layoutNodes));
+                        }
+                        if (node1_pos.y > node2_pos.y) {
+                            constraints.push(this.topConstraint(node2, node1, this.minSepHeight, layoutNodes));
+                        }
+                        else if (node1_pos.y < node2_pos.y) {
+                            constraints.push(this.topConstraint(node1, node2, this.minSepHeight, layoutNodes));
+                        }
+                        else {
+                            // If they are on the same y-axis, we need to ensure that they are not on top of each other
+                            constraints.push(this.ensureSameYConstraint(node1, node2, layoutNodes));
+                        }
+                    }
                 }
             }
+            // for (var i = 0; i < relatedNodes.length; i++) {
+            //     let next_node_idx = (i + 1) % relatedNodes.length;
+            //     let node = relatedNodes[i];
+            //     let next_node = relatedNodes[next_node_idx];
+            //     // Get the angle between the two nodes
+            //     let current_node_theta = i * angleStep;
+            //     let next_node_theta = next_node_idx * angleStep;
+            //     // This is a notional computation, where 
+            //     // we assume a circle of radius minRadius
+            //     let current_node_x = minRadius * Math.cos(current_node_theta);
+            //     let current_node_y = minRadius * Math.sin(current_node_theta);
+            //     let next_node_x = minRadius * Math.cos(next_node_theta);
+            //     let next_node_y = minRadius * Math.sin(next_node_theta);
+            //     // Now we need to determine the direction of the nodes
+            //     // relative to one another.
+            //     if (current_node_x > next_node_x) {
+            //         constraints.push(this.leftConstraint(next_node, node, this.minSepWidth, layoutNodes));
+            //     }
+            //     // HMM. Should this be <= or just an else?
+            //     else {
+            //         constraints.push(this.leftConstraint(node, next_node, this.minSepWidth, layoutNodes));
+            //     }
+            //     if (current_node_y > next_node_y) {
+            //         constraints.push(this.topConstraint(node, next_node, this.minSepHeight, layoutNodes));
+            //     }
+            //     else {
+            //         constraints.push(this.topConstraint(next_node, node, this.minSepHeight, layoutNodes));
+            //     }
+            // }
         });
         return constraints;
     }
@@ -219997,6 +220346,15 @@ class LayoutInstance {
             }
         });
         return constraints;
+    }
+    getDisconnectedNodes(g) {
+        let inNodes = g.edges().map(edge => edge.w);
+        let outNodes = g.edges().map(edge => edge.v);
+        // All nodes in the graph
+        let allNodes = new Set(g.nodes());
+        let allConnectedNodes = new Set([...inNodes, ...outNodes]);
+        let disconnectedNodes = [...allNodes].filter(node => !allConnectedNodes.has(node));
+        return disconnectedNodes;
     }
     findDisconnectedComponents(edges) {
         let inNodes = edges.map(edge => edge.w);
@@ -220091,8 +220449,30 @@ class LayoutInstance {
         let node2 = layoutNodes.find((node) => node.id === node2Id);
         return { axis: "x", node1: node1, node2: node2 };
     }
+    singletonGroup(nodeId) {
+        let groupName = `${LayoutInstance.DISCONNECTED_PREFIX}${nodeId}`;
+        return {
+            name: groupName,
+            nodeIds: [nodeId],
+            keyNodeId: nodeId
+        };
+    }
+    appliesToEdge(edge, appliesTo, layoutNodes) {
+        let edgeSrcId = edge.v;
+        let edgeDestId = edge.w;
+        // Now get the nodes 
+        let srcNode = layoutNodes.find((node) => node.id === edgeSrcId);
+        let destNode = layoutNodes.find((node) => node.id === edgeDestId);
+        // Now get the types of the nodes
+        let srcTypes = srcNode.types;
+        let destTypes = destNode.types;
+        let srcType = appliesTo[0];
+        let destType = appliesTo[1];
+        return srcTypes.includes(srcType) && destTypes.includes(destType);
+    }
 }
 exports.LayoutInstance = LayoutInstance;
+LayoutInstance.DISCONNECTED_PREFIX = "_d_";
 
 
 /***/ }),
@@ -220208,160 +220588,6 @@ exports.Logger = Logger;
 
 /***/ }),
 
-/***/ 93342:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ConstraintValidator = void 0;
-const cassowary_1 = __nccwpck_require__(4197);
-const lodash_1 = __nccwpck_require__(52356);
-class ConstraintValidator {
-    constructor(webcolaConstraints, nodes, groups) {
-        this.webcolaConstraints = webcolaConstraints;
-        this.solver = new cassowary_1.SimplexSolver();
-        this.colaNodes = nodes;
-        this.variables = {};
-        this.groups = groups;
-        this.added_constraints = [];
-        this.error = null;
-    }
-    validateConstraints() {
-        // I think this works, but I need to test it
-        return this.validateGroupConstraints() || this.validatePositionalConstraints();
-    }
-    validatePositionalConstraints() {
-        this.colaNodes.forEach(node => {
-            let index = this.getNodeIndex(node.id);
-            this.variables[index] = {
-                x: new cassowary_1.Variable(`${node.id}_x`),
-                y: new cassowary_1.Variable(`${node.id}_y`),
-            };
-        });
-        for (let i = 0; i < this.webcolaConstraints.length; i++) {
-            let constraint = this.webcolaConstraints[i];
-            this.webColaToCassowary(constraint);
-            if (this.error) {
-                return this.error;
-            }
-        }
-        this.solver.solve();
-        return this.error;
-    }
-    getGroupIndex(groupName) {
-        return this.groups.findIndex(group => group.name === groupName);
-    }
-    validateGroupConstraints() {
-        let overlappingNonSubgroups = false;
-        this.groups.forEach(group => {
-            this.groups.forEach(otherGroup => {
-                const groupIndex = this.getGroupIndex(group.name);
-                const otherGroupIndex = this.getGroupIndex(otherGroup.name);
-                if (groupIndex === otherGroupIndex || overlappingNonSubgroups) {
-                    return;
-                }
-                if (!this.isSubGroup(group, otherGroup) && !this.isSubGroup(otherGroup, group)) {
-                    let intersection = this.groupIntersection(group, otherGroup);
-                    overlappingNonSubgroups = intersection.length > 0;
-                    if (overlappingNonSubgroups) {
-                        let intersectingGroupNames = intersection.map((index) => this.colaNodes[index].id).join(', ');
-                        this.error = `Layout not satisfiable! [ ${intersectingGroupNames} ] are in groups ${group.name} and ${otherGroup.name}, but neither group is contained in the other. Groups must be either nested or disjoint.`;
-                    }
-                }
-            });
-        });
-        return this.error;
-    }
-    getNodeIndex(nodeId) {
-        return this.colaNodes.findIndex(node => node.id === nodeId);
-    }
-    colaOrientationConstraintToString(constraint) {
-        let axis = constraint.axis;
-        let equality = constraint?.equality || false;
-        let left_idx = constraint.left;
-        let right_idx = constraint.right;
-        let left = this.colaNodes[left_idx].id;
-        let right = this.colaNodes[right_idx].id;
-        let relativePosition = axis === 'x' ? 'to the left of ' : 'above ';
-        if (equality) {
-            if (axis === 'y') {
-                relativePosition = 'horizontally aligned with ';
-            }
-            else if (axis === 'x') {
-                relativePosition = 'vertically aligned with ';
-            }
-        }
-        return `ENSURE: ${left} is ${relativePosition} ${right}`;
-    }
-    webColaToCassowary(constraint) {
-        let axis = constraint.axis;
-        let strength = cassowary_1.Strength.required;
-        let equality = constraint?.equality || false;
-        let left = constraint.left;
-        let right = constraint.right;
-        let gap = constraint.gap;
-        let leftVar = this.variables[left][axis];
-        let rightVar = this.variables[right][axis];
-        let lhs = new cassowary_1.Expression(leftVar)
-            .plus(new cassowary_1.Expression(gap));
-        let rhs = new cassowary_1.Expression(rightVar);
-        try {
-            this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.LEQ, rhs, strength));
-            if (equality) {
-                this.solver.addConstraint(new cassowary_1.Inequality(lhs, cassowary_1.GEQ, rhs, strength));
-            }
-            this.added_constraints.push(constraint);
-        }
-        catch (e) {
-            let previousConstraintList = this.added_constraints.map((c) => this.colaOrientationConstraintToString(c));
-            let previousConstraintSet = new Set(previousConstraintList);
-            previousConstraintList = [...previousConstraintSet];
-            let previousConstraintString = "<br><br>" + previousConstraintList.map((c) => "<code>" + c + "</code>").join('<br>');
-            let currentConstraintString = this.colaOrientationConstraintToString(constraint);
-            this.error = `Constraint:<br> <code>${currentConstraintString}</code><br> conflicts with one (or some) the following constraints:` + previousConstraintString;
-            console.log(e);
-            return;
-        }
-    }
-    // TODO: Is this correct?    
-    isSubGroup(subgroup, group) {
-        if (subgroup === group) {
-            return true;
-        }
-        const immediateSubgroups = group.groups;
-        if (!immediateSubgroups || immediateSubgroups.length === 0) {
-            return false;
-        }
-        if (immediateSubgroups.includes(this.getGroupIndex(subgroup))) {
-            return true;
-        }
-        return immediateSubgroups.some((sg) => this.isSubGroup(subgroup, this.groups[sg]));
-    }
-    getAllLeaves(group) {
-        const leaves = group.leaves ? new Set(group.leaves) : new Set();
-        const subGroups = group.groups;
-        if (!subGroups) {
-            return leaves;
-        }
-        let subGroupLeaves = subGroups.map((subgroup) => this.getAllLeaves(this.groups[subgroup]));
-        // Now get the union set of leaves and subGroupLeaves
-        subGroupLeaves.forEach((subGroupLeafSet) => {
-            subGroupLeafSet.forEach((leaf) => leaves.add(leaf));
-        });
-        return leaves;
-    }
-    groupIntersection(group1, group2) {
-        const leaves1 = this.getAllLeaves(group1);
-        const leaves2 = this.getAllLeaves(group2);
-        return (0, lodash_1.intersection)([...leaves1], [...leaves2]);
-    }
-}
-exports.ConstraintValidator = ConstraintValidator;
-
-
-/***/ }),
-
 /***/ 22994:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -220404,6 +220630,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WebColaLayout = void 0;
 const dagre = __importStar(__nccwpck_require__(12269));
 const interfaces_1 = __nccwpck_require__(69068);
+const layoutinstance_1 = __nccwpck_require__(11761);
 class WebColaLayout {
     constructor(instanceLayout, fig_height = 800, fig_width = 800) {
         this.FIG_HEIGHT = fig_height;
@@ -220433,6 +220660,12 @@ class WebColaLayout {
         this.colaEdges = instanceLayout.edges.map(edge => this.toColaEdge(edge));
         this.groupDefinitions = this.determineGroups(instanceLayout.groups);
         this.colaConstraints = instanceLayout.constraints.map(constraint => this.toColaConstraint(constraint));
+        //// IF THERE ARE NO CONSTRAINTS, THEN FIX THE NODES TO WHATEVER
+        // STERLING / DAGRE GIVES US. OTHERWISE JUST USE THOSE
+        // AS SUGGESTED STARTING POINTS
+        if (this.colaConstraints.length === 0 && this.dagre_graph) {
+            this.colaNodes.forEach(node => node.fixed = 1);
+        }
     }
     getNodeIndex(nodeId) {
         return this.colaNodes.findIndex(node => node.id === nodeId);
@@ -220440,6 +220673,7 @@ class WebColaLayout {
     leftConstraint(leftNode, rightNode, sep) {
         // Define a separation constraint to place node A to the left of node B
         const separationConstraint = {
+            type: "separation",
             axis: 'x',
             left: leftNode,
             right: rightNode,
@@ -220450,6 +220684,7 @@ class WebColaLayout {
     topConstraint(topNode, bottomNode, sep) {
         // Define a separation constraint to place node A above node B
         const separationConstraint = {
+            type: "separation",
             axis: 'y',
             left: topNode,
             right: bottomNode,
@@ -220475,7 +220710,7 @@ class WebColaLayout {
             let dagre_node = this.dagre_graph.node(node.id);
             x = dagre_node.x;
             y = dagre_node.y;
-            fixed = 1;
+            //fixed = 1; // THIS REALLY IS NOT GOOD!
         }
         return {
             id: node.id,
@@ -220524,8 +220759,12 @@ class WebColaLayout {
             return this.topConstraint(this.getNodeIndex(constraint.top.id), this.getNodeIndex(constraint.bottom.id), distance);
         }
         if ((0, interfaces_1.isAlignmentConstraint)(constraint)) {
+            let gap = Math.floor(Math.random() * 2); // a random number between 0 and 1
+            // This is a hack to potentially ameliorate cola stability issues
+            // causing nodes to be placed on top of each other.
             // Is this right or do I have to switch axes. Check.
             const alignmentConstraint = {
+                type: "separation",
                 axis: constraint.axis,
                 left: this.getNodeIndex(constraint.node1.id),
                 right: this.getNodeIndex(constraint.node2.id),
@@ -220585,9 +220824,12 @@ class WebColaLayout {
         // Similarly, two webcola groups cannot share a subgroup.
         //Now modify groupDefinitions to be in the format that WebCola expects (ie indexed by node)
         const colaGroupsBeforeSubgrouping = Object.entries(groupDefinitions).map(([key, value]) => {
+            const defaultPadding = 10;
+            const disconnectedNodePadding = 30;
+            const disconnectedNodeMarker = layoutinstance_1.LayoutInstance.DISCONNECTED_PREFIX;
             let leaves = value.map((nodeId) => this.getNodeIndex(nodeId));
-            let padding = 10;
             let name = key;
+            let padding = name.startsWith(disconnectedNodeMarker) ? disconnectedNodePadding : defaultPadding;
             return { leaves, padding, name };
         });
         const colaGroups = Object.entries(colaGroupsBeforeSubgrouping).map(([key, value]) => {
