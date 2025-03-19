@@ -219054,9 +219054,10 @@ const axios = __nccwpck_require__(87269);
 const app = express();
 app.use(express.static(__nccwpck_require__.ab + "public"));
 app.set('views', __nccwpck_require__.ab + "views");
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 app.engine('ejs', (__nccwpck_require__(47904).__express)).set('view engine', 'ejs');
+// Set the limit for urlencoded and json payloads
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.json({ limit: '50mb' }));
 // This is a hack. I'm not sure
 // how to encode the version number.
 const version = "1.2.0";
