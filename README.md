@@ -1,4 +1,6 @@
-# Forge VSCode Extension
+# 2025 Forge VSCode Extension (deprecated)
+
+**This extension is deprecated. Use the `forge-fm` extension on the Marketplace.**
 
 This extension provides support for the [Forge](https://forge-fm.org/),
 a lightweight formal methods tool.
